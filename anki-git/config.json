@@ -1,5 +1,5 @@
 {
-  "git_repo_path": "",
+  "git_repo_path": "/Users/alexledger/git/aled1027/anki-git",
   "auto_backup_enabled": false,
   "auto_backup_interval_minutes": 10,
   "commit_message_template": "Anki backup: {timestamp}",
