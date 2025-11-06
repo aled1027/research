@@ -111,36 +111,36 @@ class AnkiGitBackup:
         decks_data = []
         deck_name_ids = col.decks.all_names_and_ids()
 
-        for deck_name_id in deck_name_ids:
+        # Sort decks by ID for deterministic output
+        sorted_deck_name_ids = sorted(deck_name_ids, key=lambda x: x.id)
+
+        for deck_name_id in sorted_deck_name_ids:
             deck_name = deck_name_id.name
             deck_id = deck_name_id.id
             deck = col.decks.get(deck_id)
 
-            # Get cards in this deck
+            # Get cards in this deck and sort by ID
             card_ids = col.decks.cids(deck_id, children=False)
+            sorted_card_ids = sorted(card_ids)
 
-            deck_info = {
-                "name": deck_name,
-                "id": deck_id,
-                "card_count": len(card_ids),
-                "config": deck
-            }
-
-            # Export notes and cards for this deck
-            notes_data = []
-            for card_id in card_ids:
+            # Group cards by note to avoid duplication
+            notes_dict = {}
+            for card_id in sorted_card_ids:
                 card = col.get_card(card_id)
-                note = col.get_note(card.nid)
+                note_id = card.nid
 
-                note_data = {
-                    "note_id": note.id,
-                    "model": note.note_type()["name"],
-                    "fields": dict(zip([f["name"] for f in note.note_type()["flds"]], note.fields)),
-                    "tags": note.tags,
-                    "cards": []
-                }
+                # Create note entry if not exists
+                if note_id not in notes_dict:
+                    note = col.get_note(note_id)
+                    notes_dict[note_id] = {
+                        "note_id": note.id,
+                        "model": note.note_type()["name"],
+                        "fields": dict(zip([f["name"] for f in note.note_type()["flds"]], note.fields)),
+                        "tags": sorted(note.tags),  # Sort tags for determinism
+                        "cards": []
+                    }
 
-                # Add card info
+                # Add card info to note
                 card_data = {
                     "card_id": card.id,
                     "queue": card.queue,
@@ -150,16 +150,28 @@ class AnkiGitBackup:
                     "reps": card.reps,
                     "lapses": card.lapses,
                 }
-                note_data["cards"].append(card_data)
-                notes_data.append(note_data)
+                notes_dict[note_id]["cards"].append(card_data)
 
-            deck_info["notes"] = notes_data
+            # Convert to list and sort by note_id
+            notes_data = [notes_dict[note_id] for note_id in sorted(notes_dict.keys())]
+
+            # Sort cards within each note by card_id (should already be sorted, but ensure)
+            for note_data in notes_data:
+                note_data["cards"] = sorted(note_data["cards"], key=lambda x: x["card_id"])
+
+            deck_info = {
+                "name": deck_name,
+                "id": deck_id,
+                "card_count": len(sorted_card_ids),
+                "config": deck,
+                "notes": notes_data
+            }
             decks_data.append(deck_info)
 
-        # Write decks data to JSON file
+        # Write decks data to JSON file with sorted keys for determinism
         decks_file = os.path.join(backup_dir, "decks.json")
         with open(decks_file, "w", encoding="utf-8") as f:
-            json.dump(decks_data, f, indent=2, ensure_ascii=False)
+            json.dump(decks_data, f, indent=2, ensure_ascii=False, sort_keys=True)
 
         # Export collection metadata
         metadata = {
@@ -172,7 +184,7 @@ class AnkiGitBackup:
 
         metadata_file = os.path.join(backup_dir, "metadata.json")
         with open(metadata_file, "w", encoding="utf-8") as f:
-            json.dump(metadata, f, indent=2)
+            json.dump(metadata, f, indent=2, sort_keys=True)
 
         # Create a human-readable summary
         summary = self.create_summary(decks_data, metadata)
