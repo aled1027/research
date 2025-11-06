@@ -1,0 +1,9 @@
+{
+  "package": "anki-git-backup",
+  "name": "Anki Git Backup",
+  "version": "0.1.0",
+  "description": "Automatically back up your Anki collection to a Git repository with commit history",
+  "author": "Claude",
+  "homepage": "https://github.com/yourusername/anki-git-backup",
+  "min_point_version": 50
+}
