@@ -161,7 +161,7 @@ To test this plugin properly:
 
 1. **Anki API**:
    - Modern Anki uses `mw.col.get_card()` and `mw.col.get_note()` instead of direct DB access
-   - `col.decks.all_names_and_ids()` returns tuples of (name, id)
+   - `col.decks.all_names_and_ids()` returns `DeckNameId` objects with `.name` and `.id` attributes (not tuples!)
    - Card scheduling data stored in card objects (queue, due, ivl, etc.)
 
 2. **Qt Integration**:
@@ -188,3 +188,24 @@ If continuing development:
 8. Support SSH keys for authentication
 9. Add backup encryption option
 10. Create Anki package (.ankiaddon) for easy distribution
+
+## Bug Fixes
+
+### Fix 1: DeckNameId Unpacking Error
+**Error**: `cannot unpack non-iterable DeckNameId object`
+
+**Cause**: The code was trying to unpack `DeckNameId` objects as tuples:
+```python
+for deck_name, deck_id in deck_ids:  # WRONG!
+```
+
+**Fix**: Access attributes directly:
+```python
+for deck_name_id in deck_name_ids:
+    deck_name = deck_name_id.name
+    deck_id = deck_name_id.id
+```
+
+**Location**: `__init__.py:114-117`
+
+This was discovered during initial user testing when triggering a manual backup.

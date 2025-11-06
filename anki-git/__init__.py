@@ -109,9 +109,11 @@ class AnkiGitBackup:
 
         # Export deck information
         decks_data = []
-        deck_ids = col.decks.all_names_and_ids()
+        deck_name_ids = col.decks.all_names_and_ids()
 
-        for deck_name, deck_id in deck_ids:
+        for deck_name_id in deck_name_ids:
+            deck_name = deck_name_id.name
+            deck_id = deck_name_id.id
             deck = col.decks.get(deck_id)
 
             # Get cards in this deck
