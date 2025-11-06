@@ -209,3 +209,23 @@ for deck_name_id in deck_name_ids:
 **Location**: `__init__.py:114-117`
 
 This was discovered during initial user testing when triggering a manual backup.
+
+### Fix 2: Deterministic Sorting for Git Diffs
+**Issue**: Without sorting, the JSON export order changes between backups, making Git diffs noisy and unhelpful.
+
+**Improvements**:
+1. **Sort decks by ID**: Decks appear in consistent order
+2. **Sort cards by ID**: Cards processed in ID order
+3. **Sort notes by ID**: Notes within each deck in ID order
+4. **Sort cards within notes by ID**: Multiple cards per note sorted
+5. **Sort tags**: Tags within each note sorted alphabetically
+6. **Sort JSON keys**: Added `sort_keys=True` to json.dump() calls
+7. **Deduplicate notes**: Fixed bug where notes with multiple cards were exported multiple times
+
+**Benefits**:
+- Git diffs only show actual changes to card content
+- Changes appear in predictable locations
+- Much easier to review what changed in each commit
+- Reduced file size (no duplicate notes)
+
+**Location**: `__init__.py:114-169, 174, 187`
