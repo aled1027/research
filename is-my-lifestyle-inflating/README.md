@@ -1,6 +1,22 @@
 # Is My Lifestyle Inflating?
 
-A Python-based tool to detect and measure lifestyle inflation, particularly useful for those pursuing FIRE (Financial Independence, Retire Early).
+An interactive web-based tool (+ Python CLI) to detect and measure lifestyle inflation, particularly useful for those pursuing FIRE (Financial Independence, Retire Early).
+
+## 🚀 Quick Start
+
+### Web Version (Recommended)
+
+1. Open `index.html` in your web browser
+2. Click "Load Example Data" to see it in action
+3. Or add your own financial data through the form
+
+**No installation required!** Works offline, all data stored locally in your browser.
+
+### Python CLI Version
+
+```bash
+python lifestyle_tracker.py your_data.json dashboard
+```
 
 ## Problem Statement
 
@@ -66,7 +82,34 @@ FI Ratio = Net Worth / (Annual Expenses × 25) × 100
 
 **Why it matters**: Shows progress to financial independence based on the 4% rule. At 100%, you're financially independent.
 
-## Installation & Usage
+## Web Tool Features
+
+The web version provides an intuitive, visual interface with:
+
+### 📊 Interactive Dashboard
+- Real-time metrics with color-coded status indicators
+- Beautiful charts powered by Chart.js
+- Automatic alerts for concerning trends
+- Responsive design works on desktop, tablet, and mobile
+
+### 💾 Easy Data Management
+- **Add entries** through interactive forms (no JSON editing needed)
+- **Import/Export** JSON files for backup or migration
+- **Edit/Delete** entries with one click
+- **Load example data** to try it out instantly
+- **Auto-save** to browser LocalStorage
+
+### 📈 Multiple Analysis Views
+
+**Dashboard**: Overview with key metrics and trends
+**Savings Rate**: Deep dive into your #1 FIRE metric
+**Inflation**: Compare your spending growth to CPI
+**Categories**: Find exactly where your money is going
+
+### 🔒 Privacy First
+All data stays in your browser - nothing sent to any server!
+
+## Python CLI Usage
 
 ### Requirements
 
@@ -311,10 +354,25 @@ Potential additions (not implemented):
 
 ## Files Included
 
-- `lifestyle_tracker.py` - Main analysis tool (450 lines)
-- `example_data.json` - Sample dataset with gradual lifestyle inflation
-- `notes.md` - Development notes and research findings
-- `README.md` - This file
+- **`index.html`** - Interactive web application (recommended)
+- **`lifestyle_tracker.py`** - Python CLI tool (450 lines)
+- **`example_data.json`** - Sample dataset with gradual lifestyle inflation
+- **`data_template.json`** - Template for creating your own data
+- **`notes.md`** - Development notes and research findings
+- **`README.md`** - This file
+
+## Which Version Should I Use?
+
+| Feature | Web Version | Python CLI |
+|---------|-------------|------------|
+| Easy to use | ✅ Best | ⚠️ Requires setup |
+| Visual charts | ✅ Beautiful | ❌ Text only |
+| Data entry | ✅ Forms | ❌ Manual JSON |
+| Installation | ✅ None needed | ⚠️ Python required |
+| Automation | ❌ Manual | ✅ Scriptable |
+| Privacy | ✅ Local only | ✅ Local only |
+
+**Recommendation**: Start with the web version for ease of use. Use the Python CLI if you need automation or prefer terminal interfaces.
 
 ## Key Takeaways
 

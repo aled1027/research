@@ -181,3 +181,101 @@ All analysis modes working correctly and providing actionable insights.
 - Budget troubleshooting
 - FIRE progress tracking
 - Accountability with partners/communities
+
+## Web Tool Development
+
+### Design Goals
+1. **No server required**: Pure HTML/CSS/JavaScript - runs locally
+2. **Visual analytics**: Interactive charts and graphs
+3. **Easy data entry**: Forms + JSON upload
+4. **Responsive design**: Works on desktop, tablet, mobile
+5. **Local storage**: Save data in browser
+6. **Export capability**: Download results and data
+
+### Web Architecture
+- **Frontend**: HTML5, CSS3, vanilla JavaScript
+- **Charts**: Chart.js for visualizations
+- **Storage**: LocalStorage API for persistence
+- **Layout**: Single-page application with tabs/sections
+- **Data**: JSON format (same as CLI tool)
+
+### Features to Implement
+1. Data input form (add monthly entries)
+2. JSON file upload/download
+3. Dashboard with key metrics
+4. Interactive charts (savings rate, spending trends, category breakdown)
+5. Multiple analysis views (same as CLI modes)
+6. Warnings and insights display
+7. Data management (edit, delete entries)
+8. Export reports
+
+## Web Tool Implementation Complete
+
+### File Created
+**index.html** (~57KB) - Complete single-page web application
+
+### Features Implemented
+
+**User Interface**:
+- Responsive design with gradient header
+- Tab-based navigation (Dashboard, Savings, Inflation, Categories, Data, About)
+- Modern card-based layout
+- Color-coded metrics (green/yellow/red for status)
+- Mobile-friendly responsive design
+
+**Data Management**:
+- Add entries via interactive form
+- Import JSON files (compatible with CLI tool format)
+- Export data as JSON
+- Load example data with one click
+- Delete individual entries
+- LocalStorage persistence (data saved in browser)
+- Data table view with all entries
+
+**Analytics & Visualizations** (using Chart.js):
+1. **Dashboard Tab**:
+   - Key metrics cards (Savings Rate, Spending, Discretionary %, FI Ratio)
+   - Alerts for concerning trends
+   - Savings rate trend line chart
+   - Spending vs Income multi-line chart
+
+2. **Savings Rate Tab**:
+   - Average, max, min savings rates
+   - Trend analysis with insights
+   - Bar chart showing monthly rates with color coding
+   - Detailed table with status indicators
+
+3. **Inflation Tab**:
+   - Personal vs CPI inflation comparison
+   - Metric cards showing averages and differences
+   - Line chart comparing personal inflation to CPI
+   - Insights on spending growth
+
+4. **Categories Tab**:
+   - Essential vs discretionary breakdown
+   - Doughnut chart of spending by category
+   - Horizontal bar chart of growth rates
+   - Hotspot detection for problem categories
+
+5. **About Tab**:
+   - Explanation of metrics
+   - Usage instructions
+   - Privacy notice
+
+**Technical Details**:
+- Pure HTML/CSS/JavaScript (no server required)
+- Chart.js 4.4.0 for visualizations
+- LocalStorage API for data persistence
+- Runs completely offline after initial load
+- No backend dependencies
+- Compatible with example_data.json from CLI tool
+
+**Advantages over CLI Tool**:
+- Visual charts and graphs
+- Interactive and intuitive
+- No Python installation needed
+- Works on any device with a browser
+- Easier data entry with forms
+- Real-time updates
+- More engaging user experience
+- Better for regular monitoring
