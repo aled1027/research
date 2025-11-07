@@ -6,11 +6,19 @@ An interactive web-based tool (+ Python CLI) to detect and measure lifestyle inf
 
 ### Web Version (Recommended)
 
-1. Open `index.html` in your web browser
-2. Click "Load Example Data" to see it in action
-3. Or add your own financial data through the form
+**Option 1: Online (After GitHub Pages is enabled)**
+- Visit: `https://aled1027.github.io/research/is-my-lifestyle-inflating/`
+- No download or installation needed!
+
+**Option 2: Local**
+1. Download or clone this repository
+2. Open `index.html` in your web browser
+3. Click "Load Example Data" to see it in action
+4. Or add your own financial data through the form
 
 **No installation required!** Works offline, all data stored locally in your browser.
+
+> **Note**: To enable the online version, see [GITHUB_PAGES_SETUP.md](../GITHUB_PAGES_SETUP.md) in the repository root.
 
 ### Python CLI Version
 
