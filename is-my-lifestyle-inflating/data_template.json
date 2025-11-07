@@ -1,0 +1,35 @@
+[
+  {
+    "date": "YYYY-MM",
+    "income": 0,
+    "savings": 0,
+    "total_spending": 0,
+    "categories": {
+      "housing": 0,
+      "groceries": 0,
+      "transportation": 0,
+      "insurance": 0,
+      "utilities": 0,
+      "dining_out": 0,
+      "entertainment": 0,
+      "shopping": 0,
+      "subscriptions": 0,
+      "travel": 0,
+      "healthcare": 0,
+      "personal_care": 0,
+      "gifts": 0,
+      "education": 0,
+      "other": 0
+    },
+    "essential_categories": [
+      "housing",
+      "groceries",
+      "transportation",
+      "insurance",
+      "utilities",
+      "healthcare"
+    ],
+    "net_worth": null,
+    "cpi": null
+  }
+]

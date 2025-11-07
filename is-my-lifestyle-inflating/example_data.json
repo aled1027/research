@@ -1,0 +1,254 @@
+[
+  {
+    "date": "2024-01",
+    "income": 8000,
+    "savings": 4000,
+    "total_spending": 4000,
+    "categories": {
+      "housing": 1500,
+      "groceries": 600,
+      "transportation": 300,
+      "insurance": 200,
+      "utilities": 150,
+      "dining_out": 400,
+      "entertainment": 300,
+      "shopping": 350,
+      "subscriptions": 100,
+      "travel": 100
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 150000,
+    "cpi": 3.1
+  },
+  {
+    "date": "2024-02",
+    "income": 8000,
+    "savings": 3800,
+    "total_spending": 4200,
+    "categories": {
+      "housing": 1500,
+      "groceries": 650,
+      "transportation": 320,
+      "insurance": 200,
+      "utilities": 160,
+      "dining_out": 450,
+      "entertainment": 320,
+      "shopping": 400,
+      "subscriptions": 100,
+      "travel": 100
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 153800,
+    "cpi": 3.2
+  },
+  {
+    "date": "2024-03",
+    "income": 8000,
+    "savings": 3700,
+    "total_spending": 4300,
+    "categories": {
+      "housing": 1500,
+      "groceries": 620,
+      "transportation": 310,
+      "insurance": 200,
+      "utilities": 155,
+      "dining_out": 500,
+      "entertainment": 350,
+      "shopping": 450,
+      "subscriptions": 115,
+      "travel": 100
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 157500,
+    "cpi": 3.5
+  },
+  {
+    "date": "2024-04",
+    "income": 8500,
+    "savings": 3900,
+    "total_spending": 4600,
+    "categories": {
+      "housing": 1500,
+      "groceries": 640,
+      "transportation": 330,
+      "insurance": 200,
+      "utilities": 165,
+      "dining_out": 550,
+      "entertainment": 400,
+      "shopping": 500,
+      "subscriptions": 115,
+      "travel": 200
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 161400,
+    "cpi": 3.4
+  },
+  {
+    "date": "2024-05",
+    "income": 8500,
+    "savings": 3800,
+    "total_spending": 4700,
+    "categories": {
+      "housing": 1500,
+      "groceries": 660,
+      "transportation": 340,
+      "insurance": 200,
+      "utilities": 170,
+      "dining_out": 600,
+      "entertainment": 450,
+      "shopping": 520,
+      "subscriptions": 130,
+      "travel": 130
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 165200,
+    "cpi": 3.3
+  },
+  {
+    "date": "2024-06",
+    "income": 8500,
+    "savings": 3600,
+    "total_spending": 4900,
+    "categories": {
+      "housing": 1500,
+      "groceries": 680,
+      "transportation": 350,
+      "insurance": 200,
+      "utilities": 180,
+      "dining_out": 650,
+      "entertainment": 500,
+      "shopping": 550,
+      "subscriptions": 140,
+      "travel": 150
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 168800,
+    "cpi": 3.0
+  },
+  {
+    "date": "2024-07",
+    "income": 9000,
+    "savings": 3700,
+    "total_spending": 5300,
+    "categories": {
+      "housing": 1500,
+      "groceries": 700,
+      "transportation": 360,
+      "insurance": 200,
+      "utilities": 190,
+      "dining_out": 750,
+      "entertainment": 600,
+      "shopping": 650,
+      "subscriptions": 150,
+      "travel": 200
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 172500,
+    "cpi": 2.9
+  },
+  {
+    "date": "2024-08",
+    "income": 9000,
+    "savings": 3500,
+    "total_spending": 5500,
+    "categories": {
+      "housing": 1500,
+      "groceries": 720,
+      "transportation": 370,
+      "insurance": 200,
+      "utilities": 200,
+      "dining_out": 800,
+      "entertainment": 650,
+      "shopping": 700,
+      "subscriptions": 160,
+      "travel": 200
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 176000,
+    "cpi": 2.5
+  },
+  {
+    "date": "2024-09",
+    "income": 9000,
+    "savings": 3400,
+    "total_spending": 5600,
+    "categories": {
+      "housing": 1500,
+      "groceries": 740,
+      "transportation": 380,
+      "insurance": 200,
+      "utilities": 210,
+      "dining_out": 850,
+      "entertainment": 700,
+      "shopping": 700,
+      "subscriptions": 170,
+      "travel": 150
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 179400,
+    "cpi": 2.4
+  },
+  {
+    "date": "2024-10",
+    "income": 9500,
+    "savings": 3500,
+    "total_spending": 6000,
+    "categories": {
+      "housing": 1500,
+      "groceries": 760,
+      "transportation": 390,
+      "insurance": 200,
+      "utilities": 220,
+      "dining_out": 950,
+      "entertainment": 800,
+      "shopping": 800,
+      "subscriptions": 180,
+      "travel": 200
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 182900,
+    "cpi": 2.6
+  },
+  {
+    "date": "2024-11",
+    "income": 9500,
+    "savings": 3300,
+    "total_spending": 6200,
+    "categories": {
+      "housing": 1500,
+      "groceries": 780,
+      "transportation": 400,
+      "insurance": 200,
+      "utilities": 230,
+      "dining_out": 1000,
+      "entertainment": 900,
+      "shopping": 850,
+      "subscriptions": 190,
+      "travel": 150
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 186200,
+    "cpi": 2.7
+  },
+  {
+    "date": "2024-12",
+    "income": 9500,
+    "savings": 3200,
+    "total_spending": 6300,
+    "categories": {
+      "housing": 1500,
+      "groceries": 800,
+      "transportation": 410,
+      "insurance": 200,
+      "utilities": 240,
+      "dining_out": 1100,
+      "entertainment": 950,
+      "shopping": 900,
+      "subscriptions": 200,
+      "travel": 0
+    },
+    "essential_categories": ["housing", "groceries", "transportation", "insurance", "utilities"],
+    "net_worth": 189400,
+    "cpi": 2.8
+  }
+]
