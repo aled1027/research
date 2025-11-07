@@ -279,3 +279,50 @@ All analysis modes working correctly and providing actionable insights.
 - Real-time updates
 - More engaging user experience
 - Better for regular monitoring
+
+## GitHub Pages Deployment
+
+### Setup Steps
+Created infrastructure for GitHub Pages deployment:
+
+1. **Landing Page**: Created `/index.html` at repository root
+   - Serves as project portfolio landing page
+   - Links to lifestyle tracker and other projects
+   - Responsive design matching tool aesthetic
+   - Direct link to `is-my-lifestyle-inflating/index.html`
+
+2. **File Structure**:
+   ```
+   /index.html                              (landing page)
+   /is-my-lifestyle-inflating/
+       ├── index.html                       (main tool)
+       ├── example_data.json                (sample data)
+       ├── lifestyle_tracker.py             (CLI version)
+       └── README.md                        (documentation)
+   ```
+
+3. **To Enable GitHub Pages** (manual steps for repository owner):
+   - Go to repository Settings on GitHub
+   - Navigate to "Pages" section
+   - Under "Source", select the branch to deploy from
+   - Select "/ (root)" as the folder
+   - Click Save
+   - GitHub will provide the URL: `https://[username].github.io/research/`
+
+4. **URLs After Deployment**:
+   - Landing page: `https://[username].github.io/research/`
+   - Lifestyle tracker: `https://[username].github.io/research/is-my-lifestyle-inflating/`
+
+5. **Benefits**:
+   - No server setup required
+   - Automatic deployment on push
+   - Free hosting via GitHub Pages
+   - Custom domain support (optional)
+   - HTTPS by default
+
+### Technical Notes
+- All tools are static (HTML/CSS/JS)
+- No build process needed
+- Works with LocalStorage (data stays in browser)
+- Can be accessed from any device
+- Easy to share with others via URL
