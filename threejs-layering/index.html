@@ -23,29 +23,27 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: calc(100% - 400px);
         }
 
         #controls {
             position: fixed;
-            right: 20px;
-            top: 20px;
-            bottom: 20px;
-            width: 350px;
-            background: rgba(30, 30, 30, 0.95);
-            border-radius: 10px;
-            padding: 20px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background: rgba(20, 20, 20, 0.98);
+            border-top: 2px solid #333;
             overflow-y: auto;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
         }
 
         #controls::-webkit-scrollbar {
-            width: 8px;
+            height: 8px;
         }
 
         #controls::-webkit-scrollbar-track {
             background: #1a1a1a;
-            border-radius: 4px;
         }
 
         #controls::-webkit-scrollbar-thumb {
@@ -53,48 +51,95 @@
             border-radius: 4px;
         }
 
-        h1 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #4a9eff;
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(30, 30, 30, 0.95);
+            border-bottom: 1px solid #333;
         }
 
-        h2 {
-            font-size: 16px;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #333;
-            color: #6ab7ff;
+        .controls-header h1 {
+            font-size: 18px;
+            color: #4a9eff;
+            margin: 0;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .help-btn, .preset-dropdown-btn {
+            padding: 8px 16px;
+            background: #2a5a9a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+
+        .help-btn:hover, .preset-dropdown-btn:hover {
+            background: #3a6aaa;
+        }
+
+        .objects-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .object-section {
             background: rgba(40, 40, 40, 0.6);
             padding: 15px;
-            margin-bottom: 15px;
             border-radius: 8px;
-            border-left: 4px solid;
+            border-top: 4px solid;
         }
 
         .object-section.red { border-color: #ff4444; }
         .object-section.green { border-color: #44ff44; }
         .object-section.blue { border-color: #4444ff; }
 
+        .object-section h2 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: #fff;
+            text-align: center;
+        }
+
         .control-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #ccc;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #bbb;
+        }
+
+        .label-with-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .value-display {
+            font-weight: bold;
+            color: #4a9eff;
+            font-size: 11px;
         }
 
         input[type="range"] {
             width: 100%;
-            height: 6px;
-            border-radius: 3px;
+            height: 4px;
+            border-radius: 2px;
             background: #444;
             outline: none;
             -webkit-appearance: none;
@@ -103,100 +148,211 @@
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #4a9eff;
             cursor: pointer;
         }
 
         input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #4a9eff;
             cursor: pointer;
             border: none;
         }
 
-        .value-display {
-            display: inline-block;
-            float: right;
-            font-weight: bold;
-            color: #4a9eff;
-        }
-
         select {
             width: 100%;
-            padding: 8px;
+            padding: 6px;
             background: #2a2a2a;
             color: #fff;
             border: 1px solid #444;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 11px;
         }
 
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
         }
 
         input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             cursor: pointer;
         }
 
-        .preset-buttons {
+        .checkboxes-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 8px;
         }
 
-        button {
-            padding: 10px;
-            background: #2a5a9a;
+        /* Help Modal */
+        #help-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        #help-modal.active {
+            display: block;
+        }
+
+        .help-content {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .help-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #ff4444;
             color: #fff;
             border: none;
+            padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
-            transition: background 0.3s;
+            font-size: 14px;
         }
 
-        button:hover {
-            background: #3a6aaa;
+        .help-close:hover {
+            background: #ff6666;
         }
 
-        .info-text {
+        .help-content h2 {
+            color: #4a9eff;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .help-content h3 {
+            color: #6ab7ff;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .help-content p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .help-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .help-content code {
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #4a9eff;
+        }
+
+        /* Preset Dropdown */
+        .preset-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .preset-menu {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            min-width: 200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .preset-menu.active {
+            display: block;
+        }
+
+        .preset-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            transition: background 0.2s;
+        }
+
+        .preset-item:last-child {
+            border-bottom: none;
+        }
+
+        .preset-item:hover {
+            background: #3a3a3a;
+        }
+
+        .preset-item-title {
+            font-weight: bold;
+            color: #4a9eff;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .preset-item-desc {
             font-size: 11px;
-            color: #888;
-            margin-top: 5px;
-            font-style: italic;
+            color: #999;
         }
 
         #info {
             position: fixed;
             left: 20px;
             top: 20px;
-            background: rgba(30, 30, 30, 0.9);
+            background: rgba(30, 30, 30, 0.95);
             padding: 15px;
             border-radius: 8px;
-            max-width: 300px;
+            max-width: 350px;
+            border: 2px solid #4a9eff;
         }
 
         #info h3 {
             color: #4a9eff;
             margin-bottom: 10px;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         #info p {
             font-size: 12px;
             line-height: 1.6;
             color: #ccc;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: #4a9eff;
+            margin-left: 4px;
         }
     </style>
 </head>
@@ -205,185 +361,291 @@
 
     <div id="info">
         <h3>🎓 Three.js Layering Demo</h3>
-        <p>Explore depth testing, transparency, and render order with three overlapping planes. Use the controls to see how different settings affect rendering.</p>
+        <p>Explore how depth testing, transparency, render order, and blending modes interact. All three planes are visible below - experiment with the controls!</p>
+        <p style="margin-top: 10px;"><strong>Tip:</strong> Try the preset scenarios to see common configurations and mistakes.</p>
     </div>
 
     <div id="controls">
-        <h1>⚙️ Rendering Controls</h1>
-
-        <div class="object-section red">
-            <h2>Red Plane (Front)</h2>
-
-            <div class="control-group">
-                <label>Material Type</label>
-                <select id="red-material">
-                    <option value="basic">MeshBasicMaterial</option>
-                    <option value="standard">MeshStandardMaterial</option>
-                    <option value="shader">ShaderMaterial (Custom)</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label>Opacity <span class="value-display" id="red-opacity-val">0.7</span></label>
-                <input type="range" id="red-opacity" min="0" max="1" step="0.01" value="0.7">
-            </div>
-
-            <div class="control-group">
-                <label>Render Order <span class="value-display" id="red-order-val">0</span></label>
-                <input type="range" id="red-order" min="-5" max="5" step="1" value="0">
-                <div class="info-text">Higher values render last (on top)</div>
-            </div>
-
-            <div class="control-group">
-                <label>Blending Mode</label>
-                <select id="red-blending">
-                    <option value="normal">NormalBlending</option>
-                    <option value="additive">AdditiveBlending</option>
-                    <option value="subtractive">SubtractiveBlending</option>
-                    <option value="multiply">MultiplyBlending</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="red-transparent" checked>
-                    <label for="red-transparent">Transparent</label>
+        <div class="controls-header">
+            <h1>⚙️ Rendering Controls - All Three Planes</h1>
+            <div class="header-buttons">
+                <div class="preset-dropdown">
+                    <button class="preset-dropdown-btn" onclick="togglePresetMenu()">📋 Load Preset</button>
+                    <div class="preset-menu" id="preset-menu">
+                        <div class="preset-item" onclick="loadPreset('default')">
+                            <div class="preset-item-title">Default</div>
+                            <div class="preset-item-desc">Standard transparent setup</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('correctTransparency')">
+                            <div class="preset-item-title">✓ Correct Transparency</div>
+                            <div class="preset-item-desc">Proper back-to-front ordering</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('incorrectOrder')">
+                            <div class="preset-item-title">✗ Wrong Order (Common Mistake)</div>
+                            <div class="preset-item-desc">depthWrite=true causes artifacts</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('glowEffect')">
+                            <div class="preset-item-title">Glow Effect</div>
+                            <div class="preset-item-desc">Additive blending demonstration</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('noDepthTest')">
+                            <div class="preset-item-title">No Depth Test</div>
+                            <div class="preset-item-desc">Shows why depth testing matters</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('opaque')">
+                            <div class="preset-item-title">All Opaque</div>
+                            <div class="preset-item-desc">Standard PBR materials</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="red-depthTest" checked>
-                    <label for="red-depthTest">Depth Test</label>
-                </div>
-                <div class="info-text">Test depth before rendering</div>
-            </div>
-
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="red-depthWrite">
-                    <label for="red-depthWrite">Depth Write</label>
-                </div>
-                <div class="info-text">Write to depth buffer</div>
+                <button class="help-btn" onclick="toggleHelp()">❓ Help & Settings Info</button>
             </div>
         </div>
 
-        <div class="object-section green">
-            <h2>Green Plane (Middle)</h2>
+        <div class="objects-grid">
+            <div class="object-section red">
+                <h2>🔴 Red Plane (Front, z=1)</h2>
 
-            <div class="control-group">
-                <label>Material Type</label>
-                <select id="green-material">
-                    <option value="basic">MeshBasicMaterial</option>
-                    <option value="standard">MeshStandardMaterial</option>
-                    <option value="shader">ShaderMaterial (Custom)</option>
-                </select>
-            </div>
+                <div class="control-group">
+                    <label>Material Type</label>
+                    <select id="red-material">
+                        <option value="basic">Basic (no lighting)</option>
+                        <option value="standard">Standard (PBR)</option>
+                        <option value="shader">Shader (custom)</option>
+                    </select>
+                </div>
 
-            <div class="control-group">
-                <label>Opacity <span class="value-display" id="green-opacity-val">0.7</span></label>
-                <input type="range" id="green-opacity" min="0" max="1" step="0.01" value="0.7">
-            </div>
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Opacity</label>
+                        <span class="value-display" id="red-opacity-val">0.7</span>
+                    </div>
+                    <input type="range" id="red-opacity" min="0" max="1" step="0.01" value="0.7">
+                </div>
 
-            <div class="control-group">
-                <label>Render Order <span class="value-display" id="green-order-val">0</span></label>
-                <input type="range" id="green-order" min="-5" max="5" step="1" value="0">
-            </div>
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Render Order</label>
+                        <span class="value-display" id="red-order-val">0</span>
+                    </div>
+                    <input type="range" id="red-order" min="-5" max="5" step="1" value="0">
+                </div>
 
-            <div class="control-group">
-                <label>Blending Mode</label>
-                <select id="green-blending">
-                    <option value="normal">NormalBlending</option>
-                    <option value="additive">AdditiveBlending</option>
-                    <option value="subtractive">SubtractiveBlending</option>
-                    <option value="multiply">MultiplyBlending</option>
-                </select>
-            </div>
+                <div class="control-group">
+                    <label>Blending Mode</label>
+                    <select id="red-blending">
+                        <option value="normal">Normal</option>
+                        <option value="additive">Additive (glow)</option>
+                        <option value="subtractive">Subtractive</option>
+                        <option value="multiply">Multiply</option>
+                    </select>
+                </div>
 
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="green-transparent" checked>
-                    <label for="green-transparent">Transparent</label>
+                <div class="checkboxes-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="red-transparent" checked>
+                        <label for="red-transparent">Transparent</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="red-depthTest" checked>
+                        <label for="red-depthTest">Depth Test</label>
+                    </div>
+                </div>
+                <div class="checkboxes-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="red-depthWrite">
+                        <label for="red-depthWrite">Depth Write</label>
+                    </div>
                 </div>
             </div>
 
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="green-depthTest" checked>
-                    <label for="green-depthTest">Depth Test</label>
+            <div class="object-section green">
+                <h2>🟢 Green Plane (Middle, z=0)</h2>
+
+                <div class="control-group">
+                    <label>Material Type</label>
+                    <select id="green-material">
+                        <option value="basic">Basic (no lighting)</option>
+                        <option value="standard">Standard (PBR)</option>
+                        <option value="shader">Shader (custom)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Opacity</label>
+                        <span class="value-display" id="green-opacity-val">0.7</span>
+                    </div>
+                    <input type="range" id="green-opacity" min="0" max="1" step="0.01" value="0.7">
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Render Order</label>
+                        <span class="value-display" id="green-order-val">0</span>
+                    </div>
+                    <input type="range" id="green-order" min="-5" max="5" step="1" value="0">
+                </div>
+
+                <div class="control-group">
+                    <label>Blending Mode</label>
+                    <select id="green-blending">
+                        <option value="normal">Normal</option>
+                        <option value="additive">Additive (glow)</option>
+                        <option value="subtractive">Subtractive</option>
+                        <option value="multiply">Multiply</option>
+                    </select>
+                </div>
+
+                <div class="checkboxes-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="green-transparent" checked>
+                        <label for="green-transparent">Transparent</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="green-depthTest" checked>
+                        <label for="green-depthTest">Depth Test</label>
+                    </div>
+                </div>
+                <div class="checkboxes-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="green-depthWrite">
+                        <label for="green-depthWrite">Depth Write</label>
+                    </div>
                 </div>
             </div>
 
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="green-depthWrite">
-                    <label for="green-depthWrite">Depth Write</label>
+            <div class="object-section blue">
+                <h2>🔵 Blue Plane (Back, z=-1)</h2>
+
+                <div class="control-group">
+                    <label>Material Type</label>
+                    <select id="blue-material">
+                        <option value="basic">Basic (no lighting)</option>
+                        <option value="standard">Standard (PBR)</option>
+                        <option value="shader">Shader (custom)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Opacity</label>
+                        <span class="value-display" id="blue-opacity-val">0.7</span>
+                    </div>
+                    <input type="range" id="blue-opacity" min="0" max="1" step="0.01" value="0.7">
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Render Order</label>
+                        <span class="value-display" id="blue-order-val">0</span>
+                    </div>
+                    <input type="range" id="blue-order" min="-5" max="5" step="1" value="0">
+                </div>
+
+                <div class="control-group">
+                    <label>Blending Mode</label>
+                    <select id="blue-blending">
+                        <option value="normal">Normal</option>
+                        <option value="additive">Additive (glow)</option>
+                        <option value="subtractive">Subtractive</option>
+                        <option value="multiply">Multiply</option>
+                    </select>
+                </div>
+
+                <div class="checkboxes-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="blue-transparent" checked>
+                        <label for="blue-transparent">Transparent</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="blue-depthTest" checked>
+                        <label for="blue-depthTest">Depth Test</label>
+                    </div>
+                </div>
+                <div class="checkboxes-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="blue-depthWrite">
+                        <label for="blue-depthWrite">Depth Write</label>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="object-section blue">
-            <h2>Blue Plane (Back)</h2>
+    <!-- Help Modal -->
+    <div id="help-modal">
+        <div class="help-content">
+            <button class="help-close" onclick="toggleHelp()">Close ✕</button>
 
-            <div class="control-group">
-                <label>Material Type</label>
-                <select id="blue-material">
-                    <option value="basic">MeshBasicMaterial</option>
-                    <option value="standard">MeshStandardMaterial</option>
-                    <option value="shader">ShaderMaterial (Custom)</option>
-                </select>
-            </div>
+            <h2>📚 Understanding the Settings</h2>
 
-            <div class="control-group">
-                <label>Opacity <span class="value-display" id="blue-opacity-val">0.7</span></label>
-                <input type="range" id="blue-opacity" min="0" max="1" step="0.01" value="0.7">
-            </div>
+            <h3>Material Type</h3>
+            <p><strong>Basic:</strong> No lighting calculations, fastest performance. Color appears the same from all angles.</p>
+            <p><strong>Standard:</strong> Physically-based rendering (PBR) with realistic lighting. Responds to lights in the scene.</p>
+            <p><strong>Shader:</strong> Custom GLSL shader with gradient alpha effect. Full control but more complex.</p>
 
-            <div class="control-group">
-                <label>Render Order <span class="value-display" id="blue-order-val">0</span></label>
-                <input type="range" id="blue-order" min="-5" max="5" step="1" value="0">
-            </div>
+            <h3>Opacity</h3>
+            <p>Controls how transparent the object is, from 0.0 (fully transparent/invisible) to 1.0 (fully opaque/solid).</p>
+            <p><em>Note:</em> Must have "Transparent" checked for opacity to work.</p>
 
-            <div class="control-group">
-                <label>Blending Mode</label>
-                <select id="blue-blending">
-                    <option value="normal">NormalBlending</option>
-                    <option value="additive">AdditiveBlending</option>
-                    <option value="subtractive">SubtractiveBlending</option>
-                    <option value="multiply">MultiplyBlending</option>
-                </select>
-            </div>
+            <h3>Render Order</h3>
+            <p>Controls the drawing sequence. Objects with <strong>higher</strong> values render <strong>after</strong> (on top of) objects with lower values.</p>
+            <ul>
+                <li>Default: 0</li>
+                <li>Range: -5 to +5 (can be any integer)</li>
+                <li><strong>Key point:</strong> For transparent objects to blend correctly, they should typically render back-to-front</li>
+            </ul>
 
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="blue-transparent" checked>
-                    <label for="blue-transparent">Transparent</label>
-                </div>
-            </div>
+            <h3>Blending Mode</h3>
+            <p><strong>Normal:</strong> Standard alpha blending - colors mix based on opacity.</p>
+            <p><strong>Additive:</strong> Colors add together, creating bright glowing effects. Great for light, fire, particles.</p>
+            <p><strong>Subtractive:</strong> Colors subtract - creates darkening effects.</p>
+            <p><strong>Multiply:</strong> Colors multiply - always darkens, useful for shadows.</p>
 
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="blue-depthTest" checked>
-                    <label for="blue-depthTest">Depth Test</label>
-                </div>
-            </div>
+            <h3>Transparent</h3>
+            <p>Must be <strong>checked</strong> to enable alpha blending. Without this, opacity has no effect.</p>
+            <p><em>Unchecked:</em> Object is fully opaque regardless of opacity setting.</p>
 
-            <div class="control-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="blue-depthWrite">
-                    <label for="blue-depthWrite">Depth Write</label>
-                </div>
-            </div>
-        </div>
+            <h3>Depth Test</h3>
+            <p>When checked, the GPU tests if a fragment is closer than what's already rendered before drawing it.</p>
+            <ul>
+                <li><strong>Checked (normal):</strong> Only renders if closer to camera</li>
+                <li><strong>Unchecked:</strong> Renders regardless of depth - object appears "on top" always</li>
+            </ul>
+            <p><strong>Use case for unchecked:</strong> UI elements, overlays, special effects that should ignore 3D space.</p>
 
-        <h2>🎯 Preset Scenarios</h2>
-        <div class="preset-buttons">
-            <button onclick="loadPreset('default')">Default</button>
-            <button onclick="loadPreset('correctTransparency')">Correct Transparency</button>
-            <button onclick="loadPreset('incorrectOrder')">Wrong Order</button>
-            <button onclick="loadPreset('glowEffect')">Glow Effect</button>
-            <button onclick="loadPreset('noDepthTest')">No Depth Test</button>
-            <button onclick="loadPreset('opaque')">All Opaque</button>
+            <h3>Depth Write</h3>
+            <p>When checked, rendering updates the depth buffer, blocking objects behind it.</p>
+            <ul>
+                <li><strong>For opaque objects:</strong> Should be checked</li>
+                <li><strong>For transparent objects:</strong> Should usually be <strong>unchecked</strong></li>
+            </ul>
+            <p><strong>⚠️ Common mistake:</strong> Having depthWrite=true on transparent objects causes rendering artifacts where objects behind don't blend properly.</p>
+
+            <h3>🎯 Recommended Settings</h3>
+            <p><strong>Standard Opaque Object:</strong></p>
+            <ul>
+                <li>Transparent: unchecked</li>
+                <li>Depth Test: checked</li>
+                <li>Depth Write: checked</li>
+            </ul>
+
+            <p><strong>Standard Transparent Object:</strong></p>
+            <ul>
+                <li>Transparent: checked</li>
+                <li>Depth Test: checked</li>
+                <li>Depth Write: <strong>unchecked</strong></li>
+                <li>Render Order: Set to ensure back-to-front rendering</li>
+            </ul>
+
+            <h3>💡 Tips</h3>
+            <ul>
+                <li>Use the <strong>"Correct Transparency"</strong> preset to see proper settings</li>
+                <li>Try <strong>"Wrong Order"</strong> to see what happens with incorrect depthWrite</li>
+                <li>Rotate the camera (click and drag) to see how settings affect rendering from different angles</li>
+                <li>Experiment with render order - higher numbers render last (appear on top)</li>
+            </ul>
         </div>
     </div>
 
@@ -680,7 +942,28 @@
                 const plane = color === 'red' ? redPlane : color === 'green' ? greenPlane : bluePlane;
                 updateMaterial(plane, color);
             });
+
+            // Close preset menu after selection
+            document.getElementById('preset-menu').classList.remove('active');
         };
+
+        // UI functions
+        window.toggleHelp = function() {
+            document.getElementById('help-modal').classList.toggle('active');
+        };
+
+        window.togglePresetMenu = function() {
+            document.getElementById('preset-menu').classList.toggle('active');
+        };
+
+        // Close preset menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const presetDropdown = document.querySelector('.preset-dropdown');
+            const presetMenu = document.getElementById('preset-menu');
+            if (!presetDropdown.contains(event.target)) {
+                presetMenu.classList.remove('active');
+            }
+        });
 
         // Animation loop
         function animate() {
@@ -699,6 +982,8 @@
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
+
+            const controlsHeight = document.getElementById('controls').offsetHeight;
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 

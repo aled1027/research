@@ -116,3 +116,51 @@ Create interactive demo with:
 - Confirmed preset scenarios demonstrate key concepts
 - Validated that depth settings interact as expected
 - Ensured UI is responsive and updates in real-time
+
+### UI/UX Improvements (Iteration 2)
+
+#### Layout Redesign
+- Moved controls from vertical sidebar to horizontal bottom panel (400px height)
+- Changed from stacked sections to 3-column grid layout
+- All three planes' controls now visible simultaneously without scrolling
+- Optimized for laptop screens (MacBook Pro 13"-15")
+
+#### Enhanced Documentation
+- Added comprehensive help modal with detailed explanations of all settings
+- Each setting includes:
+  - What it does
+  - When to use it
+  - Common mistakes and solutions
+  - Recommended configurations
+- Modal accessible via "Help & Settings Info" button in header
+
+#### Improved Preset System
+- Changed from grid buttons to dropdown menu with descriptions
+- Each preset now shows:
+  - Title with visual indicators (✓/✗)
+  - Short description of what it demonstrates
+- Presets include explanations in their names:
+  - "✓ Correct Transparency" - shows proper configuration
+  - "✗ Wrong Order (Common Mistake)" - demonstrates common error
+  - Clear categorization of what each preset teaches
+
+#### Visual Improvements
+- Color-coded plane headers (🔴/🟢/🔵) with z-position labels
+- Inline value displays for sliders (opacity, render order)
+- Compact checkbox layout (2-column grid)
+- Cleaner control spacing for better readability
+- Material type options include hints (e.g., "Basic (no lighting)")
+
+#### Accessibility & Usability
+- All controls visible at once - no need to scroll through sections
+- Larger canvas area (60% of screen vs 70% of width)
+- Clear visual hierarchy with header, grid layout
+- Quick access to presets and help from header
+- Info box updated with tips about using presets
+
+### Key Advantages of New Layout
+1. **Better for teaching**: Students can see all settings and compare them side-by-side
+2. **Laptop-friendly**: Optimized for 13"-15" screens common in education
+3. **Less cognitive load**: No scrolling needed to see current state
+4. **Faster experimentation**: All controls within reach
+5. **Better onboarding**: Help modal provides comprehensive guide
