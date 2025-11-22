@@ -164,3 +164,16 @@ Create interactive demo with:
 3. **Less cognitive load**: No scrolling needed to see current state
 4. **Faster experimentation**: All controls within reach
 5. **Better onboarding**: Help modal provides comprehensive guide
+
+### Bug Fixes (Iteration 2.1)
+
+#### Canvas Overlap Issue
+- **Problem**: Canvas was rendering into the controls panel area
+- **Root cause**: Renderer and camera were using full window height instead of accounting for 400px controls
+- **Fix applied**:
+  - Added `overflow: hidden` to canvas container
+  - Added CSS rules to constrain canvas element dimensions
+  - Fixed initial renderer setup to use `window.innerHeight - 400px`
+  - Fixed resize handler to dynamically calculate canvas height
+  - Corrected camera aspect ratio calculation to use canvas height
+- **Result**: Canvas now properly stays above controls with no overlap
