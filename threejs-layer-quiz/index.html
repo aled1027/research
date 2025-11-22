@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Layering Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .score-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 2px solid #4a9eff;
+            z-index: 1000;
+        }
+
+        .score-display h3 {
+            color: #4a9eff;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .score-display .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .quiz-container {
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+
+        .question-number {
+            color: #4a9eff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .question-category {
+            background: #2a5a9a;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .settings-display {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4a9eff;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .plane-settings {
+            background: rgba(40, 40, 40, 0.6);
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .plane-settings h4 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .plane-settings.red h4 { color: #ff4444; }
+        .plane-settings.green h4 { color: #44ff44; }
+        .plane-settings.blue h4 { color: #4444ff; }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .setting-value {
+            color: #4a9eff;
+            font-weight: bold;
+        }
+
+        .answers-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .answer-option {
+            background: #2a2a2a;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 2px solid #444;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .answer-option:hover {
+            border-color: #4a9eff;
+            background: #333;
+        }
+
+        .answer-option.selected {
+            border-color: #4a9eff;
+            background: #2a5a9a;
+        }
+
+        .answer-option.correct {
+            border-color: #44ff44;
+            background: #1a4a1a;
+        }
+
+        .answer-option.incorrect {
+            border-color: #ff4444;
+            background: #4a1a1a;
+        }
+
+        .submit-btn {
+            background: #2a5a9a;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+
+        .submit-btn:hover {
+            background: #3a6aaa;
+        }
+
+        .submit-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .next-btn {
+            background: #44aa44;
+        }
+
+        .next-btn:hover {
+            background: #55bb55;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #1a4a1a;
+            border: 2px solid #44ff44;
+        }
+
+        .feedback.incorrect {
+            background: #4a1a1a;
+            border: 2px solid #ff4444;
+        }
+
+        .feedback h3 {
+            margin-bottom: 10px;
+        }
+
+        .feedback.correct h3 {
+            color: #44ff44;
+        }
+
+        .feedback.incorrect h3 {
+            color: #ff4444;
+        }
+
+        .feedback p {
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 400px;
+            background: #0a0a0a;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        #canvas-container.show {
+            display: block;
+        }
+
+        .final-score {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .final-score h2 {
+            font-size: 36px;
+            color: #4a9eff;
+            margin-bottom: 20px;
+        }
+
+        .final-score .percentage {
+            font-size: 72px;
+            font-weight: bold;
+            color: #44ff44;
+            margin-bottom: 20px;
+        }
+
+        .final-score .message {
+            font-size: 18px;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: #2a5a9a;
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .restart-btn:hover {
+            background: #3a6aaa;
+        }
+
+        .explanation {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 4px solid #4a9eff;
+        }
+
+        .explanation-title {
+            color: #4a9eff;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Three.js Layering Quiz</h1>
+            <p class="subtitle">Test your understanding of depth testing, transparency, and render order</p>
+        </header>
+
+        <div class="score-display">
+            <h3>Score</h3>
+            <div class="score"><span id="current-score">0</span> / <span id="total-questions">20</span></div>
+        </div>
+
+        <div id="quiz-content"></div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Quiz questions data
+        const questions = [
+            {
+                id: 1,
+                category: "Depth Test",
+                question: "Two red planes overlap. Both have depthTest=true and depthWrite=true. They are both opaque. What will you see?",
+                settings: {
+                    red: { z: 1, opacity: 1.0, transparent: false, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    green: { z: -1, opacity: 1.0, transparent: false, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Only the front red plane (closer to camera)", correct: true },
+                    { text: "Both planes blended together", correct: false },
+                    { text: "Only the back red plane", correct: false },
+                    { text: "Neither plane (both invisible)", correct: false }
+                ],
+                explanation: "With depthTest=true and depthWrite=true on opaque objects, the GPU correctly renders only what's closest to the camera. The front plane blocks the back plane completely."
+            },
+            {
+                id: 2,
+                category: "Depth Test",
+                question: "Red plane (front) and blue plane (back) both have depthTest=FALSE. What happens?",
+                settings: {
+                    red: { z: 1, opacity: 0.7, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.7, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Both planes visible, order depends on when they were added to scene", correct: true },
+                    { text: "Only the front red plane", correct: false },
+                    { text: "Only the back blue plane", correct: false },
+                    { text: "Planes flicker between front and back", correct: false }
+                ],
+                explanation: "With depthTest=false, objects ignore the depth buffer entirely. They render in the order they were added to the scene or by renderOrder, not by their Z position."
+            },
+            {
+                id: 3,
+                category: "Depth Test",
+                question: "Red (front, z=1) has depthTest=false. Blue (back, z=-1) has depthTest=true. Both transparent. Which appears on top?",
+                settings: {
+                    red: { z: 1, opacity: 0.7, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.7, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Red always appears on top (depthTest=false ignores depth)", correct: true },
+                    { text: "Blue appears on top", correct: false },
+                    { text: "They blend equally", correct: false },
+                    { text: "Neither is visible", correct: false }
+                ],
+                explanation: "Objects with depthTest=false always render regardless of depth, appearing 'on top' of objects that respect depth testing. This is useful for UI overlays."
+            },
+            {
+                id: 4,
+                category: "Depth Test",
+                question: "Three opaque planes at different depths, all with depthTest=true, depthWrite=true. What do you see?",
+                settings: {
+                    red: { z: 1, opacity: 1.0, transparent: false, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    green: { z: 0, opacity: 1.0, transparent: false, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 1.0, transparent: false, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Only the red plane (it's closest)", correct: true },
+                    { text: "All three planes visible with depth ordering", correct: false },
+                    { text: "Red and green visible, blue hidden", correct: false },
+                    { text: "All three blended together", correct: false }
+                ],
+                explanation: "Opaque objects with proper depth testing only show what's closest. Since red is in front and fully opaque, it completely blocks green and blue."
+            },
+            {
+                id: 5,
+                category: "Depth Write",
+                question: "Red (front), green (middle), blue (back) - all transparent with opacity=0.6, depthTest=true, depthWrite=TRUE. What's wrong?",
+                settings: {
+                    red: { z: 1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    green: { z: 0, opacity: 0.6, transparent: true, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Objects behind don't blend properly - you'll see rendering artifacts", correct: true },
+                    { text: "Perfect transparency with all three blended", correct: false },
+                    { text: "Only the front object visible", correct: false },
+                    { text: "Nothing wrong - this is the correct setup", correct: false }
+                ],
+                explanation: "This is a common mistake! depthWrite=true on transparent objects blocks objects behind from rendering properly. Transparent objects should have depthWrite=false."
+            },
+            {
+                id: 6,
+                category: "Depth Write",
+                question: "Same setup as before, but now depthWrite=FALSE on all transparent planes. What improves?",
+                settings: {
+                    red: { z: 1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 2, blending: 'normal', material: 'basic' },
+                    green: { z: 0, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 1, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "All three planes blend correctly - proper transparency", correct: true },
+                    { text: "No difference from before", correct: false },
+                    { text: "Objects become invisible", correct: false },
+                    { text: "Objects render in wrong order", correct: false }
+                ],
+                explanation: "With depthWrite=false and proper renderOrder (back-to-front), transparent objects blend correctly. This is the standard setup for transparency."
+            },
+            {
+                id: 7,
+                category: "Depth Write",
+                question: "Opaque red plane (z=1) with depthWrite=false. Transparent blue (z=-1, opacity=0.5) behind it. What happens?",
+                settings: {
+                    red: { z: 1, opacity: 1.0, transparent: false, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.5, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Blue bleeds through red (wrong - opaque should have depthWrite=true)", correct: true },
+                    { text: "Only red visible, blue completely blocked", correct: false },
+                    { text: "Both blend together properly", correct: false },
+                    { text: "Neither plane visible", correct: false }
+                ],
+                explanation: "Opaque objects should have depthWrite=true to properly block objects behind them. With depthWrite=false, the depth buffer isn't updated, causing incorrect rendering."
+            },
+            {
+                id: 8,
+                category: "Depth Write",
+                question: "What's the correct depthWrite setting for a standard transparent object like glass?",
+                settings: {
+                    red: { z: 0, opacity: 0.3, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'standard' }
+                },
+                answers: [
+                    { text: "depthWrite = false", correct: true },
+                    { text: "depthWrite = true", correct: false },
+                    { text: "It doesn't matter", correct: false },
+                    { text: "Depends on the material type", correct: false }
+                ],
+                explanation: "Transparent objects should almost always have depthWrite=false to allow proper blending with objects behind them."
+            },
+            {
+                id: 9,
+                category: "Render Order",
+                question: "Red (z=1, renderOrder=0) and Blue (z=-1, renderOrder=5). Both transparent. Which renders last (appears on top)?",
+                settings: {
+                    red: { z: 1, opacity: 0.7, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.7, transparent: true, depthTest: true, depthWrite: false, renderOrder: 5, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Blue renders last (renderOrder=5 > renderOrder=0)", correct: true },
+                    { text: "Red renders last (it's closer)", correct: false },
+                    { text: "They render at the same time", correct: false },
+                    { text: "Render order doesn't affect transparent objects", correct: false }
+                ],
+                explanation: "renderOrder overrides spatial position. Higher renderOrder values render after lower values, regardless of Z position."
+            },
+            {
+                id: 10,
+                category: "Render Order",
+                question: "Three transparent planes: Red (z=1, order=2), Green (z=0, order=1), Blue (z=-1, order=0). What's the render sequence?",
+                settings: {
+                    red: { z: 1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 2, blending: 'normal', material: 'basic' },
+                    green: { z: 0, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 1, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Blue first, then Green, then Red (back-to-front)", correct: true },
+                    { text: "Red first, then Green, then Blue (front-to-back)", correct: false },
+                    { text: "Order doesn't matter for transparent objects", correct: false },
+                    { text: "All render simultaneously", correct: false }
+                ],
+                explanation: "RenderOrder 0, 1, 2 means Blue→Green→Red. This back-to-front order is correct for proper transparency blending."
+            },
+            {
+                id: 11,
+                category: "Render Order",
+                question: "Two planes at same depth (z=0), Red has renderOrder=-1, Blue has renderOrder=1. Which is on top?",
+                settings: {
+                    red: { z: 0, opacity: 0.7, transparent: true, depthTest: true, depthWrite: false, renderOrder: -1, blending: 'normal', material: 'basic' },
+                    blue: { z: 0, opacity: 0.7, transparent: true, depthTest: true, depthWrite: false, renderOrder: 1, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Blue appears on top (higher renderOrder)", correct: true },
+                    { text: "Red appears on top (negative renderOrder has priority)", correct: false },
+                    { text: "Z-fighting occurs", correct: false },
+                    { text: "Both render at same depth level", correct: false }
+                ],
+                explanation: "RenderOrder can be negative. Higher values (1) always render after lower values (-1), regardless of sign."
+            },
+            {
+                id: 12,
+                category: "Render Order",
+                question: "For transparent objects to blend correctly, what renderOrder pattern should you use?",
+                settings: {
+                    red: { z: 1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 2, blending: 'normal', material: 'basic' },
+                    green: { z: 0, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 1, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.6, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Back-to-front (farthest objects rendered first)", correct: true },
+                    { text: "Front-to-back (closest objects rendered first)", correct: false },
+                    { text: "Random order is fine", correct: false },
+                    { text: "RenderOrder doesn't matter if depthTest is on", correct: false }
+                ],
+                explanation: "Transparent objects should render back-to-front for correct alpha blending. This matches the example: Blue (back, order=0) → Green (middle, order=1) → Red (front, order=2)."
+            },
+            {
+                id: 13,
+                category: "Blending Modes",
+                question: "Red and Blue planes overlap with AdditiveBlending. Where they overlap, what color appears?",
+                settings: {
+                    red: { z: 1, opacity: 0.8, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'additive', material: 'basic' },
+                    blue: { z: -1, opacity: 0.8, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'additive', material: 'basic' }
+                },
+                answers: [
+                    { text: "Magenta/Purple (red + blue colors add together)", correct: true },
+                    { text: "Dark purple (colors multiply)", correct: false },
+                    { text: "Average of red and blue", correct: false },
+                    { text: "Black (colors cancel out)", correct: false }
+                ],
+                explanation: "AdditiveBlending adds color values together. Red (255,0,0) + Blue (0,0,255) = Magenta (255,0,255). This creates bright, glowing effects."
+            },
+            {
+                id: 14,
+                category: "Blending Modes",
+                question: "What visual effect does AdditiveBlending create compared to NormalBlending?",
+                settings: {
+                    red: { z: 1, opacity: 0.8, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'additive', material: 'basic' },
+                    blue: { z: -1, opacity: 0.8, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'additive', material: 'basic' }
+                },
+                answers: [
+                    { text: "Brighter, glowing appearance where objects overlap", correct: true },
+                    { text: "Darker, shadowed appearance", correct: false },
+                    { text: "More transparent", correct: false },
+                    { text: "No visible difference", correct: false }
+                ],
+                explanation: "AdditiveBlending adds colors, making overlaps brighter. It's perfect for light effects, fire, particles, and glowing objects."
+            },
+            {
+                id: 15,
+                category: "Blending Modes",
+                question: "MultiplyBlending causes overlapping areas to become:",
+                settings: {
+                    red: { z: 1, opacity: 1.0, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'multiply', material: 'basic' },
+                    green: { z: -1, opacity: 1.0, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'multiply', material: 'basic' }
+                },
+                answers: [
+                    { text: "Darker (colors multiply, values less than 1)", correct: true },
+                    { text: "Brighter", correct: false },
+                    { text: "More saturated", correct: false },
+                    { text: "Transparent", correct: false }
+                ],
+                explanation: "MultiplyBlending multiplies color values (0-1 range). Multiplying values less than 1 always produces darker results. Useful for shadows and filters."
+            },
+            {
+                id: 16,
+                category: "Blending Modes",
+                question: "Which blending mode is best for creating a glowing particle effect?",
+                settings: {
+                    red: { z: 0, opacity: 0.8, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'additive', material: 'shader' }
+                },
+                answers: [
+                    { text: "AdditiveBlending", correct: true },
+                    { text: "NormalBlending", correct: false },
+                    { text: "MultiplyBlending", correct: false },
+                    { text: "SubtractiveBlending", correct: false }
+                ],
+                explanation: "AdditiveBlending is ideal for glow effects because overlapping particles add their colors together, creating bright, luminous areas."
+            },
+            {
+                id: 17,
+                category: "Combined Concepts",
+                question: "Red plane: transparent, depthTest=true, depthWrite=true, renderOrder=0. What's the main problem?",
+                settings: {
+                    red: { z: 1, opacity: 0.5, transparent: true, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.5, transparent: true, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "depthWrite should be false for transparent objects", correct: true },
+                    { text: "depthTest should be false", correct: false },
+                    { text: "renderOrder is too low", correct: false },
+                    { text: "Nothing wrong with this setup", correct: false }
+                ],
+                explanation: "The most common transparency mistake: depthWrite=true prevents proper blending with objects behind. Always use depthWrite=false for transparent materials."
+            },
+            {
+                id: 18,
+                category: "Combined Concepts",
+                question: "An object with depthTest=false, renderOrder=100. Where does it appear?",
+                settings: {
+                    red: { z: 1, opacity: 0.8, transparent: true, depthTest: false, depthWrite: false, renderOrder: 100, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.8, transparent: true, depthTest: true, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "Always on top of everything (ignores depth, high renderOrder)", correct: true },
+                    { text: "Behind other objects", correct: false },
+                    { text: "At its Z position", correct: false },
+                    { text: "Hidden", correct: false }
+                ],
+                explanation: "depthTest=false makes it ignore depth, and renderOrder=100 ensures it renders last. Perfect for UI overlays that should always be visible."
+            },
+            {
+                id: 19,
+                category: "Combined Concepts",
+                question: "MeshBasicMaterial vs MeshStandardMaterial - which responds to scene lighting?",
+                settings: {
+                    red: { z: 0.5, opacity: 1.0, transparent: false, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -0.5, opacity: 1.0, transparent: false, depthTest: true, depthWrite: true, renderOrder: 0, blending: 'normal', material: 'standard' }
+                },
+                answers: [
+                    { text: "Only MeshStandardMaterial responds to lighting", correct: true },
+                    { text: "Only MeshBasicMaterial responds to lighting", correct: false },
+                    { text: "Both respond to lighting equally", correct: false },
+                    { text: "Neither responds to lighting", correct: false }
+                ],
+                explanation: "MeshBasicMaterial is unlit - it shows flat color from all angles. MeshStandardMaterial uses PBR lighting for realistic appearance."
+            },
+            {
+                id: 20,
+                category: "Combined Concepts",
+                question: "Final challenge: 3 transparent planes, all with depthTest=false, same renderOrder. What determines which appears on top?",
+                settings: {
+                    red: { z: 1, opacity: 0.6, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    green: { z: 0, opacity: 0.6, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' },
+                    blue: { z: -1, opacity: 0.6, transparent: true, depthTest: false, depthWrite: false, renderOrder: 0, blending: 'normal', material: 'basic' }
+                },
+                answers: [
+                    { text: "The order they were added to the scene", correct: true },
+                    { text: "Their Z position still matters", correct: false },
+                    { text: "Random/unpredictable", correct: false },
+                    { text: "All render at exactly the same depth", correct: false }
+                ],
+                explanation: "With depthTest=false and identical renderOrder, Three.js renders objects in the order they were added to the scene. Z position is ignored."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let answered = false;
+
+        // Three.js scene variables
+        let scene, camera, renderer, controls;
+        let redPlane, greenPlane, bluePlane;
+        let materials = {};
+
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0a);
+
+            const canvas = document.getElementById('canvas-container');
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(0, 0, 5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            canvas.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            // Create planes
+            const geometry = new THREE.PlaneGeometry(2, 2);
+
+            // Create all material types
+            const colors = { red: 0xff0000, green: 0x00ff00, blue: 0x0000ff };
+            materials = {
+                red: { basic: null, standard: null, shader: null },
+                green: { basic: null, standard: null, shader: null },
+                blue: { basic: null, standard: null, shader: null }
+            };
+
+            Object.keys(colors).forEach(color => {
+                materials[color].basic = new THREE.MeshBasicMaterial({
+                    color: colors[color],
+                    side: THREE.DoubleSide
+                });
+                materials[color].standard = new THREE.MeshStandardMaterial({
+                    color: colors[color],
+                    roughness: 0.5,
+                    metalness: 0.2,
+                    side: THREE.DoubleSide
+                });
+
+                const vertexShader = `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `;
+                const fragmentShader = `
+                    uniform vec3 color;
+                    uniform float opacity;
+                    varying vec2 vUv;
+                    void main() {
+                        float alpha = opacity * (1.0 - length(vUv - 0.5) * 0.5);
+                        gl_FragColor = vec4(color, alpha);
+                    }
+                `;
+                materials[color].shader = new THREE.ShaderMaterial({
+                    vertexShader,
+                    fragmentShader,
+                    uniforms: {
+                        color: { value: new THREE.Color(colors[color]) },
+                        opacity: { value: 0.7 }
+                    },
+                    side: THREE.DoubleSide
+                });
+            });
+
+            redPlane = new THREE.Mesh(geometry, materials.red.basic);
+            greenPlane = new THREE.Mesh(geometry, materials.green.basic);
+            bluePlane = new THREE.Mesh(geometry, materials.blue.basic);
+
+            scene.add(redPlane);
+            scene.add(greenPlane);
+            scene.add(bluePlane);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function applySettings(plane, settings, color) {
+            plane.position.z = settings.z;
+            plane.renderOrder = settings.renderOrder;
+
+            let material;
+            if (settings.material === 'basic') {
+                material = materials[color].basic;
+            } else if (settings.material === 'standard') {
+                material = materials[color].standard;
+            } else {
+                material = materials[color].shader;
+            }
+
+            plane.material = material;
+
+            const blendingModes = {
+                'normal': THREE.NormalBlending,
+                'additive': THREE.AdditiveBlending,
+                'subtractive': THREE.SubtractiveBlending,
+                'multiply': THREE.MultiplyBlending
+            };
+
+            if (settings.material === 'shader') {
+                material.uniforms.opacity.value = settings.opacity;
+                material.transparent = settings.transparent;
+                material.depthTest = settings.depthTest;
+                material.depthWrite = settings.depthWrite;
+                material.blending = blendingModes[settings.blending];
+            } else {
+                material.opacity = settings.opacity;
+                material.transparent = settings.transparent;
+                material.depthTest = settings.depthTest;
+                material.depthWrite = settings.depthWrite;
+                material.blending = blendingModes[settings.blending];
+            }
+
+            material.needsUpdate = true;
+            plane.visible = true;
+        }
+
+        function renderQuestion() {
+            const question = questions[currentQuestion];
+            const quizContent = document.getElementById('quiz-content');
+
+            let settingsHTML = '<div class="settings-grid">';
+
+            if (question.settings.red) {
+                settingsHTML += createPlaneSettingsHTML('red', question.settings.red);
+            }
+            if (question.settings.green) {
+                settingsHTML += createPlaneSettingsHTML('green', question.settings.green);
+            }
+            if (question.settings.blue) {
+                settingsHTML += createPlaneSettingsHTML('blue', question.settings.blue);
+            }
+
+            settingsHTML += '</div>';
+
+            let answersHTML = '<div class="answers-grid">';
+            question.answers.forEach((answer, index) => {
+                answersHTML += `
+                    <div class="answer-option" data-index="${index}">
+                        ${answer.text}
+                    </div>
+                `;
+            });
+            answersHTML += '</div>';
+
+            quizContent.innerHTML = `
+                <div class="quiz-container">
+                    <div class="question-header">
+                        <div class="question-number">Question ${question.id} of ${questions.length}</div>
+                        <div class="question-category">${question.category}</div>
+                    </div>
+
+                    <div class="question-text">${question.question}</div>
+
+                    <div class="settings-display">
+                        <h3 style="margin-bottom: 15px; color: #4a9eff;">Plane Settings:</h3>
+                        ${settingsHTML}
+                    </div>
+
+                    ${answersHTML}
+
+                    <div>
+                        <button class="submit-btn" onclick="checkAnswer()" id="submit-btn" disabled>Submit Answer</button>
+                    </div>
+
+                    <div class="feedback" id="feedback">
+                        <h3 id="feedback-title"></h3>
+                        <p id="feedback-text"></p>
+                        <div class="explanation">
+                            <div class="explanation-title">Explanation:</div>
+                            <div id="explanation-text"></div>
+                        </div>
+                        <div id="canvas-container"></div>
+                        <div style="margin-top: 20px;">
+                            <button class="submit-btn next-btn" onclick="nextQuestion()">
+                                ${currentQuestion === questions.length - 1 ? 'See Final Score' : 'Next Question →'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add click handlers to answer options
+            document.querySelectorAll('.answer-option').forEach(option => {
+                option.addEventListener('click', () => selectAnswer(option));
+            });
+
+            selectedAnswer = null;
+            answered = false;
+        }
+
+        function createPlaneSettingsHTML(color, settings) {
+            const colorNames = {
+                red: '🔴 Red Plane',
+                green: '🟢 Green Plane',
+                blue: '🔵 Blue Plane'
+            };
+
+            return `
+                <div class="plane-settings ${color}">
+                    <h4>${colorNames[color]} (z=${settings.z})</h4>
+                    <div class="setting-item">
+                        <span>Material:</span>
+                        <span class="setting-value">${settings.material}</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>Opacity:</span>
+                        <span class="setting-value">${settings.opacity}</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>Transparent:</span>
+                        <span class="setting-value">${settings.transparent ? 'true' : 'false'}</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>depthTest:</span>
+                        <span class="setting-value">${settings.depthTest ? 'true' : 'false'}</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>depthWrite:</span>
+                        <span class="setting-value">${settings.depthWrite ? 'true' : 'false'}</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>renderOrder:</span>
+                        <span class="setting-value">${settings.renderOrder}</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>Blending:</span>
+                        <span class="setting-value">${settings.blending}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectAnswer(option) {
+            if (answered) return;
+
+            // Remove previous selection
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Add selection to clicked option
+            option.classList.add('selected');
+            selectedAnswer = parseInt(option.dataset.index);
+
+            // Enable submit button
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        window.checkAnswer = function() {
+            if (selectedAnswer === null || answered) return;
+
+            answered = true;
+            const question = questions[currentQuestion];
+            const isCorrect = question.answers[selectedAnswer].correct;
+
+            // Update score
+            if (isCorrect) {
+                score++;
+                document.getElementById('current-score').textContent = score;
+            }
+
+            // Show feedback
+            const feedback = document.getElementById('feedback');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackText = document.getElementById('feedback-text');
+            const explanationText = document.getElementById('explanation-text');
+
+            if (isCorrect) {
+                feedback.className = 'feedback correct show';
+                feedbackTitle.textContent = '✓ Correct!';
+                feedbackText.textContent = 'Well done! You understand this concept.';
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedbackTitle.textContent = '✗ Incorrect';
+                const correctAnswer = question.answers.find(a => a.correct);
+                feedbackText.textContent = `The correct answer is: "${correctAnswer.text}"`;
+            }
+
+            explanationText.textContent = question.explanation;
+
+            // Highlight answers
+            document.querySelectorAll('.answer-option').forEach((option, index) => {
+                if (question.answers[index].correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedAnswer) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            // Disable submit button
+            document.getElementById('submit-btn').disabled = true;
+
+            // Render the scene
+            const canvas = document.getElementById('canvas-container');
+            canvas.classList.add('show');
+
+            // Initialize Three.js if not already done
+            if (!renderer) {
+                initThreeJS();
+            }
+
+            // Hide all planes first
+            redPlane.visible = false;
+            greenPlane.visible = false;
+            bluePlane.visible = false;
+
+            // Apply settings
+            if (question.settings.red) {
+                applySettings(redPlane, question.settings.red, 'red');
+            }
+            if (question.settings.green) {
+                applySettings(greenPlane, question.settings.green, 'green');
+            }
+            if (question.settings.blue) {
+                applySettings(bluePlane, question.settings.blue, 'blue');
+            }
+        };
+
+        window.nextQuestion = function() {
+            currentQuestion++;
+
+            if (currentQuestion >= questions.length) {
+                showFinalScore();
+            } else {
+                renderQuestion();
+            }
+        };
+
+        function showFinalScore() {
+            const percentage = Math.round((score / questions.length) * 100);
+            let message = '';
+
+            if (percentage >= 90) {
+                message = 'Excellent! You have mastered Three.js layering concepts!';
+            } else if (percentage >= 75) {
+                message = 'Great job! You have a solid understanding.';
+            } else if (percentage >= 60) {
+                message = 'Good effort! Review the concepts you missed.';
+            } else {
+                message = 'Keep practicing! Try the interactive demo to learn more.';
+            }
+
+            document.getElementById('quiz-content').innerHTML = `
+                <div class="quiz-container">
+                    <div class="final-score">
+                        <h2>Quiz Complete!</h2>
+                        <div class="percentage">${percentage}%</div>
+                        <div class="score">
+                            You scored <strong>${score}</strong> out of <strong>${questions.length}</strong>
+                        </div>
+                        <div class="message">${message}</div>
+                        <button class="restart-btn" onclick="restartQuiz()">Restart Quiz</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.restartQuiz = function() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('current-score').textContent = score;
+            renderQuestion();
+        };
+
+        // Start quiz
+        renderQuestion();
+    </script>
+</body>
+</html>
