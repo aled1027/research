@@ -1001,12 +1001,19 @@
 
             // Render the scene
             const canvas = document.getElementById('canvas-container');
-            canvas.classList.add('show');
 
             // Initialize Three.js if not already done
             if (!renderer) {
                 initThreeJS();
+            } else {
+                // Renderer exists but we have a new canvas container
+                // Re-append the renderer's canvas to the new container
+                if (!canvas.contains(renderer.domElement)) {
+                    canvas.appendChild(renderer.domElement);
+                }
             }
+
+            canvas.classList.add('show');
 
             // Resize renderer to match canvas dimensions (canvas is now visible)
             const width = canvas.clientWidth;

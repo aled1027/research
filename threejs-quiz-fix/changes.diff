@@ -1,41 +1,26 @@
 diff --git a/threejs-layer-quiz/index.html b/threejs-layer-quiz/index.html
-index 3ec95bb..d590aa1 100644
+index d590aa1..580bb78 100644
 --- a/threejs-layer-quiz/index.html
 +++ b/threejs-layer-quiz/index.html
-@@ -760,6 +760,20 @@
-             scene.add(greenPlane);
-             scene.add(bluePlane);
+@@ -1001,13 +1001,20 @@
  
-+            // Handle window resize
-+            window.addEventListener('resize', () => {
-+                const canvas = document.getElementById('canvas-container');
-+                if (canvas.classList.contains('show')) {
-+                    const width = canvas.clientWidth;
-+                    const height = canvas.clientHeight;
-+                    if (width > 0 && height > 0) {
-+                        renderer.setSize(width, height);
-+                        camera.aspect = width / height;
-+                        camera.updateProjectionMatrix();
-+                    }
-+                }
-+            });
-+
-             animate();
-         }
+             // Render the scene
+             const canvas = document.getElementById('canvas-container');
+-            canvas.classList.add('show');
  
-@@ -994,6 +1008,15 @@
+             // Initialize Three.js if not already done
+             if (!renderer) {
                  initThreeJS();
++            } else {
++                // Renderer exists but we have a new canvas container
++                // Re-append the renderer's canvas to the new container
++                if (!canvas.contains(renderer.domElement)) {
++                    canvas.appendChild(renderer.domElement);
++                }
              }
  
-+            // Resize renderer to match canvas dimensions (canvas is now visible)
-+            const width = canvas.clientWidth;
-+            const height = canvas.clientHeight;
-+            if (width > 0 && height > 0) {
-+                renderer.setSize(width, height);
-+                camera.aspect = width / height;
-+                camera.updateProjectionMatrix();
-+            }
++            canvas.classList.add('show');
 +
-             // Hide all planes first
-             redPlane.visible = false;
-             greenPlane.visible = false;
+             // Resize renderer to match canvas dimensions (canvas is now visible)
+             const width = canvas.clientWidth;
+             const height = canvas.clientHeight;
