@@ -760,6 +760,20 @@
             scene.add(greenPlane);
             scene.add(bluePlane);
 
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                const canvas = document.getElementById('canvas-container');
+                if (canvas.classList.contains('show')) {
+                    const width = canvas.clientWidth;
+                    const height = canvas.clientHeight;
+                    if (width > 0 && height > 0) {
+                        renderer.setSize(width, height);
+                        camera.aspect = width / height;
+                        camera.updateProjectionMatrix();
+                    }
+                }
+            });
+
             animate();
         }
 
@@ -992,6 +1006,15 @@
             // Initialize Three.js if not already done
             if (!renderer) {
                 initThreeJS();
+            }
+
+            // Resize renderer to match canvas dimensions (canvas is now visible)
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            if (width > 0 && height > 0) {
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
             }
 
             // Hide all planes first
