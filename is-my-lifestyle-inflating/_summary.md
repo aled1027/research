@@ -1,0 +1,7 @@
+“Is My Lifestyle Inflating?” is an interactive web and Python CLI tool designed to help individuals detect and measure lifestyle inflation—especially those pursuing Financial Independence, Retire Early (FIRE). By analyzing personal financial data over time, it provides key metrics such as savings rate, personal inflation rate, discretionary spending ratio, and progress towards financial independence, with clear visualizations and actionable alerts. The tool distinguishes between essential and discretionary spending, compares personal trends to economic inflation (CPI), and identifies category-specific hotspots of rising expenses. All processing and data storage are local for privacy, making it safe and easy to use. Try it directly in your browser: [https://aled1027.github.io/research/is-my-lifestyle-inflating/](https://aled1027.github.io/research/is-my-lifestyle-inflating/) or via the [Python CLI](https://github.com/aled1027/research/blob/main/lifestyle_tracker.py).
+
+**Key findings and features:**
+- Savings rate decline is the primary warning for lifestyle inflation; category analysis pinpoints discretionary overspending.
+- Personal inflation above CPI and a rising discretionary ratio signal concern.
+- Most lifestyle inflation is gradual and category-specific, requiring regular tracking and context-specific interpretation.
+- The tool is privacy-first and works offline, with no server-side data handling.

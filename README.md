@@ -117,5 +117,58 @@ for dirname, commit_date in subdirs_with_dates:
     print()  # Add blank line between entries
 
 ]]]-->
-## Research Projects
+## 5 research projects
+
+### [github-action-summaries](https://github.com/aled1027/research/tree/main/github-action-summaries) (2025-11-22)
+
+Inspired by Simon Willison's open research workflow, this project streamlines documentation by automating the generation and maintenance of project summaries and indexes using GitHub Actions. It leverages [Simon Willison's llm CLI tool](https://github.com/simonw/llm) to create AI-powered summaries for each research project, caches these summaries for efficiency, and produces a responsive [index.html](https://github.com/simonw/research) for easy browsing. On every commit to the main branch, the system detects new projects, generates or updates summaries, and synchronizes both README.md and the HTML index, making research management effortless and consistent. Enhanced features include chronological listing, dynamic icon assignment, and badges for new projects.
+
+**Key features:**
+- Automated, cached AI summary generation via the llm CLI
+- Instant README.md and index.html updates on code push
+- Chronological sorting using git history
+- Smart icons and “New” badges for projects
+- Zero-maintenance workflow requiring no manual intervention
+
+### [threejs-layer-quiz](https://github.com/aled1027/research/tree/main/threejs-layer-quiz) (2025-11-22)
+
+Designed to reinforce core Three.js rendering concepts, the Layering Quiz presents 20 interactive multiple-choice questions that challenge users to predict visual outcomes based on specific material settings—covering depth testing, depth writing, render order, and blending modes. Each question not only assesses theoretical knowledge but also provides instant feedback, detailed explanations, and a live Three.js render illustrating the correct answer. The quiz supports structured learning by organizing questions into focused categories and integrates with the [Three.js Layering Demo](../threejs-layering/index.html), encouraging hands-on experimentation. Scoring and feedback mechanisms help users identify and target common mistakes in transparency, depth, and blending configuration.
+
+**Key features & findings:**
+- Highlights frequent errors, such as incorrect depthWrite settings on transparent objects and improper renderOrder usage.
+- Reinforces when to use additive, multiply, or normal blending for various visual effects.
+- Distinguishes effects of material type and settings on rendered outcomes.
+- Built entirely with vanilla JavaScript and [Three.js](https://threejs.org/) ES6 modules for direct browser use.
+
+### [threejs-layering](https://github.com/aled1027/research/tree/main/threejs-layering) (2025-11-22)
+
+The Three.js Layering & Materials Teaching Tool is an interactive demo designed for intermediate developers to explore and understand how rendering order, depth testing, transparency, blending modes, and material types work in Three.js. Users manipulate live controls for overlapping colored planes, instantly visualizing how settings like `depthTest`, `depthWrite`, `renderOrder`, and blending affect 3D scene composition—especially transparent objects. Key learning scenarios and experiments illustrate common pitfalls and solutions, such as transparent object sorting and blending artifacts, while supporting multiple material types from MeshBasicMaterial to custom ShaderMaterial. The demo showcases the necessity of proper depth and blending handling for correct, artifact-free rendering and highlights performance considerations relevant to real projects. For hands-on use, see [the Three.js documentation](https://threejs.org/docs/) and browse related transparency topics in [Three.js Discourse](https://discourse.threejs.org/).
+
+**Key findings:**
+- Transparent objects require `depthWrite=false` and careful `renderOrder` for correct layering and blending.
+- Different blending modes (normal, additive, multiply) enable varied visual effects but behave differently with opacity.
+- Material choice impacts both rendering appearance and performance in live 3D scenes.
+- Depth testing prevents visual artifacts and controls UI overlays versus scene depth.
+- Custom shaders provide advanced control but demand GLSL and Three.js uniform management expertise.
+
+### [is-my-lifestyle-inflating](https://github.com/aled1027/research/tree/main/is-my-lifestyle-inflating) (2025-11-07)
+
+“Is My Lifestyle Inflating?” is an interactive web and Python CLI tool designed to help individuals detect and measure lifestyle inflation—especially those pursuing Financial Independence, Retire Early (FIRE). By analyzing personal financial data over time, it provides key metrics such as savings rate, personal inflation rate, discretionary spending ratio, and progress towards financial independence, with clear visualizations and actionable alerts. The tool distinguishes between essential and discretionary spending, compares personal trends to economic inflation (CPI), and identifies category-specific hotspots of rising expenses. All processing and data storage are local for privacy, making it safe and easy to use. Try it directly in your browser: [https://aled1027.github.io/research/is-my-lifestyle-inflating/](https://aled1027.github.io/research/is-my-lifestyle-inflating/) or via the [Python CLI](https://github.com/aled1027/research/blob/main/lifestyle_tracker.py).
+
+**Key findings and features:**
+- Savings rate decline is the primary warning for lifestyle inflation; category analysis pinpoints discretionary overspending.
+- Personal inflation above CPI and a rising discretionary ratio signal concern.
+- Most lifestyle inflation is gradual and category-specific, requiring regular tracking and context-specific interpretation.
+- The tool is privacy-first and works offline, with no server-side data handling.
+
+### [anki-git](https://github.com/aled1027/research/tree/main/anki-git) (2025-11-06)
+
+The Anki Git Backup project introduces an add-on for [Anki](https://apps.ankiweb.net/) that automatically exports and backs up your entire flashcard collection to a Git repository in structured, human-readable JSON format. The tool enables both manual and scheduled backups, tracks all changes with Git commits, and optionally syncs your backup to a remote service like GitHub or GitLab. Inspired by the [Obsidian Git plugin](https://github.com/Vinzent03/obsidian-git), it provides version history, readable summaries, and is highly configurable without sending any data beyond your specified remote. Limitations include lack of media file backup and no direct restoration function; however, future support for these features is planned.
+
+**Key features & findings:**
+- Automatic and manual backups with customizable intervals and commit messages.
+- Exports decks, cards, and notes in organized JSON, but currently no media backup.
+- Structured history via Git; users can view, diff, and restore previous versions.
+- High transparency and privacy—data stays local unless explicitly pushed to a remote repository.
+
 <!--[[[end]]]-->
