@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Mastery Quiz</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            min-width: 200px;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-content {
+            padding: 30px;
+        }
+
+        .question-card {
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .question-number {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .difficulty-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .difficulty-beginner {
+            background: #d1f4e0;
+            color: #0a6331;
+        }
+
+        .difficulty-intermediate {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty-advanced {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 20px;
+        }
+
+        #visualization-canvas {
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin: 20px auto;
+            display: block;
+            border-radius: 12px;
+            background: #000;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d1f4e0;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+        }
+
+        .explanation-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        .results {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+
+        .results-message {
+            font-size: 1.2rem;
+            color: #495057;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .quiz-content {
+                padding: 20px;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .menu {
+                padding: 15px 20px;
+            }
+
+            .button {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+
+            #visualization-canvas {
+                height: 200px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Three.js Mastery Quiz</h1>
+            <p class="subtitle">Test your knowledge from beginner to advanced</p>
+        </header>
+
+        <div class="menu">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <button class="button button-secondary" id="clearProgress">Clear Progress</button>
+        </div>
+
+        <div class="quiz-content" id="quizContent">
+            <!-- Quiz questions will be rendered here -->
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions database
+        const questions = [
+            // BEGINNER QUESTIONS (1-15)
+            {
+                id: 1,
+                difficulty: 'beginner',
+                question: 'What are the three essential components needed to render a basic Three.js scene?',
+                options: [
+                    'Scene, Camera, Renderer',
+                    'Mesh, Light, Camera',
+                    'Geometry, Material, Renderer',
+                    'Scene, Light, Canvas'
+                ],
+                correct: 0,
+                explanation: 'Every Three.js application requires three core components: a Scene (container for objects), a Camera (defines viewpoint), and a Renderer (draws the scene to the canvas). Without any of these, you cannot render anything.',
+                visualization: 'basic-scene'
+            },
+            {
+                id: 2,
+                difficulty: 'beginner',
+                question: 'Which camera type uses perspective projection, making objects smaller as they get farther away?',
+                options: [
+                    'OrthographicCamera',
+                    'PerspectiveCamera',
+                    'CubeCamera',
+                    'ArrayCamera'
+                ],
+                correct: 1,
+                explanation: 'PerspectiveCamera mimics human vision with perspective projection, where distant objects appear smaller. OrthographicCamera maintains object size regardless of distance, useful for 2D games or technical drawings.',
+                visualization: null
+            },
+            {
+                id: 3,
+                difficulty: 'beginner',
+                question: 'What method must be called in the animation loop to update the scene on screen?',
+                options: [
+                    'scene.update()',
+                    'camera.refresh()',
+                    'renderer.render(scene, camera)',
+                    'scene.render()'
+                ],
+                correct: 2,
+                explanation: 'renderer.render(scene, camera) is called in every frame of the animation loop. It tells the renderer to draw the current state of the scene from the camera\'s perspective.',
+                visualization: null
+            },
+            {
+                id: 4,
+                difficulty: 'beginner',
+                question: 'What does the field of view (FOV) parameter control in a PerspectiveCamera?',
+                options: [
+                    'The distance the camera can see',
+                    'The width of the viewing angle in degrees',
+                    'The rotation speed of the camera',
+                    'The aspect ratio of the viewport'
+                ],
+                correct: 1,
+                explanation: 'FOV (Field of View) is the vertical viewing angle in degrees. A larger FOV (e.g., 75°) creates a wide-angle "fisheye" effect, while a smaller FOV (e.g., 35°) creates a "zoomed in" telescopic effect. Human vision is approximately 50-60°.',
+                visualization: null
+            },
+            {
+                id: 5,
+                difficulty: 'beginner',
+                question: 'How do you create a simple cube mesh in Three.js?',
+                options: [
+                    'new THREE.Cube(1, 1, 1)',
+                    'new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material)',
+                    'THREE.createCube(1, 1, 1, material)',
+                    'new THREE.CubeMesh(1, 1, 1)'
+                ],
+                correct: 1,
+                explanation: 'A Mesh combines geometry (shape) and material (appearance). You create it with new THREE.Mesh(geometry, material). BoxGeometry creates a cube shape, and you can use any material like MeshBasicMaterial.',
+                visualization: 'cube'
+            },
+            {
+                id: 6,
+                difficulty: 'beginner',
+                question: 'What is the purpose of requestAnimationFrame() in Three.js?',
+                options: [
+                    'To load 3D models faster',
+                    'To create smooth animations synchronized with the browser\'s refresh rate',
+                    'To request permission to use WebGL',
+                    'To allocate memory for frames'
+                ],
+                correct: 1,
+                explanation: 'requestAnimationFrame() synchronizes your animation loop with the browser\'s refresh rate (typically 60fps). It pauses when the tab is inactive, saving resources, and provides a timestamp for smooth animations.',
+                visualization: null
+            },
+            {
+                id: 7,
+                difficulty: 'beginner',
+                question: 'Which material does NOT require lighting to be visible?',
+                options: [
+                    'MeshLambertMaterial',
+                    'MeshPhongMaterial',
+                    'MeshBasicMaterial',
+                    'MeshStandardMaterial'
+                ],
+                correct: 2,
+                explanation: 'MeshBasicMaterial is unaffected by lights - it displays its color regardless of scene lighting. All other materials (Lambert, Phong, Standard) require lights to be visible. MeshBasicMaterial is useful for debugging or creating glowing effects.',
+                visualization: null
+            },
+            {
+                id: 8,
+                difficulty: 'beginner',
+                question: 'What does the position.set(x, y, z) method do?',
+                options: [
+                    'Creates a new position vector',
+                    'Sets the object\'s position in 3D space',
+                    'Defines the camera\'s viewing direction',
+                    'Sets the scene\'s origin point'
+                ],
+                correct: 1,
+                explanation: 'position.set(x, y, z) sets an object\'s location in 3D space. Three.js uses a right-handed coordinate system: +X is right, +Y is up, +Z is towards you. For example, position.set(0, 5, 10) places an object 5 units up and 10 units forward.',
+                visualization: null
+            },
+            {
+                id: 9,
+                difficulty: 'beginner',
+                question: 'What does scene.add(object) do?',
+                options: [
+                    'Combines two objects into one',
+                    'Adds the object to the scene graph so it will be rendered',
+                    'Increases the object\'s size',
+                    'Duplicates the object'
+                ],
+                correct: 1,
+                explanation: 'scene.add(object) adds an object to the scene graph, making it part of the render tree. Only objects added to the scene (or to children of the scene) will be rendered. You can also add objects to other objects to create hierarchies.',
+                visualization: null
+            },
+            {
+                id: 10,
+                difficulty: 'beginner',
+                question: 'What is the default color format for Three.js colors?',
+                options: [
+                    'RGB (0-255)',
+                    'Hexadecimal (0x000000)',
+                    'HSL (hue, saturation, lightness)',
+                    'Color names ("red", "blue")'
+                ],
+                correct: 1,
+                explanation: 'Three.js primarily uses hexadecimal color format: 0xRRGGBB (e.g., 0xff0000 for red). However, the THREE.Color class accepts hex, RGB, HSL, and color names. Internally, colors are stored as RGB floats (0.0-1.0).',
+                visualization: null
+            },
+            {
+                id: 11,
+                difficulty: 'beginner',
+                question: 'What does the aspect ratio parameter in PerspectiveCamera typically represent?',
+                options: [
+                    'The size of objects in the scene',
+                    'The ratio of canvas width to height',
+                    'The camera\'s zoom level',
+                    'The rendering quality'
+                ],
+                correct: 1,
+                explanation: 'Aspect ratio is width/height of your viewport (usually window.innerWidth / window.innerHeight). It prevents distortion - without the correct aspect ratio, circles become ovals. Update it when the window resizes.',
+                visualization: null
+            },
+            {
+                id: 12,
+                difficulty: 'beginner',
+                question: 'Which geometry type creates a sphere in Three.js?',
+                options: [
+                    'SphereGeometry',
+                    'CircleGeometry',
+                    'BallGeometry',
+                    'RoundGeometry'
+                ],
+                correct: 0,
+                explanation: 'SphereGeometry creates a 3D sphere. Parameters include radius, widthSegments (horizontal detail), and heightSegments (vertical detail). More segments = smoother sphere but more vertices to render.',
+                visualization: 'sphere'
+            },
+            {
+                id: 13,
+                difficulty: 'beginner',
+                question: 'What is the purpose of the near and far parameters in a PerspectiveCamera?',
+                options: [
+                    'They define the camera\'s movement limits',
+                    'They set the rendering distance range (clipping planes)',
+                    'They control the camera\'s zoom speed',
+                    'They determine the camera\'s position'
+                ],
+                correct: 1,
+                explanation: 'Near and far clipping planes define what\'s rendered. Objects closer than near or farther than far are clipped (not rendered). Common values: near=0.1, far=1000. Never use near=0 (causes depth buffer issues).',
+                visualization: null
+            },
+            {
+                id: 14,
+                difficulty: 'beginner',
+                question: 'How do you make a mesh rotate continuously in the animation loop?',
+                options: [
+                    'mesh.rotate(0.01)',
+                    'mesh.rotation.y += 0.01',
+                    'mesh.spin(0.01)',
+                    'mesh.transform.rotate(0.01)'
+                ],
+                correct: 1,
+                explanation: 'Modify mesh.rotation.x, .y, or .z in your animation loop. Rotation values are in radians. mesh.rotation.y += 0.01 rotates around the Y axis by 0.01 radians per frame. Use Math.PI for precise angles (Math.PI = 180°).',
+                visualization: null
+            },
+            {
+                id: 15,
+                difficulty: 'beginner',
+                question: 'What does the wireframe property do when set to true on a material?',
+                options: [
+                    'Displays only the edges of the geometry',
+                    'Makes the material transparent',
+                    'Adds a glowing effect',
+                    'Increases rendering performance'
+                ],
+                correct: 0,
+                explanation: 'Setting wireframe: true on a material renders only the edges of triangles, showing the underlying geometry structure. This is useful for debugging, understanding mesh topology, or creating wireframe-style visuals.',
+                visualization: null
+            },
+
+            // INTERMEDIATE QUESTIONS (16-35)
+            {
+                id: 16,
+                difficulty: 'intermediate',
+                question: 'What is the difference between MeshLambertMaterial and MeshPhongMaterial?',
+                options: [
+                    'Lambert is faster; Phong is slower but more accurate',
+                    'Phong supports specular highlights; Lambert does not',
+                    'Lambert works with DirectionalLight only',
+                    'Phong requires more lights in the scene'
+                ],
+                correct: 1,
+                explanation: 'MeshPhongMaterial supports specular highlights (shiny reflections) while MeshLambertMaterial uses simple diffuse shading. Phong is more computationally expensive but produces more realistic results for shiny materials. Lambert is better for matte surfaces.',
+                visualization: 'materials'
+            },
+            {
+                id: 17,
+                difficulty: 'intermediate',
+                question: 'Which light type is most performance-efficient for general scene lighting?',
+                options: [
+                    'PointLight',
+                    'SpotLight',
+                    'AmbientLight',
+                    'DirectionalLight'
+                ],
+                correct: 2,
+                explanation: 'AmbientLight has no position or direction - it uniformly illuminates all objects with zero computation cost. However, it doesn\'t create depth or shadows. Use it as base illumination combined with other lights for realistic scenes.',
+                visualization: null
+            },
+            {
+                id: 18,
+                difficulty: 'intermediate',
+                question: 'What is the purpose of OrbitControls?',
+                options: [
+                    'To make objects orbit around each other',
+                    'To allow user camera navigation via mouse/touch',
+                    'To create planetary motion animations',
+                    'To optimize rendering performance'
+                ],
+                correct: 1,
+                explanation: 'OrbitControls enables interactive camera control - users can rotate (orbit), zoom, and pan the camera using mouse or touch. It\'s essential for interactive 3D viewers. Must be updated in the animation loop with controls.update().',
+                visualization: null
+            },
+            {
+                id: 19,
+                difficulty: 'intermediate',
+                question: 'How do you properly dispose of geometry and materials to prevent memory leaks?',
+                options: [
+                    'Delete the variables holding them',
+                    'Call .dispose() method on each',
+                    'Remove them from the scene',
+                    'Set them to null'
+                ],
+                correct: 1,
+                explanation: 'WebGL resources aren\'t garbage collected automatically. Call geometry.dispose() and material.dispose() to free GPU memory. Also dispose textures and renderers. Failing to dispose causes memory leaks, especially in SPAs.',
+                visualization: null
+            },
+            {
+                id: 20,
+                difficulty: 'intermediate',
+                question: 'What does the TextureLoader.load() method return?',
+                options: [
+                    'A promise that resolves to the texture',
+                    'A THREE.Texture object immediately',
+                    'An Image element',
+                    'Base64 encoded image data'
+                ],
+                correct: 1,
+                explanation: 'TextureLoader.load() immediately returns a THREE.Texture that\'s initially blank. The texture updates when the image loads. You can provide callbacks: onLoad, onProgress, onError. The texture can be used before loading completes.',
+                visualization: null
+            },
+            {
+                id: 21,
+                difficulty: 'intermediate',
+                question: 'What is the purpose of BufferGeometry over the deprecated Geometry?',
+                options: [
+                    'BufferGeometry is easier to use',
+                    'BufferGeometry is more performant with direct GPU memory',
+                    'BufferGeometry supports more shapes',
+                    'BufferGeometry has better documentation'
+                ],
+                correct: 1,
+                explanation: 'BufferGeometry stores vertex data in typed arrays that map directly to GPU memory, making it much faster. Geometry stored data as THREE.Vector3 objects (slower). All built-in geometries now use BufferGeometry.',
+                visualization: null
+            },
+            {
+                id: 22,
+                difficulty: 'intermediate',
+                question: 'Which material is physically-based and recommended for realistic rendering?',
+                options: [
+                    'MeshLambertMaterial',
+                    'MeshPhongMaterial',
+                    'MeshStandardMaterial',
+                    'MeshBasicMaterial'
+                ],
+                correct: 2,
+                explanation: 'MeshStandardMaterial uses PBR (Physically Based Rendering) with roughness and metalness properties. It produces realistic results under various lighting. MeshPhysicalMaterial extends it with clearcoat and transmission for even more realism.',
+                visualization: null
+            },
+            {
+                id: 23,
+                difficulty: 'intermediate',
+                question: 'What does the scene.traverse() method do?',
+                options: [
+                    'Moves through all objects in the scene graph',
+                    'Animates the camera path',
+                    'Optimizes the scene for rendering',
+                    'Loads scene assets'
+                ],
+                correct: 0,
+                explanation: 'scene.traverse(callback) recursively visits every object in the scene graph, calling your callback for each. Useful for batch operations like updating materials, finding objects by name, or disposing resources.',
+                visualization: null
+            },
+            {
+                id: 24,
+                difficulty: 'intermediate',
+                question: 'What is the recommended way to handle window resizing in Three.js?',
+                options: [
+                    'Reload the entire scene',
+                    'Update camera aspect ratio and renderer size',
+                    'Only update the canvas CSS',
+                    'Resize is handled automatically'
+                ],
+                correct: 1,
+                explanation: 'On resize: (1) update camera.aspect = width/height, (2) call camera.updateProjectionMatrix(), (3) call renderer.setSize(width, height). Without this, the scene appears stretched or distorted.',
+                visualization: null
+            },
+            {
+                id: 25,
+                difficulty: 'intermediate',
+                question: 'What does the double-sided rendering property do?',
+                options: [
+                    'Renders both sides of faces',
+                    'Doubles the rendering speed',
+                    'Creates mirror effects',
+                    'Enables stereoscopic rendering'
+                ],
+                correct: 0,
+                explanation: 'material.side = THREE.DoubleSide renders both front and back faces. Default is THREE.FrontSide (back-face culling for performance). Use DoubleSide for planes or inside-out geometry, but it doubles draw calls.',
+                visualization: null
+            },
+            {
+                id: 26,
+                difficulty: 'intermediate',
+                question: 'How do you create transparency with textures in Three.js?',
+                options: [
+                    'Use PNG with alpha channel and set transparent: true',
+                    'Set opacity to 0.5',
+                    'Use alphaTest property only',
+                    'Transparency is automatic with PNG files'
+                ],
+                correct: 0,
+                explanation: 'For texture transparency: (1) use PNG/WebP with alpha channel, (2) set material.transparent = true, (3) assign texture to material.map and optionally material.alphaMap. Also set material.alphaTest to clip semi-transparent pixels.',
+                visualization: null
+            },
+            {
+                id: 27,
+                difficulty: 'intermediate',
+                question: 'What is a Group in Three.js?',
+                options: [
+                    'A container for organizing multiple objects together',
+                    'A type of geometry',
+                    'A rendering optimization',
+                    'A lighting configuration'
+                ],
+                correct: 0,
+                explanation: 'Group is a container (like an empty Object3D) for organizing related objects. Transforming the group transforms all children. Useful for complex models, creating hierarchies (e.g., car with wheels), or managing multiple objects as one unit.',
+                visualization: null
+            },
+            {
+                id: 28,
+                difficulty: 'intermediate',
+                question: 'What does the renderer.setClearColor() method do?',
+                options: [
+                    'Clears all objects from the scene',
+                    'Sets the background color of the canvas',
+                    'Removes all lights',
+                    'Resets the camera position'
+                ],
+                correct: 1,
+                explanation: 'renderer.setClearColor(color, alpha) sets the background color that shows when nothing is rendered. Alpha determines transparency (0=transparent, 1=opaque). Alternatively, use scene.background = new THREE.Color(0xffffff).',
+                visualization: null
+            },
+            {
+                id: 29,
+                difficulty: 'intermediate',
+                question: 'What is raycasting used for in Three.js?',
+                options: [
+                    'Creating light rays for rendering',
+                    'Detecting mouse/touch intersections with 3D objects',
+                    'Drawing straight lines in the scene',
+                    'Optimizing render performance'
+                ],
+                correct: 1,
+                explanation: 'Raycaster casts a ray into the scene and returns intersected objects. Essential for mouse picking, hover effects, and click interactions. Create ray from camera through mouse position, then use raycaster.intersectObjects(scene.children).',
+                visualization: null
+            },
+            {
+                id: 30,
+                difficulty: 'intermediate',
+                question: 'What is the purpose of the normal map in materials?',
+                options: [
+                    'To add surface detail without additional geometry',
+                    'To normalize color values',
+                    'To improve rendering performance',
+                    'To create reflections'
+                ],
+                correct: 0,
+                explanation: 'Normal maps simulate surface detail (bumps, grooves) by modifying surface normals, affecting how light interacts without adding geometry. They\'re more efficient than displacement maps and essential for detailed materials.',
+                visualization: null
+            },
+            {
+                id: 31,
+                difficulty: 'intermediate',
+                question: 'How do you create a custom geometry with specific vertices?',
+                options: [
+                    'Use BufferGeometry and setAttribute()',
+                    'Modify an existing geometry\'s vertices array',
+                    'Use the GeometryBuilder class',
+                    'Define vertices in a JSON file'
+                ],
+                correct: 0,
+                explanation: 'Create BufferGeometry, then use setAttribute("position", new THREE.BufferAttribute(vertices, 3)) where vertices is a Float32Array. Each 3 values define x,y,z. Also set indices for triangles and compute normals.',
+                visualization: null
+            },
+            {
+                id: 32,
+                difficulty: 'intermediate',
+                question: 'What is the Clock object used for in Three.js?',
+                options: [
+                    'Displaying time in the scene',
+                    'Measuring elapsed time and delta time for animations',
+                    'Scheduling rendering frames',
+                    'Synchronizing multiple animations'
+                ],
+                correct: 1,
+                explanation: 'THREE.Clock tracks elapsed time and delta time (time since last frame). Use clock.getDelta() for frame-independent animations - multiply movement by delta so animations run at the same speed regardless of framerate.',
+                visualization: null
+            },
+            {
+                id: 33,
+                difficulty: 'intermediate',
+                question: 'What is the recommended way to load 3D models (GLTF) in Three.js?',
+                options: [
+                    'Use GLTFLoader with callbacks or promises',
+                    'Use the built-in load() method',
+                    'Import them as JavaScript modules',
+                    'Convert to JSON first'
+                ],
+                correct: 0,
+                explanation: 'GLTFLoader.load(url, onLoad, onProgress, onError) loads GLTF/GLB models. GLTF is the recommended format - it\'s efficient, supports animations, materials, and textures. Access the model via gltf.scene in the onLoad callback.',
+                visualization: null
+            },
+            {
+                id: 34,
+                difficulty: 'intermediate',
+                question: 'What does the fog property on a scene do?',
+                options: [
+                    'Creates realistic atmospheric fog based on distance',
+                    'Blurs the entire scene',
+                    'Reduces rendering quality',
+                    'Creates particle effects'
+                ],
+                correct: 0,
+                explanation: 'scene.fog = new THREE.Fog(color, near, far) creates distance-based fog that fades objects to the fog color. THREE.FogExp2 uses exponential density. Fog adds depth and hides far clipping, but doesn\'t work with MeshBasicMaterial.',
+                visualization: null
+            },
+            {
+                id: 35,
+                difficulty: 'intermediate',
+                question: 'What is instancing (InstancedMesh) used for?',
+                options: [
+                    'Creating unique variations of objects',
+                    'Efficiently rendering many copies of the same geometry',
+                    'Loading models faster',
+                    'Reducing file sizes'
+                ],
+                correct: 1,
+                explanation: 'InstancedMesh renders many copies of the same geometry/material in one draw call. Set instance count, then use setMatrixAt() for each instance\'s transform. Extremely efficient for particles, trees, crowds - thousands of objects with minimal overhead.',
+                visualization: null
+            },
+
+            // ADVANCED QUESTIONS (36-50)
+            {
+                id: 36,
+                difficulty: 'advanced',
+                question: 'What is the purpose of the updateMatrixWorld() method?',
+                options: [
+                    'Updates object transformations in world space',
+                    'Refreshes the material properties',
+                    'Recalculates lighting',
+                    'Optimizes geometry'
+                ],
+                correct: 0,
+                explanation: 'updateMatrixWorld() recalculates world matrices from local transforms. Usually called automatically, but needed when querying world position/rotation immediately after changes, or when matrixAutoUpdate is false. Updates entire hierarchy recursively.',
+                visualization: null
+            },
+            {
+                id: 37,
+                difficulty: 'advanced',
+                question: 'What is the most efficient way to animate thousands of objects independently?',
+                options: [
+                    'Use a loop to update each object',
+                    'Use InstancedMesh with per-instance attributes',
+                    'Create separate scenes for each object',
+                    'Use Workers to parallelize updates'
+                ],
+                correct: 1,
+                explanation: 'InstancedMesh with shader-based animation is most efficient. Store per-instance data (like offsets, speeds) in instance attributes, compute positions in vertex shader. This moves computation to GPU and uses one draw call instead of thousands.',
+                visualization: null
+            },
+            {
+                id: 38,
+                difficulty: 'advanced',
+                question: 'What is the purpose of the onBeforeRender callback?',
+                options: [
+                    'To validate scene before rendering',
+                    'To execute code right before an object is rendered',
+                    'To preload assets',
+                    'To set up the camera'
+                ],
+                correct: 1,
+                explanation: 'mesh.onBeforeRender = (renderer, scene, camera) => {} executes just before rendering that object. Useful for per-object logic like billboard effects, dynamic LOD, updating uniforms based on camera distance, or conditional visibility.',
+                visualization: null
+            },
+            {
+                id: 39,
+                difficulty: 'advanced',
+                question: 'How do custom shaders communicate with JavaScript?',
+                options: [
+                    'Through global variables',
+                    'Via uniforms (JS to shader) and attributes/varyings',
+                    'Using callback functions',
+                    'Through the render loop'
+                ],
+                correct: 1,
+                explanation: 'Uniforms pass data from JS to shaders (same value for all vertices/fragments). Attributes pass per-vertex data. Varyings pass data from vertex to fragment shader. Update uniforms in JS, and shaders receive the new values automatically.',
+                visualization: null
+            },
+            {
+                id: 40,
+                difficulty: 'advanced',
+                question: 'What is the primary benefit of using a render target (WebGLRenderTarget)?',
+                options: [
+                    'Faster rendering',
+                    'Rendering to a texture instead of the screen for post-processing or effects',
+                    'Higher quality output',
+                    'Reduced memory usage'
+                ],
+                correct: 1,
+                explanation: 'WebGLRenderTarget renders to a texture instead of canvas. Essential for post-processing (render scene to texture, then apply effects), reflections (render from mirror\'s perspective), shadow maps, or multi-pass rendering techniques.',
+                visualization: null
+            },
+            {
+                id: 41,
+                difficulty: 'advanced',
+                question: 'What is the purpose of LOD (Level of Detail) in Three.js?',
+                options: [
+                    'To change object detail based on camera distance',
+                    'To compress textures',
+                    'To reduce file sizes',
+                    'To improve material quality'
+                ],
+                correct: 0,
+                explanation: 'THREE.LOD switches between different geometry detail levels based on camera distance. Add multiple versions with lod.addLevel(mesh, distance). Shows high-poly mesh when close, low-poly when far, improving performance without visible quality loss.',
+                visualization: null
+            },
+            {
+                id: 42,
+                difficulty: 'advanced',
+                question: 'What does the depthWrite property control in materials?',
+                options: [
+                    'Shadow casting',
+                    'Whether the object writes to the depth buffer',
+                    'The object\'s render order',
+                    'Z-index of the object'
+                ],
+                correct: 1,
+                explanation: 'depthWrite controls whether rendering updates the depth buffer. Set false for transparent objects rendered after opaque ones to prevent depth sorting issues. Often combined with depthTest and renderOrder for correct transparency.',
+                visualization: null
+            },
+            {
+                id: 43,
+                difficulty: 'advanced',
+                question: 'How can you improve performance when rendering many transparent objects?',
+                options: [
+                    'Render from back to front by sorting',
+                    'Use lower resolution textures',
+                    'Disable antialiasing',
+                    'Reduce the number of lights'
+                ],
+                correct: 0,
+                explanation: 'Transparent objects must render back-to-front for correct blending. Sort by camera distance and use renderOrder. Consider: reduce overdraw, use alphaTest for cutouts, combine into one geometry, or use order-independent transparency techniques.',
+                visualization: null
+            },
+            {
+                id: 44,
+                difficulty: 'advanced',
+                question: 'What is the purpose of the frustum in Three.js?',
+                options: [
+                    'To define the camera\'s viewing volume for culling',
+                    'To create geometric shapes',
+                    'To calculate lighting',
+                    'To manage memory'
+                ],
+                correct: 0,
+                explanation: 'The frustum is the camera\'s viewing volume (pyramid shape). Three.js automatically culls (doesn\'t render) objects outside the frustum. You can manually test with frustum.intersectsObject(). Frustum culling is a key performance optimization.',
+                visualization: null
+            },
+            {
+                id: 45,
+                difficulty: 'advanced',
+                question: 'What is the benefit of using the ShaderMaterial onBeforeCompile hook?',
+                options: [
+                    'To modify built-in material shaders without writing from scratch',
+                    'To validate shader syntax',
+                    'To improve shader performance',
+                    'To enable shader debugging'
+                ],
+                correct: 0,
+                explanation: 'material.onBeforeCompile = (shader) => {} lets you modify built-in material shaders. Inject custom code, add uniforms, modify vertex positions or colors. Combines convenience of built-in materials with power of custom shaders.',
+                visualization: null
+            },
+            {
+                id: 46,
+                difficulty: 'advanced',
+                question: 'What is skinning in Three.js?',
+                options: [
+                    'Applying textures to materials',
+                    'Deforming a mesh based on bone transformations',
+                    'Creating realistic skin materials',
+                    'Optimizing mesh topology'
+                ],
+                correct: 1,
+                explanation: 'Skinning (skeletal animation) deforms a mesh based on bone positions. Used for character animation. Bones are stored in a Skeleton, each vertex has bone weights. SkinnedMesh handles this. Most commonly loaded from animated GLTF models.',
+                visualization: null
+            },
+            {
+                id: 47,
+                difficulty: 'advanced',
+                question: 'What is the purpose of MorphTargets?',
+                options: [
+                    'To create object transformations',
+                    'To blend between different geometry shapes for animation',
+                    'To optimize rendering',
+                    'To create procedural geometry'
+                ],
+                correct: 1,
+                explanation: 'Morph targets (blend shapes) define alternate vertex positions. Interpolate between base and target shapes using morphTargetInfluences. Used for facial animation, deformations. Each target must have the same vertex count as base geometry.',
+                visualization: null
+            },
+            {
+                id: 48,
+                difficulty: 'advanced',
+                question: 'How do you implement custom post-processing effects?',
+                options: [
+                    'Modify the renderer settings',
+                    'Use EffectComposer with custom shader passes',
+                    'Use CSS filters on the canvas',
+                    'Modify material shaders'
+                ],
+                correct: 1,
+                explanation: 'EffectComposer chains post-processing passes. Create custom Pass, write fragment shader for screen-space effect. Each pass renders to texture, next pass uses it. Common for bloom, depth of field, color grading, etc.',
+                visualization: null
+            },
+            {
+                id: 49,
+                difficulty: 'advanced',
+                question: 'What is the purpose of the shadow camera in DirectionalLight?',
+                options: [
+                    'To position the light',
+                    'To define the shadow map coverage and resolution area',
+                    'To create camera shadows',
+                    'To optimize shadow rendering'
+                ],
+                correct: 1,
+                explanation: 'Shadow camera (orthographic for DirectionalLight) defines shadow map coverage. Adjust camera.left/right/top/bottom to fit your scene - too large wastes resolution, too small clips shadows. Use CameraHelper to visualize and tune.',
+                visualization: null
+            },
+            {
+                id: 50,
+                difficulty: 'advanced',
+                question: 'What is the most efficient way to update vertex positions dynamically?',
+                options: [
+                    'Recreate the geometry each frame',
+                    'Modify BufferAttribute array and set needsUpdate = true',
+                    'Use morphTargets',
+                    'Use a separate geometry for each frame'
+                ],
+                correct: 1,
+                explanation: 'Access geometry.attributes.position.array (Float32Array), modify values, then set geometry.attributes.position.needsUpdate = true to upload to GPU. Also call computeVertexNormals() if lighting is affected. Much faster than recreating geometry.',
+                visualization: null
+            }
+        ];
+
+        // State management
+        let currentQuestionIndex = 0;
+        let answers = {};
+        let answered = false;
+
+        // Load progress from localStorage
+        function loadProgress() {
+            const saved = localStorage.getItem('threejs-quiz-progress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                answers = data.answers || {};
+                currentQuestionIndex = data.currentIndex || 0;
+            }
+        }
+
+        // Save progress to localStorage
+        function saveProgress() {
+            localStorage.setItem('threejs-quiz-progress', JSON.stringify({
+                answers,
+                currentIndex: currentQuestionIndex
+            }));
+            updateProgress();
+        }
+
+        // Clear all progress
+        function clearProgress() {
+            if (confirm('Are you sure you want to clear all progress? This cannot be undone.')) {
+                localStorage.removeItem('threejs-quiz-progress');
+                answers = {};
+                currentQuestionIndex = 0;
+                answered = false;
+                renderQuestion();
+                updateProgress();
+            }
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const percentage = (Object.keys(answers).length / questions.length) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+
+        // Three.js visualization setup
+        let scene, camera, renderer, currentMesh;
+
+        function initVisualization() {
+            const canvas = document.getElementById('visualization-canvas');
+            if (!canvas) return;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setClearColor(0x1a1a2e);
+
+            camera.position.z = 5;
+        }
+
+        function clearVisualization() {
+            if (currentMesh) {
+                scene.remove(currentMesh);
+                if (currentMesh.geometry) currentMesh.geometry.dispose();
+                if (currentMesh.material) currentMesh.material.dispose();
+                currentMesh = null;
+            }
+        }
+
+        function showVisualization(type) {
+            const canvas = document.getElementById('visualization-canvas');
+            if (!canvas) return;
+
+            clearVisualization();
+
+            switch(type) {
+                case 'basic-scene':
+                    // Show basic scene setup
+                    const geometry1 = new THREE.BoxGeometry(2, 2, 2);
+                    const material1 = new THREE.MeshPhongMaterial({ color: 0x667eea, wireframe: false });
+                    currentMesh = new THREE.Mesh(geometry1, material1);
+                    scene.add(currentMesh);
+
+                    const light1 = new THREE.DirectionalLight(0xffffff, 1);
+                    light1.position.set(5, 5, 5);
+                    scene.add(light1);
+                    scene.add(new THREE.AmbientLight(0x404040));
+                    break;
+
+                case 'cube':
+                    const cubeGeo = new THREE.BoxGeometry(2, 2, 2);
+                    const cubeMat = new THREE.MeshPhongMaterial({ color: 0x764ba2 });
+                    currentMesh = new THREE.Mesh(cubeGeo, cubeMat);
+                    scene.add(currentMesh);
+
+                    const light2 = new THREE.DirectionalLight(0xffffff, 1);
+                    light2.position.set(5, 5, 5);
+                    scene.add(light2);
+                    scene.add(new THREE.AmbientLight(0x404040));
+                    break;
+
+                case 'sphere':
+                    const sphereGeo = new THREE.SphereGeometry(1.5, 32, 32);
+                    const sphereMat = new THREE.MeshPhongMaterial({ color: 0x667eea });
+                    currentMesh = new THREE.Mesh(sphereGeo, sphereMat);
+                    scene.add(currentMesh);
+
+                    const light3 = new THREE.DirectionalLight(0xffffff, 1);
+                    light3.position.set(5, 5, 5);
+                    scene.add(light3);
+                    scene.add(new THREE.AmbientLight(0x404040));
+                    break;
+
+                case 'materials':
+                    // Show lambert vs phong
+                    const geo = new THREE.SphereGeometry(1, 32, 32);
+                    const mat = new THREE.MeshPhongMaterial({
+                        color: 0x764ba2,
+                        shininess: 100,
+                        specular: 0xffffff
+                    });
+                    currentMesh = new THREE.Mesh(geo, mat);
+                    scene.add(currentMesh);
+
+                    const light4 = new THREE.DirectionalLight(0xffffff, 1);
+                    light4.position.set(5, 5, 5);
+                    scene.add(light4);
+                    scene.add(new THREE.AmbientLight(0x202020));
+                    break;
+            }
+
+            canvas.classList.remove('hidden');
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (currentMesh) {
+                currentMesh.rotation.x += 0.01;
+                currentMesh.rotation.y += 0.01;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Render current question
+        function renderQuestion() {
+            const question = questions[currentQuestionIndex];
+            answered = !!answers[question.id];
+
+            const difficultyClass = `difficulty-${question.difficulty}`;
+            const difficultyLabel = question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1);
+
+            let html = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">Question ${currentQuestionIndex + 1} of ${questions.length}</span>
+                        <span class="difficulty-badge ${difficultyClass}">${difficultyLabel}</span>
+                    </div>
+                    <div class="question-text">${question.question}</div>
+            `;
+
+            if (question.visualization) {
+                html += `<canvas id="visualization-canvas"></canvas>`;
+            }
+
+            html += '<div class="options">';
+
+            question.options.forEach((option, index) => {
+                let optionClass = 'option';
+                if (answered) {
+                    optionClass += ' disabled';
+                    if (index === question.correct) {
+                        optionClass += ' correct';
+                    } else if (answers[question.id] === index) {
+                        optionClass += ' incorrect';
+                    }
+                } else if (answers[question.id] === index) {
+                    optionClass += ' selected';
+                }
+
+                html += `
+                    <div class="${optionClass}" onclick="selectAnswer(${index})">
+                        ${String.fromCharCode(65 + index)}. ${option}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            if (answered) {
+                const isCorrect = answers[question.id] === question.correct;
+                html += `
+                    <div class="explanation">
+                        <div class="explanation-title">
+                            ${isCorrect ? '✅ Correct!' : '❌ Incorrect'}
+                        </div>
+                        <p>${question.explanation}</p>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="navigation">
+                    <button class="button button-secondary" onclick="previousQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>
+                        ← Previous
+                    </button>
+                    <button class="button button-primary" onclick="nextQuestion()">
+                        ${currentQuestionIndex === questions.length - 1 ? 'View Results' : 'Next →'}
+                    </button>
+                </div>
+                </div>
+            `;
+
+            document.getElementById('quizContent').innerHTML = html;
+
+            // Initialize visualization if needed
+            if (question.visualization) {
+                initVisualization();
+                showVisualization(question.visualization);
+            }
+        }
+
+        // Select an answer
+        function selectAnswer(index) {
+            if (answered) return;
+
+            const question = questions[currentQuestionIndex];
+            answers[question.id] = index;
+            answered = true;
+            saveProgress();
+            renderQuestion();
+        }
+
+        // Navigate to previous question
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                saveProgress();
+                renderQuestion();
+            }
+        }
+
+        // Navigate to next question or show results
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                saveProgress();
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Show results
+        function showResults() {
+            let correct = 0;
+            let beginnerCorrect = 0, beginnerTotal = 0;
+            let intermediateCorrect = 0, intermediateTotal = 0;
+            let advancedCorrect = 0, advancedTotal = 0;
+
+            questions.forEach(q => {
+                if (answers[q.id] === q.correct) {
+                    correct++;
+                    if (q.difficulty === 'beginner') beginnerCorrect++;
+                    else if (q.difficulty === 'intermediate') intermediateCorrect++;
+                    else advancedCorrect++;
+                }
+                if (q.difficulty === 'beginner') beginnerTotal++;
+                else if (q.difficulty === 'intermediate') intermediateTotal++;
+                else advancedTotal++;
+            });
+
+            const percentage = Math.round((correct / questions.length) * 100);
+            let message = '';
+
+            if (percentage >= 90) message = '🏆 Outstanding! You\'re a Three.js expert!';
+            else if (percentage >= 75) message = '🌟 Excellent work! You have strong Three.js skills!';
+            else if (percentage >= 60) message = '✨ Good job! Keep practicing to master Three.js!';
+            else if (percentage >= 40) message = '📚 Not bad! Review the concepts and try again!';
+            else message = '💪 Keep learning! Three.js takes practice!';
+
+            const html = `
+                <div class="results">
+                    <h2>Quiz Complete!</h2>
+                    <div class="score">${correct} / ${questions.length}</div>
+                    <div class="results-message">${message}</div>
+
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${percentage}%</div>
+                            <div class="stat-label">Overall Score</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${beginnerCorrect}/${beginnerTotal}</div>
+                            <div class="stat-label">Beginner</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${intermediateCorrect}/${intermediateTotal}</div>
+                            <div class="stat-label">Intermediate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${advancedCorrect}/${advancedTotal}</div>
+                            <div class="stat-label">Advanced</div>
+                        </div>
+                    </div>
+
+                    <button class="button button-primary" onclick="restartQuiz()">
+                        Start Over
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('quizContent').innerHTML = html;
+        }
+
+        // Restart quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            answered = false;
+            renderQuestion();
+        }
+
+        // Event listeners
+        document.getElementById('clearProgress').addEventListener('click', clearProgress);
+
+        // Initialize
+        loadProgress();
+        updateProgress();
+        renderQuestion();
+    </script>
+</body>
+</html>
