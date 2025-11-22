@@ -36,10 +36,23 @@ def get_git_origin():
         )
         if result.returncode == 0 and result.stdout.strip():
             origin = result.stdout.strip()
+
+            # Handle local proxy URLs (e.g., http://local_proxy@127.0.0.1:25644/git/aled1027/research)
+            if 'local_proxy@' in origin and '/git/' in origin:
+                # Extract the path after /git/
+                parts = origin.split('/git/')
+                if len(parts) > 1:
+                    repo_path = parts[1]
+                    origin = f'https://github.com/{repo_path}'
+
+            # Handle SSH URLs
             if origin.startswith('git@github.com:'):
                 origin = origin.replace('git@github.com:', 'https://github.com/')
+
+            # Remove .git suffix
             if origin.endswith('.git'):
                 origin = origin[:-4]
+
             return origin
     except Exception:
         pass
