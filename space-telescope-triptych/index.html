@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Telescope Triptych - Three.js Simulation</title>
+    <title>Space Telescope Triptych - Interactive Variations</title>
     <style>
         * {
             margin: 0;
@@ -32,6 +32,7 @@
             font-size: 14px;
             max-width: 300px;
             backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
         #info h1 {
@@ -49,14 +50,84 @@
         #info strong {
             color: #FF6B9D;
         }
+
+        #variation-nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .variation-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 2px solid #4ECDC4;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-align: left;
+            min-width: 200px;
+        }
+
+        .variation-btn:hover {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: #FF6B9D;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.4);
+            transform: translateX(-5px);
+        }
+
+        .variation-btn.active {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: #FF6B9D;
+            box-shadow: 0 0 25px rgba(255, 107, 157, 0.6);
+        }
+
+        .variation-btn .number {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background: #4ECDC4;
+            color: #000;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+
+        .variation-btn.active .number {
+            background: #FF6B9D;
+        }
     </style>
 </head>
 <body>
     <div id="info">
-        <h1>Space Telescope Triptych</h1>
-        <p>🌌 Cosmic flux flows through space</p>
-        <p>🛰️ Satellites orbit <strong>Earth</strong></p>
-        <p>📡 Data streams collected</p>
+        <h1 id="variation-title">Cosmic Flow</h1>
+        <p id="variation-desc">🌌 Cosmic flux flows through space</p>
+        <p id="variation-detail">🛰️ Satellites orbit <strong>Earth</strong></p>
+        <p id="variation-extra">📡 Data streams collected</p>
+    </div>
+
+    <div id="variation-nav">
+        <button class="variation-btn active" data-variation="0">
+            <span class="number">1</span>Cosmic Flow
+        </button>
+        <button class="variation-btn" data-variation="1">
+            <span class="number">2</span>Data Matrix
+        </button>
+        <button class="variation-btn" data-variation="2">
+            <span class="number">3</span>Blueprint
+        </button>
+        <button class="variation-btn" data-variation="3">
+            <span class="number">4</span>Constellations
+        </button>
     </div>
 
     <script type="importmap">
@@ -72,29 +143,80 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // Scene setup
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.00025);
+        // Global variables
+        let scene, camera, renderer, controls;
+        let currentVariation = null;
+        let animationId = null;
+        let cleanupFunctions = [];
 
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        camera.position.set(60, 30, 80);
+        // Initialize Three.js base
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.00025);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
+            camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(60, 30, 80);
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
 
-        // Starfield background
-        function createStarfield() {
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+        }
+
+        // Cleanup current variation
+        function cleanup() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+
+            cleanupFunctions.forEach(fn => fn());
+            cleanupFunctions = [];
+
+            while(scene.children.length > 0) {
+                const obj = scene.children[0];
+                scene.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) {
+                    if (Array.isArray(obj.material)) {
+                        obj.material.forEach(mat => mat.dispose());
+                    } else {
+                        obj.material.dispose();
+                    }
+                }
+            }
+        }
+
+        // Update info panel
+        function updateInfo(title, desc, detail, extra) {
+            document.getElementById('variation-title').textContent = title;
+            document.getElementById('variation-desc').textContent = desc;
+            document.getElementById('variation-detail').textContent = detail;
+            document.getElementById('variation-extra').textContent = extra;
+        }
+
+        // ============ VARIATION 1: COSMIC FLOW ============
+        function createVariation1() {
+            updateInfo(
+                'Cosmic Flow',
+                '🌌 Cosmic flux flows through space',
+                '🛰️ Satellites orbit Earth',
+                '📡 Data streams collected'
+            );
+
+            camera.position.set(60, 30, 80);
+            camera.lookAt(0, 0, 0);
+
+            // Starfield
             const starsGeometry = new THREE.BufferGeometry();
             const starCount = 2000;
             const positions = new Float32Array(starCount * 3);
@@ -105,7 +227,6 @@
                 positions[i + 1] = (Math.random() - 0.5) * 500;
                 positions[i + 2] = (Math.random() - 0.5) * 500;
 
-                // Varied star colors
                 const color = new THREE.Color();
                 color.setHSL(Math.random(), 0.5, 0.8);
                 colors[i] = color.r;
@@ -125,18 +246,15 @@
 
             const stars = new THREE.Points(starsGeometry, starsMaterial);
             scene.add(stars);
-        }
 
-        // Create cosmic flux - abstract background energy fields
-        function createCosmicFlux() {
-            const fluxElements = [];
-            const colors = [0xFF6B9D, 0x4ECDC4, 0xFFD700, 0xF4E04D, 0x9D4EDD, 0x06FFA5];
+            // Cosmic flux elements
+            const cosmicFlux = [];
+            const fluxColors = [0xFF6B9D, 0x4ECDC4, 0xFFD700, 0xF4E04D, 0x9D4EDD, 0x06FFA5];
 
-            // Create flowing nebula clouds in the background
             for (let i = 0; i < 8; i++) {
                 const geometry = new THREE.IcosahedronGeometry(15 + Math.random() * 20, 1);
                 const material = new THREE.MeshBasicMaterial({
-                    color: colors[Math.floor(Math.random() * colors.length)],
+                    color: fluxColors[Math.floor(Math.random() * fluxColors.length)],
                     transparent: true,
                     opacity: 0.05 + Math.random() * 0.08,
                     wireframe: false,
@@ -150,7 +268,7 @@
                     (Math.random() - 0.5) * 300 - 100
                 );
 
-                fluxElements.push({
+                cosmicFlux.push({
                     mesh: cloud,
                     driftSpeed: new THREE.Vector3(
                         (Math.random() - 0.5) * 0.02,
@@ -163,429 +281,574 @@
                 scene.add(cloud);
             }
 
-            // Create energy rings
-            for (let i = 0; i < 5; i++) {
-                const ringGeometry = new THREE.TorusGeometry(
-                    40 + Math.random() * 60,
-                    0.5 + Math.random() * 1,
-                    8,
-                    32
+            // Earth
+            const earthGroup = new THREE.Group();
+            const earthGeometry = new THREE.SphereGeometry(12, 64, 64);
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                color: 0x2E86AB,
+                emissive: 0x1a4d6d,
+                emissiveIntensity: 0.4,
+                shininess: 20
+            });
+            const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            earthGroup.add(earth);
+
+            const earthGlowGeometry = new THREE.SphereGeometry(14, 32, 32);
+            const earthGlowMaterial = new THREE.MeshBasicMaterial({
+                color: 0x4ECDC4,
+                transparent: true,
+                opacity: 0.25,
+                side: THREE.BackSide
+            });
+            const earthGlow = new THREE.Mesh(earthGlowGeometry, earthGlowMaterial);
+            earthGroup.add(earthGlow);
+
+            scene.add(earthGroup);
+
+            // Satellites
+            class Satellite {
+                constructor(orbitRadius, orbitSpeed, orbitOffset) {
+                    this.group = new THREE.Group();
+
+                    const bodyGeometry = new THREE.CylinderGeometry(0.6, 0.6, 2.5, 8);
+                    const bodyMaterial = new THREE.MeshPhongMaterial({
+                        color: 0xEEEEEE,
+                        emissive: 0x4ECDC4,
+                        emissiveIntensity: 0.5
+                    });
+                    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                    this.group.add(body);
+
+                    const panelGeometry = new THREE.BoxGeometry(4, 0.15, 2);
+                    const panelMaterial = new THREE.MeshPhongMaterial({
+                        color: 0x1a5f7a,
+                        emissive: 0xFF6B9D,
+                        emissiveIntensity: 0.4
+                    });
+
+                    const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
+                    panel1.position.x = 2.5;
+                    this.group.add(panel1);
+
+                    const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
+                    panel2.position.x = -2.5;
+                    this.group.add(panel2);
+
+                    this.orbitRadius = orbitRadius;
+                    this.orbitSpeed = orbitSpeed;
+                    this.orbitAngle = orbitOffset;
+
+                    scene.add(this.group);
+                }
+
+                update(time) {
+                    this.orbitAngle += this.orbitSpeed;
+                    const x = Math.cos(this.orbitAngle) * this.orbitRadius;
+                    const z = Math.sin(this.orbitAngle) * this.orbitRadius;
+                    const y = Math.sin(this.orbitAngle * 2) * (this.orbitRadius * 0.3);
+
+                    this.group.position.set(x, y, z);
+                    this.group.rotation.y = -this.orbitAngle;
+                }
+            }
+
+            const satellites = [];
+            for (let i = 0; i < 6; i++) {
+                const satellite = new Satellite(
+                    25 + Math.random() * 10,
+                    0.004 + Math.random() * 0.004,
+                    (Math.PI * 2 / 6) * i
                 );
-                const ringMaterial = new THREE.MeshBasicMaterial({
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    transparent: true,
-                    opacity: 0.1 + Math.random() * 0.15,
-                    wireframe: true
+                satellites.push(satellite);
+            }
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x2a2a3e, 0.6);
+            scene.add(ambientLight);
+
+            const earthLight = new THREE.PointLight(0x4ECDC4, 1.2, 150);
+            earthLight.position.set(30, 0, 0);
+            scene.add(earthLight);
+
+            // Animation
+            let time = 0;
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                time++;
+
+                cosmicFlux.forEach(element => {
+                    element.mesh.position.add(element.driftSpeed);
+                    const pulse = Math.sin(time * element.pulseSpeed + element.pulseOffset);
+                    element.mesh.material.opacity = 0.05 + pulse * 0.05;
+                    element.mesh.rotation.x += 0.0003;
+                    element.mesh.rotation.y += 0.0005;
                 });
 
-                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-                ring.position.set(
-                    (Math.random() - 0.5) * 200,
-                    (Math.random() - 0.5) * 150,
-                    (Math.random() - 0.5) * 200 - 80
-                );
-                ring.rotation.set(
-                    Math.random() * Math.PI,
-                    Math.random() * Math.PI,
-                    Math.random() * Math.PI
-                );
+                satellites.forEach(satellite => satellite.update(time));
+                earthGroup.rotation.y += 0.002;
 
-                fluxElements.push({
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // ============ VARIATION 2: DATA MATRIX ============
+        function createVariation2() {
+            updateInfo(
+                'Data Matrix',
+                '📊 Abstract data flows',
+                '🔷 Geometric structures',
+                '⚡ Information streams'
+            );
+
+            camera.position.set(80, 40, 80);
+            camera.lookAt(0, 0, 0);
+
+            // Grid floor
+            const gridHelper = new THREE.GridHelper(200, 50, 0x4ECDC4, 0x222244);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+
+            // Central data sphere
+            const centralGeometry = new THREE.IcosahedronGeometry(15, 2);
+            const centralMaterial = new THREE.MeshBasicMaterial({
+                color: 0x4ECDC4,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.6
+            });
+            const centralSphere = new THREE.Mesh(centralGeometry, centralMaterial);
+            scene.add(centralSphere);
+
+            // Orbiting data cubes
+            const dataCubes = [];
+            for (let i = 0; i < 12; i++) {
+                const size = 2 + Math.random() * 3;
+                const geometry = new THREE.BoxGeometry(size, size, size);
+                const material = new THREE.MeshBasicMaterial({
+                    color: [0xFF6B9D, 0x4ECDC4, 0xFFD700, 0x9D4EDD][i % 4],
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const cube = new THREE.Mesh(geometry, material);
+
+                dataCubes.push({
+                    mesh: cube,
+                    orbitRadius: 30 + Math.random() * 20,
+                    orbitSpeed: 0.003 + Math.random() * 0.005,
+                    angle: (Math.PI * 2 / 12) * i,
+                    height: Math.random() * 40 - 20
+                });
+                scene.add(cube);
+            }
+
+            // Data stream particles
+            const streamGeometry = new THREE.BufferGeometry();
+            const streamCount = 500;
+            const streamPositions = new Float32Array(streamCount * 3);
+            const streamColors = new Float32Array(streamCount * 3);
+
+            for (let i = 0; i < streamCount * 3; i += 3) {
+                streamPositions[i] = (Math.random() - 0.5) * 100;
+                streamPositions[i + 1] = Math.random() * 80 - 40;
+                streamPositions[i + 2] = (Math.random() - 0.5) * 100;
+
+                const color = new THREE.Color([0xFF6B9D, 0x4ECDC4, 0xFFD700][Math.floor(Math.random() * 3)]);
+                streamColors[i] = color.r;
+                streamColors[i + 1] = color.g;
+                streamColors[i + 2] = color.b;
+            }
+
+            streamGeometry.setAttribute('position', new THREE.BufferAttribute(streamPositions, 3));
+            streamGeometry.setAttribute('color', new THREE.BufferAttribute(streamColors, 3));
+
+            const streamMaterial = new THREE.PointsMaterial({
+                size: 1.5,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending
+            });
+
+            const streams = new THREE.Points(streamGeometry, streamMaterial);
+            scene.add(streams);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0x4ECDC4, 1.5, 200);
+            pointLight.position.set(0, 30, 0);
+            scene.add(pointLight);
+
+            // Animation
+            let time = 0;
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                time += 0.01;
+
+                centralSphere.rotation.x += 0.005;
+                centralSphere.rotation.y += 0.008;
+
+                dataCubes.forEach(cube => {
+                    cube.angle += cube.orbitSpeed;
+                    cube.mesh.position.x = Math.cos(cube.angle) * cube.orbitRadius;
+                    cube.mesh.position.z = Math.sin(cube.angle) * cube.orbitRadius;
+                    cube.mesh.position.y = cube.height + Math.sin(time + cube.angle) * 5;
+                    cube.mesh.rotation.x += 0.01;
+                    cube.mesh.rotation.y += 0.015;
+                });
+
+                const positions = streams.geometry.attributes.position.array;
+                for (let i = 1; i < positions.length; i += 3) {
+                    positions[i] += 0.3;
+                    if (positions[i] > 40) positions[i] = -40;
+                }
+                streams.geometry.attributes.position.needsUpdate = true;
+                streams.rotation.y += 0.001;
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // ============ VARIATION 3: BLUEPRINT SCHEMATIC ============
+        function createVariation3() {
+            updateInfo(
+                'Blueprint Schematic',
+                '📐 Technical wireframes',
+                '🔧 Engineering diagrams',
+                '📏 Precision design'
+            );
+
+            camera.position.set(70, 50, 70);
+            camera.lookAt(0, 0, 0);
+
+            scene.fog = new THREE.Fog(0x0a1628, 50, 300);
+
+            // Blueprint grid
+            const gridGeometry = new THREE.PlaneGeometry(300, 300, 60, 60);
+            const gridMaterial = new THREE.MeshBasicMaterial({
+                color: 0x1a3a52,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.2
+            });
+            const grid = new THREE.Mesh(gridGeometry, gridMaterial);
+            grid.rotation.x = -Math.PI / 2;
+            grid.position.y = -20;
+            scene.add(grid);
+
+            // Central telescope structure
+            const telescopeGroup = new THREE.Group();
+
+            // Main body
+            const bodyGeometry = new THREE.CylinderGeometry(4, 6, 20, 8, 1, true);
+            const blueprintMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            const body = new THREE.Mesh(bodyGeometry, blueprintMaterial);
+            telescopeGroup.add(body);
+
+            // Mirror assembly
+            const mirrorGeometry = new THREE.ConeGeometry(8, 15, 8, 1, true);
+            const mirror = new THREE.Mesh(mirrorGeometry, blueprintMaterial);
+            mirror.position.y = -12;
+            telescopeGroup.add(mirror);
+
+            // Solar panels
+            for (let i = 0; i < 4; i++) {
+                const panelGeometry = new THREE.BoxGeometry(15, 0.2, 8, 4, 1, 2);
+                const panel = new THREE.Mesh(panelGeometry, blueprintMaterial);
+                const angle = (Math.PI / 2) * i;
+                panel.position.x = Math.cos(angle) * 10;
+                panel.position.z = Math.sin(angle) * 10;
+                panel.position.y = 5;
+                panel.rotation.y = angle;
+                telescopeGroup.add(panel);
+            }
+
+            // Antenna
+            const antennaGeometry = new THREE.ConeGeometry(3, 8, 6, 1, true);
+            const antenna = new THREE.Mesh(antennaGeometry, blueprintMaterial);
+            antenna.position.y = 15;
+            telescopeGroup.add(antenna);
+
+            scene.add(telescopeGroup);
+
+            // Orbiting measurement rings
+            const orbitRings = [];
+            for (let i = 0; i < 4; i++) {
+                const ringGeometry = new THREE.TorusGeometry(25 + i * 8, 0.3, 16, 100);
+                const ringMaterial = new THREE.MeshBasicMaterial({
+                    color: [0x00ffff, 0xff00ff, 0xffff00, 0x00ff00][i],
+                    wireframe: false,
+                    transparent: true,
+                    opacity: 0.4
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+                ring.rotation.y = (Math.random() - 0.5) * 0.5;
+                orbitRings.push({
                     mesh: ring,
+                    speed: 0.002 + i * 0.001
+                });
+                scene.add(ring);
+            }
+
+            // Reference points
+            const pointsGeometry = new THREE.BufferGeometry();
+            const pointsCount = 100;
+            const pointsPositions = new Float32Array(pointsCount * 3);
+
+            for (let i = 0; i < pointsCount * 3; i += 3) {
+                const radius = 40 + Math.random() * 60;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+
+                pointsPositions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                pointsPositions[i + 1] = radius * Math.cos(phi);
+                pointsPositions[i + 2] = radius * Math.sin(phi) * Math.sin(theta);
+            }
+
+            pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pointsPositions, 3));
+            const pointsMaterial = new THREE.PointsMaterial({
+                color: 0x00ffff,
+                size: 2,
+                transparent: true,
+                opacity: 0.6
+            });
+            const points = new THREE.Points(pointsGeometry, pointsMaterial);
+            scene.add(points);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x0a1628, 1);
+            scene.add(ambientLight);
+
+            const blueprintLight = new THREE.PointLight(0x00ffff, 1, 200);
+            blueprintLight.position.set(0, 40, 40);
+            scene.add(blueprintLight);
+
+            // Animation
+            let time = 0;
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                time += 0.01;
+
+                telescopeGroup.rotation.y += 0.003;
+                telescopeGroup.position.y = Math.sin(time * 0.5) * 2;
+
+                orbitRings.forEach(ring => {
+                    ring.mesh.rotation.z += ring.speed;
+                });
+
+                points.rotation.y += 0.001;
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // ============ VARIATION 4: PARTICLE CONSTELLATIONS ============
+        function createVariation4() {
+            updateInfo(
+                'Particle Constellations',
+                '✨ Stellar patterns emerge',
+                '⭐ Cosmic connections',
+                '🌟 Celestial networks'
+            );
+
+            camera.position.set(0, 0, 120);
+            camera.lookAt(0, 0, 0);
+
+            // Main constellation particles
+            const constellations = [];
+            const constellationColors = [0xFF6B9D, 0x4ECDC4, 0xFFD700, 0x9D4EDD, 0x06FFA5];
+
+            for (let c = 0; c < 5; c++) {
+                const particleCount = 30;
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+                const centerRadius = 30 + c * 15;
+
+                for (let i = 0; i < particleCount; i++) {
+                    const theta = (Math.PI * 2 / particleCount) * i;
+                    const phi = Math.random() * Math.PI;
+                    const r = centerRadius + (Math.random() - 0.5) * 10;
+
+                    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                    positions[i * 3 + 2] = r * Math.cos(phi);
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+                const material = new THREE.PointsMaterial({
+                    color: constellationColors[c],
+                    size: 3,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending
+                });
+
+                const constellation = new THREE.Points(geometry, material);
+                constellations.push({
+                    mesh: constellation,
                     rotationSpeed: new THREE.Vector3(
                         (Math.random() - 0.5) * 0.005,
                         (Math.random() - 0.5) * 0.005,
                         (Math.random() - 0.5) * 0.005
                     )
                 });
-                scene.add(ring);
+                scene.add(constellation);
             }
 
-            // Create floating energy particles
-            const particleCount = 200;
-            const particlesGeometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const particleColors = new Float32Array(particleCount * 3);
+            // Connection lines between particles
+            const connections = [];
+            for (let c = 0; c < constellations.length; c++) {
+                const positions = constellations[c].mesh.geometry.attributes.position.array;
+                const lineGeometry = new THREE.BufferGeometry();
+                const linePositions = [];
 
-            for (let i = 0; i < particleCount * 3; i += 3) {
-                positions[i] = (Math.random() - 0.5) * 400;
-                positions[i + 1] = (Math.random() - 0.5) * 300;
-                positions[i + 2] = (Math.random() - 0.5) * 400 - 100;
+                for (let i = 0; i < positions.length; i += 9) {
+                    linePositions.push(
+                        positions[i], positions[i + 1], positions[i + 2],
+                        positions[i + 3], positions[i + 4], positions[i + 5]
+                    );
+                }
 
-                const color = new THREE.Color(colors[Math.floor(Math.random() * colors.length)]);
-                particleColors[i] = color.r;
-                particleColors[i + 1] = color.g;
-                particleColors[i + 2] = color.b;
+                lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+                const lineMaterial = new THREE.LineBasicMaterial({
+                    color: constellationColors[c],
+                    transparent: true,
+                    opacity: 0.2,
+                    blending: THREE.AdditiveBlending
+                });
+
+                const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+                connections.push(lines);
+                scene.add(lines);
             }
 
-            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+            // Flowing particle streams
+            const streamGeometry = new THREE.BufferGeometry();
+            const streamCount = 1000;
+            const streamPositions = new Float32Array(streamCount * 3);
+            const streamColors = new Float32Array(streamCount * 3);
 
-            const particlesMaterial = new THREE.PointsMaterial({
-                size: 2,
+            for (let i = 0; i < streamCount; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const r = Math.random() * 100;
+                streamPositions[i * 3] = Math.cos(theta) * r;
+                streamPositions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+                streamPositions[i * 3 + 2] = Math.sin(theta) * r;
+
+                const color = new THREE.Color(constellationColors[i % constellationColors.length]);
+                streamColors[i * 3] = color.r;
+                streamColors[i * 3 + 1] = color.g;
+                streamColors[i * 3 + 2] = color.b;
+            }
+
+            streamGeometry.setAttribute('position', new THREE.BufferAttribute(streamPositions, 3));
+            streamGeometry.setAttribute('color', new THREE.BufferAttribute(streamColors, 3));
+
+            const streamMaterial = new THREE.PointsMaterial({
+                size: 1,
                 vertexColors: true,
                 transparent: true,
-                opacity: 0.4,
+                opacity: 0.6,
                 blending: THREE.AdditiveBlending
             });
 
-            const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-            fluxElements.push({ mesh: particles, isParticleSystem: true });
-            scene.add(particles);
+            const streams = new THREE.Points(streamGeometry, streamMaterial);
+            scene.add(streams);
 
-            return fluxElements;
-        }
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x202040, 0.5);
+            scene.add(ambientLight);
 
-        const cosmicFlux = createCosmicFlux();
-
-        // Earth - positioned prominently as the focal point
-        const earthGroup = new THREE.Group();
-
-        const earthGeometry = new THREE.SphereGeometry(12, 64, 64);
-        const earthMaterial = new THREE.MeshPhongMaterial({
-            color: 0x2E86AB,
-            emissive: 0x1a4d6d,
-            emissiveIntensity: 0.4,
-            shininess: 20
-        });
-        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-        earth.castShadow = true;
-        earth.receiveShadow = true;
-        earthGroup.add(earth);
-
-        // Multi-layered Earth glow for more stylized look
-        const earthGlowGeometry = new THREE.SphereGeometry(14, 32, 32);
-        const earthGlowMaterial = new THREE.MeshBasicMaterial({
-            color: 0x4ECDC4,
-            transparent: true,
-            opacity: 0.25,
-            side: THREE.BackSide
-        });
-        const earthGlow = new THREE.Mesh(earthGlowGeometry, earthGlowMaterial);
-        earthGroup.add(earthGlow);
-
-        // Outer atmospheric glow
-        const earthGlow2Geometry = new THREE.SphereGeometry(16, 32, 32);
-        const earthGlow2Material = new THREE.MeshBasicMaterial({
-            color: 0x06FFA5,
-            transparent: true,
-            opacity: 0.1,
-            side: THREE.BackSide,
-            blending: THREE.AdditiveBlending
-        });
-        const earthGlow2 = new THREE.Mesh(earthGlow2Geometry, earthGlow2Material);
-        earthGroup.add(earthGlow2);
-
-        // Position Earth
-        earthGroup.position.set(0, 0, 0);
-        scene.add(earthGroup);
-
-        // Satellites - stylized and orbiting Earth
-        class Satellite {
-            constructor(orbitRadius, orbitSpeed, orbitOffset, orbitInclination) {
-                this.group = new THREE.Group();
-
-                // More stylized satellite body with glow
-                const bodyGeometry = new THREE.CylinderGeometry(0.6, 0.6, 2.5, 8);
-                const bodyMaterial = new THREE.MeshPhongMaterial({
-                    color: 0xEEEEEE,
-                    emissive: 0x4ECDC4,
-                    emissiveIntensity: 0.5,
-                    shininess: 50
-                });
-                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-                this.group.add(body);
-
-                // Glowing solar panels
-                const panelGeometry = new THREE.BoxGeometry(4, 0.15, 2);
-                const panelMaterial = new THREE.MeshPhongMaterial({
-                    color: 0x1a5f7a,
-                    emissive: 0xFF6B9D,
-                    emissiveIntensity: 0.4,
-                    transparent: true,
-                    opacity: 0.9
-                });
-
-                const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
-                panel1.position.x = 2.5;
-                this.group.add(panel1);
-
-                const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
-                panel2.position.x = -2.5;
-                this.group.add(panel2);
-
-                // Stylized antenna with glow
-                const antennaGeometry = new THREE.ConeGeometry(0.4, 1.5, 8);
-                const antennaMaterial = new THREE.MeshPhongMaterial({
-                    color: 0xFF6B9D,
-                    emissive: 0xFF6B9D,
-                    emissiveIntensity: 0.6
-                });
-                const antenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
-                antenna.position.y = 2;
-                this.group.add(antenna);
-
-                // Add a subtle glow around satellite
-                const glowGeometry = new THREE.SphereGeometry(1.5, 16, 16);
-                const glowMaterial = new THREE.MeshBasicMaterial({
-                    color: 0x4ECDC4,
-                    transparent: true,
-                    opacity: 0.15,
-                    blending: THREE.AdditiveBlending
-                });
-                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-                this.group.add(glow);
-
-                this.orbitRadius = orbitRadius;
-                this.orbitSpeed = orbitSpeed;
-                this.orbitAngle = orbitOffset;
-                this.orbitInclination = orbitInclination;
-                this.earthPosition = earthGroup.position;
-
-                scene.add(this.group);
-            }
-
-            update(time) {
-                this.orbitAngle += this.orbitSpeed;
-
-                // Orbit around Earth with inclination for more interesting paths
-                const x = Math.cos(this.orbitAngle) * this.orbitRadius;
-                const z = Math.sin(this.orbitAngle) * this.orbitRadius;
-                const y = Math.sin(this.orbitAngle * 2 + this.orbitInclination) * (this.orbitRadius * 0.3);
-
-                this.group.position.set(
-                    this.earthPosition.x + x,
-                    this.earthPosition.y + y,
-                    this.earthPosition.z + z
+            constellationColors.forEach((color, i) => {
+                const light = new THREE.PointLight(color, 0.8, 150);
+                const angle = (Math.PI * 2 / constellationColors.length) * i;
+                light.position.set(
+                    Math.cos(angle) * 60,
+                    Math.sin(angle * 2) * 30,
+                    Math.sin(angle) * 60
                 );
+                scene.add(light);
+            });
 
-                // Rotate satellite to face direction of movement
-                this.group.rotation.y = -this.orbitAngle;
+            // Animation
+            let time = 0;
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                time += 0.01;
 
-                // Slight wobble for realism
-                this.group.rotation.x = Math.sin(time * 0.001) * 0.1;
-            }
+                constellations.forEach((constellation, idx) => {
+                    constellation.mesh.rotation.x += constellation.rotationSpeed.x;
+                    constellation.mesh.rotation.y += constellation.rotationSpeed.y;
+                    constellation.mesh.rotation.z += constellation.rotationSpeed.z;
 
-            getPosition() {
-                return this.group.position;
-            }
-        }
+                    // Pulse effect
+                    constellation.mesh.material.opacity = 0.6 + Math.sin(time + idx) * 0.2;
+                    connections[idx].rotation.copy(constellation.mesh.rotation);
+                });
 
-        // Create satellites orbiting Earth
-        const satellites = [];
-        for (let i = 0; i < 8; i++) {
-            const satellite = new Satellite(
-                25 + Math.random() * 15,  // Orbit radius around Earth
-                0.004 + Math.random() * 0.006,  // Orbit speed
-                (Math.PI * 2 / 8) * i,  // Evenly distribute around orbit
-                Math.random() * Math.PI  // Random orbital inclination
-            );
-            satellites.push(satellite);
-        }
-
-        // Data transmission particles
-        class DataStream {
-            constructor(startPos, endPos, color) {
-                this.particles = [];
-                this.startPos = startPos.clone();
-                this.endPos = endPos.clone();
-                this.color = color;
-                this.particleCount = 20;
-                this.progress = 0;
-
-                for (let i = 0; i < this.particleCount; i++) {
-                    const geometry = new THREE.SphereGeometry(0.3, 8, 8);
-                    const material = new THREE.MeshBasicMaterial({
-                        color: this.color,
-                        transparent: true,
-                        opacity: 0
-                    });
-                    const particle = new THREE.Mesh(geometry, material);
-                    this.particles.push(particle);
-                    scene.add(particle);
+                const positions = streams.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    const theta = Math.atan2(positions[i + 2], positions[i]);
+                    positions[i] = Math.cos(theta + 0.01) * Math.sqrt(positions[i]**2 + positions[i + 2]**2);
+                    positions[i + 2] = Math.sin(theta + 0.01) * Math.sqrt(positions[i]**2 + positions[i + 2]**2);
                 }
+                streams.geometry.attributes.position.needsUpdate = true;
+
+                controls.update();
+                renderer.render(scene, camera);
             }
-
-            update(deltaTime) {
-                this.progress += deltaTime * 0.0005;
-
-                this.particles.forEach((particle, i) => {
-                    const offset = i / this.particleCount;
-                    const t = (this.progress + offset) % 1;
-
-                    // Bezier curve for interesting path
-                    const midPoint = new THREE.Vector3()
-                        .addVectors(this.startPos, this.endPos)
-                        .multiplyScalar(0.5)
-                        .add(new THREE.Vector3(0, 20, 0));
-
-                    const pos = new THREE.Vector3();
-                    pos.x = (1 - t) * (1 - t) * this.startPos.x + 2 * (1 - t) * t * midPoint.x + t * t * this.endPos.x;
-                    pos.y = (1 - t) * (1 - t) * this.startPos.y + 2 * (1 - t) * t * midPoint.y + t * t * this.endPos.y;
-                    pos.z = (1 - t) * (1 - t) * this.startPos.z + 2 * (1 - t) * t * midPoint.z + t * t * this.endPos.z;
-
-                    particle.position.copy(pos);
-
-                    // Fade in and out
-                    const opacity = Math.sin(t * Math.PI) * 0.8;
-                    particle.material.opacity = opacity;
-                });
-            }
-
-            updateEndpoints(startPos, endPos) {
-                this.startPos.copy(startPos);
-                this.endPos.copy(endPos);
-            }
-
-            destroy() {
-                this.particles.forEach(particle => {
-                    scene.remove(particle);
-                    particle.geometry.dispose();
-                    particle.material.dispose();
-                });
-            }
+            animate();
         }
 
-        // Create stylized data streams from satellites to Earth
-        const dataStreams = [];
-        const streamColors = [0x4ECDC4, 0xFF6B9D, 0xFFD700, 0xF4E04D, 0x9D4EDD, 0x06FFA5];
-        satellites.forEach((satellite, i) => {
-            const stream = new DataStream(
-                satellite.getPosition(),
-                earthGroup.position,
-                streamColors[i % streamColors.length]
-            );
-            dataStreams.push({ stream, satellite });
+        // Variation loader
+        function loadVariation(index) {
+            cleanup();
+
+            switch(index) {
+                case 0:
+                    createVariation1();
+                    break;
+                case 1:
+                    createVariation2();
+                    break;
+                case 2:
+                    createVariation3();
+                    break;
+                case 3:
+                    createVariation4();
+                    break;
+            }
+
+            currentVariation = index;
+        }
+
+        // Navigation setup
+        document.querySelectorAll('.variation-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const variation = parseInt(btn.dataset.variation);
+
+                document.querySelectorAll('.variation-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                loadVariation(variation);
+            });
         });
-
-        // Cosmic energy particles around Earth
-        function createEarthEnergyParticles() {
-            const particles = [];
-            const colors = [0x4ECDC4, 0xFF6B9D, 0xFFD700, 0x06FFA5];
-
-            for (let i = 0; i < 30; i++) {
-                const geometry = new THREE.SphereGeometry(0.3, 8, 8);
-                const material = new THREE.MeshBasicMaterial({
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    transparent: true,
-                    opacity: 0.7,
-                    blending: THREE.AdditiveBlending
-                });
-                const particle = new THREE.Mesh(geometry, material);
-
-                particles.push({
-                    mesh: particle,
-                    offset: Math.random() * Math.PI * 2,
-                    speed: 0.01 + Math.random() * 0.02,
-                    distance: 18 + Math.random() * 8,
-                    heightOffset: Math.random() * Math.PI * 2,
-                    heightSpeed: 0.005 + Math.random() * 0.01
-                });
-                scene.add(particle);
-            }
-            return particles;
-        }
-
-        const earthEnergyParticles = createEarthEnergyParticles();
-
-        // Stylized lighting
-        const ambientLight = new THREE.AmbientLight(0x2a2a3e, 0.6);
-        scene.add(ambientLight);
-
-        // Main light for Earth
-        const earthLight = new THREE.PointLight(0x4ECDC4, 1.2, 150);
-        earthLight.position.copy(earthGroup.position);
-        earthLight.position.x += 30;
-        earthLight.castShadow = true;
-        scene.add(earthLight);
-
-        // Secondary accent light
-        const accentLight = new THREE.PointLight(0xFF6B9D, 0.8, 120);
-        accentLight.position.set(-40, 20, 30);
-        scene.add(accentLight);
-
-        // Distant cosmic light
-        const cosmicLight = new THREE.PointLight(0x9D4EDD, 0.4, 200);
-        cosmicLight.position.set(0, 80, -100);
-        scene.add(cosmicLight);
-
-        // Animation loop
-        let time = 0;
-        function animate() {
-            requestAnimationFrame(animate);
-            time++;
-
-            // Animate cosmic flux elements
-            cosmicFlux.forEach(element => {
-                if (element.isParticleSystem) {
-                    // Slowly rotate particle system
-                    element.mesh.rotation.y += 0.0002;
-                    element.mesh.rotation.x += 0.0001;
-                } else if (element.driftSpeed) {
-                    // Drift nebula clouds
-                    element.mesh.position.add(element.driftSpeed);
-
-                    // Pulse opacity
-                    if (element.pulseSpeed) {
-                        const pulse = Math.sin(time * element.pulseSpeed + element.pulseOffset);
-                        element.mesh.material.opacity = element.mesh.material.opacity * 0.98 +
-                            (0.05 + pulse * 0.08) * 0.02;
-                    }
-
-                    // Slowly rotate
-                    element.mesh.rotation.x += 0.0003;
-                    element.mesh.rotation.y += 0.0005;
-                } else if (element.rotationSpeed) {
-                    // Rotate energy rings
-                    element.mesh.rotation.x += element.rotationSpeed.x;
-                    element.mesh.rotation.y += element.rotationSpeed.y;
-                    element.mesh.rotation.z += element.rotationSpeed.z;
-                }
-            });
-
-            // Update satellites
-            satellites.forEach(satellite => {
-                satellite.update(time);
-            });
-
-            // Update data streams
-            dataStreams.forEach(({ stream, satellite }) => {
-                stream.updateEndpoints(satellite.getPosition(), earthGroup.position);
-                stream.update(time);
-            });
-
-            // Update Earth energy particles
-            earthEnergyParticles.forEach(particle => {
-                particle.offset += particle.speed;
-                particle.heightOffset += particle.heightSpeed;
-
-                const earthPos = earthGroup.position;
-                particle.mesh.position.x = earthPos.x + Math.cos(particle.offset) * particle.distance;
-                particle.mesh.position.z = earthPos.z + Math.sin(particle.offset) * particle.distance;
-                particle.mesh.position.y = earthPos.y + Math.sin(particle.heightOffset) * 10;
-
-                // Pulse opacity for energy effect
-                particle.mesh.material.opacity = 0.4 + Math.sin(time * 0.03 + particle.offset) * 0.3;
-            });
-
-            // Rotate Earth group with subtle wobble
-            earthGroup.rotation.y += 0.002;
-            earthGroup.rotation.x = Math.sin(time * 0.0005) * 0.05;
-
-            // Animate Earth glow layers
-            earthGroup.children.forEach((child, index) => {
-                if (index > 0) {  // Skip the main Earth sphere
-                    child.rotation.y += 0.001 * (index + 1);
-                }
-            });
-
-            // Subtle light pulsing for more dynamic feel
-            earthLight.intensity = 1.2 + Math.sin(time * 0.01) * 0.2;
-            accentLight.intensity = 0.8 + Math.sin(time * 0.015) * 0.15;
-
-            controls.update();
-            renderer.render(scene, camera);
-        }
 
         // Handle window resize
         window.addEventListener('resize', () => {
@@ -594,9 +857,9 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Start animation
-        createStarfield();
-        animate();
+        // Initialize
+        initThreeJS();
+        loadVariation(0);
     </script>
 </body>
 </html>
