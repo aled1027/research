@@ -117,7 +117,17 @@ for dirname, commit_date in subdirs_with_dates:
     print()  # Add blank line between entries
 
 ]]]-->
-## 9 research projects
+## 10 research projects
+
+### [voxel-space-telescope](https://github.com/aled1027/research/tree/main/voxel-space-telescope) (2025-11-23)
+
+The Voxel Space Telescope project transforms the Space Telescope Triptych into a dynamic, cube-based cosmic visualization using Three.js and an isometric orthographic camera. By leveraging Three.js's InstancedMesh, the scene efficiently animates over 1,700 individual cubes forming entities like Earth, satellites, data streams, cosmic formations, and a cube starfield—each with unique, per-cube animations and glow effects, entirely without post-processing. The isometric projection ensures a consistent blocky aesthetic and clear spatial relationships, while interactive controls enable real-time exploration in any modern browser. Design priorities focused on performance, recognizability, and the visual contrast of cubes as voxels. The implementation is self-contained; all you need is the [Three.js library](https://threejs.org/) and the provided [index.html](https://github.com/mrdoob/three.js/blob/dev/examples/index.html) file.
+
+**Key findings and innovations:**
+- Achieves real-time animation of 1,700+ cubes using InstancedMesh and a shared geometry, maximizing GPU performance.
+- Adopts an orthographic isometric camera for consistent scale, clarity, and retro-style visuals.
+- Eliminates post-processing, relying instead on material effects like additive blending and emissive lighting.
+- Offers modular, maintainable class structure for voxel entities, supporting future extensibility.
 
 ### [space-telescope-triptych](https://github.com/aled1027/research/tree/main/space-telescope-triptych) (2025-11-23)
 
