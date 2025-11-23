@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voxel Space Telescope - Isometric View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0a0a0a, #1a1a2e);
+            font-family: 'Arial', sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        #info h1 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #4ECDC4;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        #info p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        #info strong {
+            color: #FF6B9D;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>Voxel Space Telescope</h1>
+        <p>🟦 Isometric voxel world</p>
+        <p>🟨 Cubes orbit <strong>Earth</strong></p>
+        <p>🟪 Data flows in cubic streams</p>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Scene setup with isometric camera
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.0003);
+
+        // Isometric camera setup
+        const aspect = window.innerWidth / window.innerHeight;
+        const frustumSize = 100;
+        const camera = new THREE.OrthographicCamera(
+            frustumSize * aspect / -2,
+            frustumSize * aspect / 2,
+            frustumSize / 2,
+            frustumSize / -2,
+            0.1,
+            1000
+        );
+
+        // Position camera for isometric view
+        const isoAngle = Math.PI / 4; // 45 degrees
+        const distance = 120;
+        camera.position.set(
+            distance * Math.cos(isoAngle),
+            distance * 0.7,
+            distance * Math.sin(isoAngle)
+        );
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableRotate = true;
+
+        // Shared cube geometry
+        const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+        // Voxelized starfield using instanced meshes
+        function createVoxelStarfield() {
+            const starCount = 500;
+            const starMesh = new THREE.InstancedMesh(
+                cubeGeometry,
+                new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.6
+                }),
+                starCount
+            );
+
+            const dummy = new THREE.Object3D();
+            const colors = [];
+
+            for (let i = 0; i < starCount; i++) {
+                dummy.position.set(
+                    (Math.random() - 0.5) * 500,
+                    (Math.random() - 0.5) * 500,
+                    (Math.random() - 0.5) * 500
+                );
+
+                const scale = 0.3 + Math.random() * 0.5;
+                dummy.scale.set(scale, scale, scale);
+
+                dummy.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+
+                dummy.updateMatrix();
+                starMesh.setMatrixAt(i, dummy.matrix);
+
+                const color = new THREE.Color();
+                color.setHSL(Math.random(), 0.3, 0.8);
+                colors.push(color.r, color.g, color.b);
+            }
+
+            // Set instance colors
+            const colorArray = new Float32Array(colors);
+            starMesh.instanceColor = new THREE.InstancedBufferAttribute(colorArray, 3);
+
+            scene.add(starMesh);
+            return starMesh;
+        }
+
+        const voxelStars = createVoxelStarfield();
+
+        // Voxel Earth - spherical arrangement of cubes
+        class VoxelEarth {
+            constructor(radius, density) {
+                this.group = new THREE.Group();
+                this.cubes = [];
+                this.cubeCount = 0;
+
+                // Calculate cube positions in a sphere
+                const positions = [];
+                const step = 2.5;
+
+                for (let x = -radius; x <= radius; x += step) {
+                    for (let y = -radius; y <= radius; y += step) {
+                        for (let z = -radius; z <= radius; z += step) {
+                            const dist = Math.sqrt(x*x + y*y + z*z);
+                            if (dist <= radius && dist >= radius - 8) {
+                                positions.push({ x, y, z, dist });
+                            }
+                        }
+                    }
+                }
+
+                this.cubeCount = positions.length;
+
+                // Create instanced mesh for Earth cubes
+                this.instancedMesh = new THREE.InstancedMesh(
+                    cubeGeometry,
+                    new THREE.MeshPhongMaterial({
+                        color: 0x2E86AB,
+                        emissive: 0x1a4d6d,
+                        emissiveIntensity: 0.3
+                    }),
+                    this.cubeCount
+                );
+
+                const dummy = new THREE.Object3D();
+
+                positions.forEach((pos, i) => {
+                    dummy.position.set(pos.x, pos.y, pos.z);
+
+                    const scale = 2.0 + Math.random() * 0.5;
+                    dummy.scale.set(scale, scale, scale);
+
+                    dummy.rotation.set(
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI
+                    );
+
+                    dummy.updateMatrix();
+                    this.instancedMesh.setMatrixAt(i, dummy.matrix);
+
+                    this.cubes.push({
+                        index: i,
+                        basePos: pos,
+                        offset: Math.random() * Math.PI * 2,
+                        speed: 0.005 + Math.random() * 0.01
+                    });
+                });
+
+                this.group.add(this.instancedMesh);
+
+                // Add glow cubes
+                this.glowCubes = this.createGlowLayer(radius + 3, 80);
+                this.group.add(this.glowCubes);
+
+                scene.add(this.group);
+            }
+
+            createGlowLayer(radius, count) {
+                const glowMesh = new THREE.InstancedMesh(
+                    cubeGeometry,
+                    new THREE.MeshBasicMaterial({
+                        color: 0x4ECDC4,
+                        transparent: true,
+                        opacity: 0.3,
+                        blending: THREE.AdditiveBlending
+                    }),
+                    count
+                );
+
+                const dummy = new THREE.Object3D();
+
+                for (let i = 0; i < count; i++) {
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+
+                    const x = radius * Math.sin(phi) * Math.cos(theta);
+                    const y = radius * Math.sin(phi) * Math.sin(theta);
+                    const z = radius * Math.cos(phi);
+
+                    dummy.position.set(x, y, z);
+                    dummy.scale.set(1.5, 1.5, 1.5);
+                    dummy.lookAt(0, 0, 0);
+
+                    dummy.updateMatrix();
+                    glowMesh.setMatrixAt(i, dummy.matrix);
+                }
+
+                return glowMesh;
+            }
+
+            update(time) {
+                const dummy = new THREE.Object3D();
+
+                this.cubes.forEach(cube => {
+                    const pulse = Math.sin(time * cube.speed + cube.offset);
+                    const scale = 2.0 + pulse * 0.2;
+
+                    dummy.position.set(
+                        cube.basePos.x + Math.sin(time * 0.001 + cube.offset) * 0.3,
+                        cube.basePos.y + Math.cos(time * 0.001 + cube.offset) * 0.3,
+                        cube.basePos.z
+                    );
+
+                    dummy.scale.set(scale, scale, scale);
+                    dummy.rotation.set(
+                        time * 0.002,
+                        time * 0.003,
+                        cube.offset
+                    );
+
+                    dummy.updateMatrix();
+                    this.instancedMesh.setMatrixAt(cube.index, dummy.matrix);
+                });
+
+                this.instancedMesh.instanceMatrix.needsUpdate = true;
+                this.group.rotation.y += 0.001;
+            }
+        }
+
+        const voxelEarth = new VoxelEarth(12, 0.8);
+
+        // Voxel Satellite
+        class VoxelSatellite {
+            constructor(orbitRadius, orbitSpeed, orbitOffset) {
+                this.group = new THREE.Group();
+                this.orbitRadius = orbitRadius;
+                this.orbitSpeed = orbitSpeed;
+                this.orbitAngle = orbitOffset;
+                this.cubes = [];
+
+                // Satellite body structure
+                const structure = [
+                    // Main body
+                    { x: 0, y: 0, z: 0, size: 2, color: 0xEEEEEE },
+                    { x: 0, y: 2, z: 0, size: 1.5, color: 0xEEEEEE },
+                    { x: 0, y: -2, z: 0, size: 1.5, color: 0xEEEEEE },
+
+                    // Solar panels (left)
+                    { x: -3, y: 0, z: 0, size: 1.5, color: 0xFF6B9D },
+                    { x: -5, y: 0, z: 0, size: 1.5, color: 0xFF6B9D },
+
+                    // Solar panels (right)
+                    { x: 3, y: 0, z: 0, size: 1.5, color: 0xFF6B9D },
+                    { x: 5, y: 0, z: 0, size: 1.5, color: 0xFF6B9D },
+
+                    // Antenna
+                    { x: 0, y: 4, z: 0, size: 1, color: 0x4ECDC4 },
+                    { x: 0, y: 5, z: 0, size: 0.8, color: 0x4ECDC4 }
+                ];
+
+                structure.forEach((cube, i) => {
+                    const geometry = new THREE.BoxGeometry(cube.size, cube.size, cube.size);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: cube.color,
+                        emissive: cube.color,
+                        emissiveIntensity: 0.3
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.set(cube.x, cube.y, cube.z);
+
+                    this.cubes.push({
+                        mesh,
+                        basePos: { x: cube.x, y: cube.y, z: cube.z },
+                        offset: i * 0.5
+                    });
+
+                    this.group.add(mesh);
+                });
+
+                scene.add(this.group);
+            }
+
+            update(time) {
+                this.orbitAngle += this.orbitSpeed;
+
+                const x = Math.cos(this.orbitAngle) * this.orbitRadius;
+                const z = Math.sin(this.orbitAngle) * this.orbitRadius;
+                const y = Math.sin(this.orbitAngle * 2) * (this.orbitRadius * 0.3);
+
+                this.group.position.set(x, y, z);
+                this.group.rotation.y = -this.orbitAngle;
+
+                // Animate individual cubes
+                this.cubes.forEach(cube => {
+                    const wobble = Math.sin(time * 0.01 + cube.offset) * 0.2;
+                    cube.mesh.position.y = cube.basePos.y + wobble;
+                    cube.mesh.rotation.x = time * 0.005;
+                });
+            }
+
+            getPosition() {
+                return this.group.position;
+            }
+        }
+
+        // Create voxel satellites
+        const satellites = [];
+        for (let i = 0; i < 6; i++) {
+            const satellite = new VoxelSatellite(
+                30 + Math.random() * 10,
+                0.003 + Math.random() * 0.004,
+                (Math.PI * 2 / 6) * i
+            );
+            satellites.push(satellite);
+        }
+
+        // Cubic data stream
+        class CubicDataStream {
+            constructor(startPos, endPos, color, cubeCount = 15) {
+                this.cubeCount = cubeCount;
+                this.cubes = [];
+                this.startPos = startPos.clone();
+                this.endPos = endPos.clone();
+                this.progress = 0;
+
+                // Create instanced mesh for data cubes
+                this.instancedMesh = new THREE.InstancedMesh(
+                    cubeGeometry,
+                    new THREE.MeshBasicMaterial({
+                        color: color,
+                        transparent: true,
+                        opacity: 0.8,
+                        blending: THREE.AdditiveBlending
+                    }),
+                    cubeCount
+                );
+
+                for (let i = 0; i < cubeCount; i++) {
+                    this.cubes.push({
+                        index: i,
+                        offset: i / cubeCount
+                    });
+                }
+
+                scene.add(this.instancedMesh);
+            }
+
+            update(time) {
+                this.progress += 0.003;
+
+                const dummy = new THREE.Object3D();
+
+                this.cubes.forEach(cube => {
+                    const t = (this.progress + cube.offset) % 1;
+
+                    // Bezier curve path
+                    const midPoint = new THREE.Vector3()
+                        .addVectors(this.startPos, this.endPos)
+                        .multiplyScalar(0.5)
+                        .add(new THREE.Vector3(0, 15, 0));
+
+                    const pos = new THREE.Vector3();
+                    pos.x = (1 - t) * (1 - t) * this.startPos.x + 2 * (1 - t) * t * midPoint.x + t * t * this.endPos.x;
+                    pos.y = (1 - t) * (1 - t) * this.startPos.y + 2 * (1 - t) * t * midPoint.y + t * t * this.endPos.y;
+                    pos.z = (1 - t) * (1 - t) * this.startPos.z + 2 * (1 - t) * t * midPoint.z + t * t * this.endPos.z;
+
+                    dummy.position.copy(pos);
+
+                    const scale = Math.sin(t * Math.PI) * 0.8 + 0.5;
+                    dummy.scale.set(scale, scale, scale);
+
+                    dummy.rotation.set(
+                        time * 0.05 + cube.offset,
+                        time * 0.07 + cube.offset,
+                        time * 0.03 + cube.offset
+                    );
+
+                    dummy.updateMatrix();
+                    this.instancedMesh.setMatrixAt(cube.index, dummy.matrix);
+                });
+
+                this.instancedMesh.instanceMatrix.needsUpdate = true;
+            }
+
+            updateEndpoints(startPos, endPos) {
+                this.startPos.copy(startPos);
+                this.endPos.copy(endPos);
+            }
+        }
+
+        // Create data streams
+        const dataStreams = [];
+        const streamColors = [0x4ECDC4, 0xFF6B9D, 0xFFD700, 0xF4E04D, 0x9D4EDD, 0x06FFA5];
+        satellites.forEach((satellite, i) => {
+            const stream = new CubicDataStream(
+                satellite.getPosition(),
+                new THREE.Vector3(0, 0, 0),
+                streamColors[i % streamColors.length]
+            );
+            dataStreams.push({ stream, satellite });
+        });
+
+        // Voxelized cosmic flux - floating cube formations
+        class CosmicCubeFormation {
+            constructor(centerPos, cubeCount, color) {
+                this.centerPos = centerPos;
+                this.cubeCount = cubeCount;
+
+                this.instancedMesh = new THREE.InstancedMesh(
+                    cubeGeometry,
+                    new THREE.MeshBasicMaterial({
+                        color: color,
+                        transparent: true,
+                        opacity: 0.2,
+                        wireframe: false
+                    }),
+                    cubeCount
+                );
+
+                this.cubes = [];
+                const dummy = new THREE.Object3D();
+
+                for (let i = 0; i < cubeCount; i++) {
+                    const angle = (i / cubeCount) * Math.PI * 2;
+                    const radius = 10 + Math.random() * 20;
+                    const height = (Math.random() - 0.5) * 30;
+
+                    const x = Math.cos(angle) * radius;
+                    const z = Math.sin(angle) * radius;
+
+                    this.cubes.push({
+                        index: i,
+                        offset: angle,
+                        radius: radius,
+                        height: height,
+                        rotSpeed: (Math.random() - 0.5) * 0.01
+                    });
+
+                    dummy.position.set(
+                        centerPos.x + x,
+                        centerPos.y + height,
+                        centerPos.z + z
+                    );
+
+                    const size = 2 + Math.random() * 3;
+                    dummy.scale.set(size, size, size);
+
+                    dummy.updateMatrix();
+                    this.instancedMesh.setMatrixAt(i, dummy.matrix);
+                }
+
+                scene.add(this.instancedMesh);
+            }
+
+            update(time) {
+                const dummy = new THREE.Object3D();
+
+                this.cubes.forEach(cube => {
+                    cube.offset += cube.rotSpeed;
+
+                    const x = Math.cos(cube.offset) * cube.radius;
+                    const z = Math.sin(cube.offset) * cube.radius;
+                    const y = cube.height + Math.sin(time * 0.001 + cube.offset) * 3;
+
+                    dummy.position.set(
+                        this.centerPos.x + x,
+                        this.centerPos.y + y,
+                        this.centerPos.z + z
+                    );
+
+                    const pulse = Math.sin(time * 0.005 + cube.offset);
+                    const size = 2 + pulse * 0.5;
+                    dummy.scale.set(size, size, size);
+
+                    dummy.rotation.set(
+                        time * 0.002,
+                        time * 0.003,
+                        cube.offset
+                    );
+
+                    dummy.updateMatrix();
+                    this.instancedMesh.setMatrixAt(cube.index, dummy.matrix);
+                });
+
+                this.instancedMesh.instanceMatrix.needsUpdate = true;
+            }
+        }
+
+        // Create cosmic formations
+        const cosmicFormations = [];
+        const cosmicColors = [0xFF6B9D, 0x4ECDC4, 0x9D4EDD, 0x06FFA5];
+
+        for (let i = 0; i < 4; i++) {
+            const formation = new CosmicCubeFormation(
+                new THREE.Vector3(
+                    (Math.random() - 0.5) * 150,
+                    (Math.random() - 0.5) * 100,
+                    (Math.random() - 0.5) * 150
+                ),
+                30,
+                cosmicColors[i]
+            );
+            cosmicFormations.push(formation);
+        }
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x2a2a3e, 0.8);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0x4ECDC4, 1.0);
+        mainLight.position.set(50, 50, 50);
+        scene.add(mainLight);
+
+        const accentLight = new THREE.DirectionalLight(0xFF6B9D, 0.6);
+        accentLight.position.set(-40, 30, -40);
+        scene.add(accentLight);
+
+        // Animation loop
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time++;
+
+            // Update voxel Earth
+            voxelEarth.update(time);
+
+            // Update satellites
+            satellites.forEach(satellite => {
+                satellite.update(time);
+            });
+
+            // Update data streams
+            dataStreams.forEach(({ stream, satellite }) => {
+                stream.updateEndpoints(satellite.getPosition(), new THREE.Vector3(0, 0, 0));
+                stream.update(time);
+            });
+
+            // Update cosmic formations
+            cosmicFormations.forEach(formation => {
+                formation.update(time);
+            });
+
+            // Subtle star rotation
+            voxelStars.rotation.y += 0.0001;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.left = frustumSize * aspect / -2;
+            camera.right = frustumSize * aspect / 2;
+            camera.top = frustumSize / 2;
+            camera.bottom = frustumSize / -2;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
