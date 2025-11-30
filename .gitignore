@@ -1,2 +1,15 @@
+# macOS
 .DS_Store
-__pycache__
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS app bundles (generated from build)
+*.app
+
+# Swift toolchain installers
+*.pkg
+
+# Build artifacts
+*.dSYM
