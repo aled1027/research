@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Toon Material Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 400px);
+            overflow: hidden;
+        }
+
+        #canvas-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background: rgba(20, 20, 20, 0.98);
+            border-top: 2px solid #333;
+            overflow-y: auto;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #controls::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #controls::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        #controls::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(30, 30, 30, 0.95);
+            border-bottom: 1px solid #333;
+        }
+
+        .controls-header h1 {
+            font-size: 18px;
+            color: #ff6b9d;
+            margin: 0;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .help-btn, .preset-dropdown-btn {
+            padding: 8px 16px;
+            background: #d946a6;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+
+        .help-btn:hover, .preset-dropdown-btn:hover {
+            background: #f55dc2;
+        }
+
+        .controls-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .control-section {
+            background: rgba(40, 40, 40, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border-top: 3px solid #ff6b9d;
+        }
+
+        .control-section h2 {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #ff6b9d;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 11px;
+            color: #bbb;
+            font-weight: 500;
+        }
+
+        .label-with-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .value-display {
+            font-weight: bold;
+            color: #ff6b9d;
+            font-size: 11px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #444;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ff6b9d;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ff6b9d;
+            cursor: pointer;
+            border: none;
+        }
+
+        select {
+            width: 100%;
+            padding: 6px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 32px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #2a2a2a;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        #info {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 350px;
+            border: 2px solid #ff6b9d;
+        }
+
+        #info h3 {
+            color: #ff6b9d;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        #info p {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        /* Help Modal */
+        #help-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        #help-modal.active {
+            display: block;
+        }
+
+        .help-content {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .help-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #ff4444;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .help-close:hover {
+            background: #ff6666;
+        }
+
+        .help-content h2 {
+            color: #ff6b9d;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .help-content h3 {
+            color: #ffb3d1;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .help-content p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .help-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .help-content code {
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #ff6b9d;
+        }
+
+        /* Preset Dropdown */
+        .preset-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .preset-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin-top: 5px;
+            min-width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .preset-menu.active {
+            display: block;
+        }
+
+        .preset-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            transition: background 0.2s;
+        }
+
+        .preset-item:last-child {
+            border-bottom: none;
+        }
+
+        .preset-item:hover {
+            background: #3a3a3a;
+        }
+
+        .preset-item-title {
+            font-weight: bold;
+            color: #ff6b9d;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .preset-item-desc {
+            font-size: 11px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="info">
+        <h3>🎨 Toon Material Explorer</h3>
+        <p>Explore Three.js MeshToonMaterial properties including gradient maps, colors, metalness, and roughness. Perfect for learning cel-shading and cartoon rendering!</p>
+        <p style="margin-top: 10px;"><strong>Tip:</strong> Try different presets to see dramatic variations in toon shading styles.</p>
+    </div>
+
+    <div id="controls">
+        <div class="controls-header">
+            <h1>🎨 Toon Material Controls</h1>
+            <div class="header-buttons">
+                <div class="preset-dropdown">
+                    <button class="preset-dropdown-btn" onclick="togglePresetMenu()">📋 Load Preset</button>
+                    <div class="preset-menu" id="preset-menu">
+                        <div class="preset-item" onclick="loadPreset('classicToon')">
+                            <div class="preset-item-title">Classic Toon</div>
+                            <div class="preset-item-desc">Traditional cel-shaded look with 3 steps</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('pastelDream')">
+                            <div class="preset-item-title">Pastel Dream</div>
+                            <div class="preset-item-desc">Soft, desaturated colors with smooth gradients</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('vibrantBold')">
+                            <div class="preset-item-title">Vibrant Bold</div>
+                            <div class="preset-item-desc">High saturation with sharp 2-step gradient</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('metallicToon')">
+                            <div class="preset-item-title">Metallic Toon</div>
+                            <div class="preset-item-desc">High metalness for reflective surfaces</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('roughMatte')">
+                            <div class="preset-item-title">Rough Matte</div>
+                            <div class="preset-item-desc">High roughness for non-reflective surfaces</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('emissiveGlow')">
+                            <div class="preset-item-title">Emissive Glow</div>
+                            <div class="preset-item-desc">Glowing effect with high emissive intensity</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('subtlePastel')">
+                            <div class="preset-item-title">Subtle Pastel</div>
+                            <div class="preset-item-desc">Very soft colors with 5-step gradient</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('highContrast')">
+                            <div class="preset-item-title">High Contrast</div>
+                            <div class="preset-item-desc">Dramatic 2-step shading with strong lights</div>
+                        </div>
+                        <div class="preset-item" onclick="loadPreset('smoothGradient')">
+                            <div class="preset-item-title">Smooth Gradient</div>
+                            <div class="preset-item-desc">No gradient map for smooth transitions</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="help-btn" onclick="toggleHelp()">❓ Help & Info</button>
+            </div>
+        </div>
+
+        <div class="controls-content">
+            <div class="control-section">
+                <h2>📐 Shape & Gradient</h2>
+
+                <div class="control-group">
+                    <label>3D Object</label>
+                    <select id="object-type">
+                        <option value="torusKnot">Torus Knot</option>
+                        <option value="sphere">Sphere</option>
+                        <option value="torus">Torus</option>
+                        <option value="cube">Cube</option>
+                        <option value="dodecahedron">Dodecahedron</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Gradient Map (Toon Steps)</label>
+                    <select id="gradient-map">
+                        <option value="none">None (Smooth)</option>
+                        <option value="2" selected>2 Steps (Hard Edge)</option>
+                        <option value="3">3 Steps (Classic Toon)</option>
+                        <option value="5">5 Steps (Soft Toon)</option>
+                        <option value="10">10 Steps (Very Smooth)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="flat-shading">
+                        <label for="flat-shading">Flat Shading</label>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="auto-rotate" checked>
+                        <label for="auto-rotate">Auto Rotate</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h2>🎨 Colors & Material</h2>
+
+                <div class="control-group">
+                    <label>Base Color</label>
+                    <input type="color" id="base-color" value="#ff6b9d">
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Roughness</label>
+                        <span class="value-display" id="roughness-val">0.80</span>
+                    </div>
+                    <input type="range" id="roughness" min="0" max="1" step="0.01" value="0.8">
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Metalness</label>
+                        <span class="value-display" id="metalness-val">0.00</span>
+                    </div>
+                    <input type="range" id="metalness" min="0" max="1" step="0.01" value="0">
+                </div>
+
+                <div class="control-group">
+                    <label>Emissive Color</label>
+                    <input type="color" id="emissive-color" value="#000000">
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Emissive Intensity</label>
+                        <span class="value-display" id="emissive-intensity-val">0.00</span>
+                    </div>
+                    <input type="range" id="emissive-intensity" min="0" max="2" step="0.1" value="0">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h2>💡 Lighting</h2>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Ambient Light</label>
+                        <span class="value-display" id="ambient-val">0.50</span>
+                    </div>
+                    <input type="range" id="ambient-light" min="0" max="2" step="0.1" value="0.5">
+                </div>
+
+                <div class="control-group">
+                    <div class="label-with-value">
+                        <label>Directional Light</label>
+                        <span class="value-display" id="directional-val">1.00</span>
+                    </div>
+                    <input type="range" id="directional-light" min="0" max="3" step="0.1" value="1">
+                </div>
+
+                <div class="control-group">
+                    <label>Light Color</label>
+                    <input type="color" id="light-color" value="#ffffff">
+                </div>
+
+                <div class="control-group">
+                    <label>Background Color</label>
+                    <input type="color" id="bg-color" value="#1a1a2e">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal">
+        <div class="help-content">
+            <button class="help-close" onclick="toggleHelp()">Close ✕</button>
+
+            <h2>🎓 Understanding Toon Materials</h2>
+
+            <h3>What is Toon Shading?</h3>
+            <p>Toon shading (also called cel-shading) is a non-photorealistic rendering technique that makes 3D objects look like hand-drawn cartoons or anime. It uses distinct color bands instead of smooth gradients.</p>
+
+            <h3>Gradient Map</h3>
+            <p>The <code>gradientMap</code> is the most important property for toon materials. It controls how light intensity translates to color bands:</p>
+            <ul>
+                <li><strong>2 Steps:</strong> Creates a hard, comic book style with just light and shadow</li>
+                <li><strong>3 Steps:</strong> Classic cel-shading with highlight, midtone, and shadow</li>
+                <li><strong>5+ Steps:</strong> Softer toon look with more gradual transitions</li>
+                <li><strong>None:</strong> Removes the toon effect, creates smooth shading</li>
+            </ul>
+
+            <h3>Creating Pastel Looks</h3>
+            <p>To achieve soft, pastel colors:</p>
+            <ul>
+                <li>Use desaturated colors (pinks, light blues, lavenders)</li>
+                <li>Increase ambient light (0.7-1.0)</li>
+                <li>Use 5+ step gradient maps for softer transitions</li>
+                <li>Lower directional light intensity</li>
+                <li>Add subtle emissive glow</li>
+            </ul>
+
+            <h3>Creating Vibrant/Bold Looks</h3>
+            <p>For strong, punchy colors:</p>
+            <ul>
+                <li>Use fully saturated colors (pure red, blue, green)</li>
+                <li>Use 2-3 step gradient maps for hard edges</li>
+                <li>Higher directional light intensity (1.5-2.0)</li>
+                <li>Lower ambient light for more contrast</li>
+            </ul>
+
+            <h3>Roughness</h3>
+            <p>Controls surface smoothness:</p>
+            <ul>
+                <li><strong>0.0:</strong> Very smooth, glossy surface (mirror-like)</li>
+                <li><strong>0.5:</strong> Semi-glossy (plastic-like)</li>
+                <li><strong>1.0:</strong> Completely rough, matte surface</li>
+            </ul>
+
+            <h3>Metalness</h3>
+            <p>Controls metallic appearance:</p>
+            <ul>
+                <li><strong>0.0:</strong> Non-metallic (plastic, rubber, wood)</li>
+                <li><strong>0.5:</strong> Semi-metallic</li>
+                <li><strong>1.0:</strong> Fully metallic (reflects environment)</li>
+            </ul>
+
+            <h3>Emissive</h3>
+            <p>Makes objects appear to glow:</p>
+            <ul>
+                <li>Set emissive color to add self-illumination</li>
+                <li>Increase intensity for stronger glow effect</li>
+                <li>Great for sci-fi or magical effects</li>
+            </ul>
+
+            <h3>Flat Shading</h3>
+            <p>When enabled, each polygon face has a uniform color, creating a more angular, geometric look. Great for low-poly art styles!</p>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li>Toon materials work best with strong directional lighting</li>
+                <li>Experiment with gradient steps - fewer steps = more stylized</li>
+                <li>Combine metalness and toon shading for unique effects</li>
+                <li>Use presets as starting points, then customize!</li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+
+        // Calculate canvas height accounting for controls panel
+        const controlsHeight = 400;
+        const canvasHeight = window.innerHeight - controlsHeight;
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / canvasHeight, 0.1, 1000);
+        camera.position.set(0, 0, 5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, canvasHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        // Create gradient textures for toon effect
+        function createGradientTexture(steps) {
+            if (steps === 'none') return null;
+
+            const colors = new Uint8Array(steps * 3);
+            for (let i = 0; i < steps; i++) {
+                const value = Math.floor((i / (steps - 1)) * 255);
+                colors[i * 3] = value;
+                colors[i * 3 + 1] = value;
+                colors[i * 3 + 2] = value;
+            }
+
+            const texture = new THREE.DataTexture(colors, steps, 1, THREE.RGBFormat);
+            texture.needsUpdate = true;
+            return texture;
+        }
+
+        // Create initial toon material
+        let toonMaterial = new THREE.MeshToonMaterial({
+            color: 0xff6b9d,
+            gradientMap: createGradientTexture(2),
+            roughness: 0.8,
+            metalness: 0
+        });
+
+        // Create initial geometry and mesh
+        let currentGeometry = new THREE.TorusKnotGeometry(1.2, 0.4, 128, 32);
+        let mesh = new THREE.Mesh(currentGeometry, toonMaterial);
+        scene.add(mesh);
+
+        // Auto rotation flag
+        let autoRotate = true;
+
+        // Update material function
+        function updateMaterial() {
+            const baseColor = document.getElementById('base-color').value;
+            const roughness = parseFloat(document.getElementById('roughness').value);
+            const metalness = parseFloat(document.getElementById('metalness').value);
+            const emissiveColor = document.getElementById('emissive-color').value;
+            const emissiveIntensity = parseFloat(document.getElementById('emissive-intensity').value);
+            const gradientSteps = document.getElementById('gradient-map').value;
+            const flatShading = document.getElementById('flat-shading').checked;
+
+            // Update value displays
+            document.getElementById('roughness-val').textContent = roughness.toFixed(2);
+            document.getElementById('metalness-val').textContent = metalness.toFixed(2);
+            document.getElementById('emissive-intensity-val').textContent = emissiveIntensity.toFixed(2);
+
+            // Update material properties
+            toonMaterial.color.setStyle(baseColor);
+            toonMaterial.roughness = roughness;
+            toonMaterial.metalness = metalness;
+            toonMaterial.emissive.setStyle(emissiveColor);
+            toonMaterial.emissiveIntensity = emissiveIntensity;
+            toonMaterial.gradientMap = createGradientTexture(gradientSteps === 'none' ? 'none' : parseInt(gradientSteps));
+            toonMaterial.flatShading = flatShading;
+            toonMaterial.needsUpdate = true;
+        }
+
+        // Update lighting function
+        function updateLighting() {
+            const ambientIntensity = parseFloat(document.getElementById('ambient-light').value);
+            const directionalIntensity = parseFloat(document.getElementById('directional-light').value);
+            const lightColor = document.getElementById('light-color').value;
+            const bgColor = document.getElementById('bg-color').value;
+
+            // Update value displays
+            document.getElementById('ambient-val').textContent = ambientIntensity.toFixed(2);
+            document.getElementById('directional-val').textContent = directionalIntensity.toFixed(2);
+
+            // Update lights
+            ambientLight.intensity = ambientIntensity;
+            directionalLight.intensity = directionalIntensity;
+
+            const color = new THREE.Color(lightColor);
+            ambientLight.color = color;
+            directionalLight.color = color;
+
+            scene.background.setStyle(bgColor);
+        }
+
+        // Change geometry function
+        function changeGeometry() {
+            const geometryType = document.getElementById('object-type').value;
+
+            // Remove old mesh
+            scene.remove(mesh);
+            currentGeometry.dispose();
+
+            // Create new geometry
+            switch(geometryType) {
+                case 'torusKnot':
+                    currentGeometry = new THREE.TorusKnotGeometry(1.2, 0.4, 128, 32);
+                    break;
+                case 'sphere':
+                    currentGeometry = new THREE.SphereGeometry(1.5, 64, 64);
+                    break;
+                case 'torus':
+                    currentGeometry = new THREE.TorusGeometry(1.2, 0.5, 32, 64);
+                    break;
+                case 'cube':
+                    currentGeometry = new THREE.BoxGeometry(2, 2, 2, 10, 10, 10);
+                    break;
+                case 'dodecahedron':
+                    currentGeometry = new THREE.DodecahedronGeometry(1.5, 0);
+                    break;
+            }
+
+            // Create new mesh and add to scene
+            mesh = new THREE.Mesh(currentGeometry, toonMaterial);
+            scene.add(mesh);
+        }
+
+        // Event listeners
+        document.getElementById('base-color').addEventListener('input', updateMaterial);
+        document.getElementById('roughness').addEventListener('input', updateMaterial);
+        document.getElementById('metalness').addEventListener('input', updateMaterial);
+        document.getElementById('emissive-color').addEventListener('input', updateMaterial);
+        document.getElementById('emissive-intensity').addEventListener('input', updateMaterial);
+        document.getElementById('gradient-map').addEventListener('change', updateMaterial);
+        document.getElementById('flat-shading').addEventListener('change', updateMaterial);
+
+        document.getElementById('ambient-light').addEventListener('input', updateLighting);
+        document.getElementById('directional-light').addEventListener('input', updateLighting);
+        document.getElementById('light-color').addEventListener('input', updateLighting);
+        document.getElementById('bg-color').addEventListener('input', updateLighting);
+
+        document.getElementById('object-type').addEventListener('change', changeGeometry);
+        document.getElementById('auto-rotate').addEventListener('change', (e) => {
+            autoRotate = e.target.checked;
+        });
+
+        // Preset configurations
+        window.loadPreset = function(preset) {
+            const presets = {
+                classicToon: {
+                    color: '#ff6b9d',
+                    roughness: 0.8,
+                    metalness: 0,
+                    emissiveColor: '#000000',
+                    emissiveIntensity: 0,
+                    gradientMap: '3',
+                    flatShading: false,
+                    ambientLight: 0.5,
+                    directionalLight: 1,
+                    lightColor: '#ffffff',
+                    bgColor: '#1a1a2e'
+                },
+                pastelDream: {
+                    color: '#ffd1dc',
+                    roughness: 0.9,
+                    metalness: 0,
+                    emissiveColor: '#ffe6f0',
+                    emissiveIntensity: 0.2,
+                    gradientMap: '5',
+                    flatShading: false,
+                    ambientLight: 0.9,
+                    directionalLight: 0.5,
+                    lightColor: '#fff0f5',
+                    bgColor: '#f0e6fa'
+                },
+                vibrantBold: {
+                    color: '#ff0066',
+                    roughness: 0.6,
+                    metalness: 0,
+                    emissiveColor: '#000000',
+                    emissiveIntensity: 0,
+                    gradientMap: '2',
+                    flatShading: false,
+                    ambientLight: 0.3,
+                    directionalLight: 1.8,
+                    lightColor: '#ffffff',
+                    bgColor: '#0a0a0a'
+                },
+                metallicToon: {
+                    color: '#4a90e2',
+                    roughness: 0.2,
+                    metalness: 0.9,
+                    emissiveColor: '#000000',
+                    emissiveIntensity: 0,
+                    gradientMap: '3',
+                    flatShading: false,
+                    ambientLight: 0.5,
+                    directionalLight: 1.2,
+                    lightColor: '#ffffff',
+                    bgColor: '#1a1a2e'
+                },
+                roughMatte: {
+                    color: '#8b4513',
+                    roughness: 1.0,
+                    metalness: 0,
+                    emissiveColor: '#000000',
+                    emissiveIntensity: 0,
+                    gradientMap: '3',
+                    flatShading: false,
+                    ambientLight: 0.6,
+                    directionalLight: 0.8,
+                    lightColor: '#ffffff',
+                    bgColor: '#2a2a2a'
+                },
+                emissiveGlow: {
+                    color: '#00ffff',
+                    roughness: 0.5,
+                    metalness: 0,
+                    emissiveColor: '#00ffff',
+                    emissiveIntensity: 1.5,
+                    gradientMap: '3',
+                    flatShading: false,
+                    ambientLight: 0.3,
+                    directionalLight: 0.7,
+                    lightColor: '#ffffff',
+                    bgColor: '#0a0a1a'
+                },
+                subtlePastel: {
+                    color: '#c8b6e2',
+                    roughness: 0.95,
+                    metalness: 0,
+                    emissiveColor: '#d4c9e8',
+                    emissiveIntensity: 0.1,
+                    gradientMap: '10',
+                    flatShading: false,
+                    ambientLight: 1.0,
+                    directionalLight: 0.4,
+                    lightColor: '#f5f0ff',
+                    bgColor: '#ede7f6'
+                },
+                highContrast: {
+                    color: '#ffaa00',
+                    roughness: 0.7,
+                    metalness: 0,
+                    emissiveColor: '#000000',
+                    emissiveIntensity: 0,
+                    gradientMap: '2',
+                    flatShading: false,
+                    ambientLight: 0.2,
+                    directionalLight: 2.5,
+                    lightColor: '#ffffff',
+                    bgColor: '#000000'
+                },
+                smoothGradient: {
+                    color: '#9c27b0',
+                    roughness: 0.5,
+                    metalness: 0.3,
+                    emissiveColor: '#000000',
+                    emissiveIntensity: 0,
+                    gradientMap: 'none',
+                    flatShading: false,
+                    ambientLight: 0.5,
+                    directionalLight: 1.0,
+                    lightColor: '#ffffff',
+                    bgColor: '#1a1a2e'
+                }
+            };
+
+            const config = presets[preset];
+            if (!config) return;
+
+            // Apply material settings
+            document.getElementById('base-color').value = config.color;
+            document.getElementById('roughness').value = config.roughness;
+            document.getElementById('metalness').value = config.metalness;
+            document.getElementById('emissive-color').value = config.emissiveColor;
+            document.getElementById('emissive-intensity').value = config.emissiveIntensity;
+            document.getElementById('gradient-map').value = config.gradientMap;
+            document.getElementById('flat-shading').checked = config.flatShading;
+
+            // Apply lighting settings
+            document.getElementById('ambient-light').value = config.ambientLight;
+            document.getElementById('directional-light').value = config.directionalLight;
+            document.getElementById('light-color').value = config.lightColor;
+            document.getElementById('bg-color').value = config.bgColor;
+
+            // Update material and lighting
+            updateMaterial();
+            updateLighting();
+
+            // Close preset menu
+            document.getElementById('preset-menu').classList.remove('active');
+        };
+
+        // UI functions
+        window.toggleHelp = function() {
+            document.getElementById('help-modal').classList.toggle('active');
+        };
+
+        window.togglePresetMenu = function() {
+            document.getElementById('preset-menu').classList.toggle('active');
+        };
+
+        // Close preset menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const presetDropdown = document.querySelector('.preset-dropdown');
+            const presetMenu = document.getElementById('preset-menu');
+            if (!presetDropdown.contains(event.target)) {
+                presetMenu.classList.remove('active');
+            }
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (autoRotate) {
+                mesh.rotation.x += 0.005;
+                mesh.rotation.y += 0.01;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const controlsHeight = document.getElementById('controls').offsetHeight;
+            const canvasHeight = window.innerHeight - controlsHeight;
+
+            camera.aspect = window.innerWidth / canvasHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, canvasHeight);
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
