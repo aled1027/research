@@ -1,0 +1,67 @@
+{
+  "display_information": {
+    "name": "Emoji Rewriter",
+    "description": "Rewrite your messages with emoji additions",
+    "background_color": "#2c2d30"
+  },
+  "features": {
+    "app_home": {
+      "home_tab_enabled": true,
+      "messages_tab_enabled": false,
+      "messages_tab_read_only_enabled": false
+    },
+    "bot_user": {
+      "display_name": "Emoji Rewriter",
+      "always_online": true
+    },
+    "slash_commands": [
+      {
+        "command": "/rewrite",
+        "description": "Rewrite your message with emoji additions",
+        "usage_hint": "<your message>",
+        "should_escape": false
+      },
+      {
+        "command": "/monitor-channel",
+        "description": "Add current channel to monitoring list",
+        "should_escape": false
+      },
+      {
+        "command": "/unmonitor-channel",
+        "description": "Remove current channel from monitoring list",
+        "should_escape": false
+      },
+      {
+        "command": "/list-monitored",
+        "description": "List all monitored channels",
+        "should_escape": false
+      }
+    ]
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "commands",
+        "chat:write",
+        "channels:read",
+        "groups:read",
+        "im:read",
+        "mpim:read",
+        "users:read"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "app_home_opened"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false
+  }
+}
