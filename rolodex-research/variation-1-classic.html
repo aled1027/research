@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic Rotating Cards - Rolodex</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            background: #1a1a1a;
+        }
+
+        .container {
+            height: 100vh;
+            perspective: 1500px;
+            perspective-origin: 50% 50%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .rolodex {
+            height: 100vh;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .card {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            backface-visibility: hidden;
+        }
+
+        .card-content {
+            max-width: 800px;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .card h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .card p {
+            font-size: 1.3rem;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 8rem;
+            font-weight: bold;
+            opacity: 0.1;
+            color: white;
+        }
+
+        /* Color themes for each card */
+        .card:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .card:nth-child(3) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .card:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .card:nth-child(5) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .card:nth-child(6) { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+        .nav {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav button {
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .nav button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1000;
+        }
+
+        .scroll-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .scroll-dot.active {
+            background: white;
+            transform: scale(1.5);
+        }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+
+    <div class="container">
+        <div class="rolodex" id="rolodex">
+            <div class="card" data-index="0">
+                <div class="card-number">01</div>
+                <div class="card-content">
+                    <h2>Classic Rotating Cards</h2>
+                    <p>Experience the traditional rolodex effect with cards rotating on a horizontal axis. Each card smoothly rotates into view as you scroll.</p>
+                </div>
+            </div>
+            <div class="card" data-index="1">
+                <div class="card-number">02</div>
+                <div class="card-content">
+                    <h2>Smooth Transitions</h2>
+                    <p>Watch as cards rotate with depth and perspective. The 3D transform creates a realistic cylindrical carousel effect.</p>
+                </div>
+            </div>
+            <div class="card" data-index="2">
+                <div class="card-number">03</div>
+                <div class="card-content">
+                    <h2>GSAP ScrollTrigger</h2>
+                    <p>Powered by GSAP's ScrollTrigger plugin, enabling smooth scroll-based animations with precise control.</p>
+                </div>
+            </div>
+            <div class="card" data-index="3">
+                <div class="card-number">04</div>
+                <div class="card-content">
+                    <h2>3D Perspective</h2>
+                    <p>Cards rotate in 3D space, creating depth and dimension. The perspective transform adds realism to the motion.</p>
+                </div>
+            </div>
+            <div class="card" data-index="4">
+                <div class="card-number">05</div>
+                <div class="card-content">
+                    <h2>Entering Animation</h2>
+                    <p>Cards rotate in from below with scale and opacity changes, creating a dramatic entrance effect.</p>
+                </div>
+            </div>
+            <div class="card" data-index="5">
+                <div class="card-number">06</div>
+                <div class="card-content">
+                    <h2>Leaving Animation</h2>
+                    <p>As you scroll past, cards rotate away and fade, maintaining the continuous cylinder illusion.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-indicator" id="scrollIndicator"></div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        const cards = document.querySelectorAll('.card');
+        const indicator = document.getElementById('scrollIndicator');
+
+        // Create scroll indicator dots
+        cards.forEach((card, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'scroll-dot';
+            dot.dataset.index = i;
+            if (i === 0) dot.classList.add('active');
+            indicator.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.scroll-dot');
+
+        // Set up spacer for scrolling
+        const spacer = document.createElement('div');
+        spacer.style.height = `${cards.length * 100}vh`;
+        document.body.appendChild(spacer);
+
+        // Animate each card
+        cards.forEach((card, index) => {
+            // Starting position
+            gsap.set(card, {
+                rotateX: 90,
+                z: -500,
+                opacity: 0,
+                scale: 0.8
+            });
+
+            // Enter animation
+            gsap.to(card, {
+                rotateX: 0,
+                z: 0,
+                opacity: 1,
+                scale: 1,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100}vh top`,
+                    end: () => `${index * 100 + 50}vh top`,
+                    scrub: 1,
+                    onEnter: () => updateIndicator(index),
+                    onEnterBack: () => updateIndicator(index)
+                }
+            });
+
+            // Active state - subtle rotation while in view
+            gsap.to(card, {
+                rotateY: 5,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 25}vh top`,
+                    end: () => `${index * 100 + 75}vh top`,
+                    scrub: 1
+                }
+            });
+
+            // Leave animation
+            gsap.to(card, {
+                rotateX: -90,
+                z: -500,
+                opacity: 0,
+                scale: 0.8,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 50}vh top`,
+                    end: () => `${(index + 1) * 100}vh top`,
+                    scrub: 1
+                }
+            });
+        });
+
+        function updateIndicator(index) {
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        // Smooth scroll on dot click
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                gsap.to(window, {
+                    duration: 1,
+                    scrollTo: index * window.innerHeight,
+                    ease: 'power2.inOut'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

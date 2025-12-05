@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circular Scroll Wheel - Rolodex</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            background: radial-gradient(circle at center, #2c3e50 0%, #1a1a1a 100%);
+        }
+
+        .container {
+            height: 100vh;
+            perspective: 2000px;
+            perspective-origin: 50% 50%;
+            overflow: hidden;
+            position: fixed;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wheel {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .card {
+            position: absolute;
+            width: 80vw;
+            max-width: 800px;
+            height: 100vh;
+            left: 50%;
+            top: 50%;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-content {
+            width: 100%;
+            height: 70vh;
+            border-radius: 25px;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .card-content:hover {
+            transform: scale(1.02);
+        }
+
+        .card h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .card p {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.8;
+            max-width: 600px;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 8rem;
+            font-weight: bold;
+            opacity: 0.2;
+            color: white;
+            line-height: 1;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Color themes */
+        .card:nth-child(1) .card-content { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card:nth-child(2) .card-content { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .card:nth-child(3) .card-content { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .card:nth-child(4) .card-content { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .card:nth-child(5) .card-content { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .card:nth-child(6) .card-content { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .rotation-indicator {
+            position: fixed;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .wheel-visual {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: relative;
+            animation: rotate 20s linear infinite;
+        }
+
+        .wheel-visual::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .center-dot {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+
+    <div class="center-dot"></div>
+
+    <div class="rotation-indicator">
+        <div class="wheel-visual"></div>
+        <span id="angleDisplay">0°</span>
+    </div>
+
+    <div class="container">
+        <div class="wheel" id="wheel">
+            <div class="card" data-index="0">
+                <div class="card-content">
+                    <div class="icon">🎡</div>
+                    <div class="card-number">01</div>
+                    <h2>Circular Wheel</h2>
+                    <p>Cards arranged in a circle that rotates as you scroll, like a physical rotating file wheel or ferris wheel.</p>
+                </div>
+            </div>
+            <div class="card" data-index="1">
+                <div class="card-content">
+                    <div class="icon">🔄</div>
+                    <div class="card-number">02</div>
+                    <h2>Continuous Rotation</h2>
+                    <p>The wheel rotates smoothly using trigonometric calculations to position each card around a virtual circle.</p>
+                </div>
+            </div>
+            <div class="card" data-index="2">
+                <div class="card-content">
+                    <div class="icon">📐</div>
+                    <div class="card-number">03</div>
+                    <h2>Math in Motion</h2>
+                    <p>Using sine and cosine functions to calculate X and Y positions, creating perfect circular motion.</p>
+                </div>
+            </div>
+            <div class="card" data-index="3">
+                <div class="card-content">
+                    <div class="icon">🎯</div>
+                    <div class="card-number">04</div>
+                    <h2>Focused Card</h2>
+                    <p>The card at the top center scales up and gains full opacity, drawing attention to the active content.</p>
+                </div>
+            </div>
+            <div class="card" data-index="4">
+                <div class="card-content">
+                    <div class="icon">✨</div>
+                    <div class="card-number">05</div>
+                    <h2>Depth Effects</h2>
+                    <p>Cards further from the center reduce in scale and opacity, creating a sense of depth and perspective.</p>
+                </div>
+            </div>
+            <div class="card" data-index="5">
+                <div class="card-content">
+                    <div class="icon">🌀</div>
+                    <div class="card-number">06</div>
+                    <h2>Infinite Loop</h2>
+                    <p>The circular arrangement creates a natural infinite loop, perfect for continuous browsing experiences.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        const wheel = document.getElementById('wheel');
+        const cards = document.querySelectorAll('.card');
+        const angleDisplay = document.getElementById('angleDisplay');
+        const totalCards = cards.length;
+        const radius = 800; // Virtual circle radius
+
+        // Set up spacer for scrolling
+        const spacer = document.createElement('div');
+        spacer.style.height = `${cards.length * 100}vh`;
+        document.body.appendChild(spacer);
+
+        // Function to position cards in a circle
+        function updateCardPositions(rotation) {
+            cards.forEach((card, index) => {
+                // Calculate angle for this card
+                const baseAngle = (360 / totalCards) * index;
+                const angle = (baseAngle + rotation) % 360;
+                const rad = (angle * Math.PI) / 180;
+
+                // Calculate position on the circle
+                const x = Math.sin(rad) * radius;
+                const y = -Math.cos(rad) * radius;
+                const z = Math.cos(rad) * 400 - 400; // Depth
+
+                // Calculate scale and opacity based on position (front vs back)
+                // Cards at the top (angle ~0) should be largest and most visible
+                const normalizedAngle = ((angle + 180) % 360) - 180; // -180 to 180
+                const distanceFromTop = Math.abs(normalizedAngle) / 180; // 0 to 1
+                const scale = 1 - (distanceFromTop * 0.4); // 1 to 0.6
+                const opacity = 1 - (distanceFromTop * 0.7); // 1 to 0.3
+
+                // Apply transforms
+                gsap.set(card, {
+                    x: x,
+                    y: y,
+                    z: z,
+                    scale: scale,
+                    opacity: opacity,
+                    rotateY: angle - 90,
+                    zIndex: Math.round(1000 - Math.abs(normalizedAngle))
+                });
+            });
+
+            // Update angle display
+            angleDisplay.textContent = `${Math.round(rotation)}°`;
+        }
+
+        // Initialize positions
+        updateCardPositions(0);
+
+        // Animate rotation based on scroll
+        gsap.to({}, {
+            scrollTrigger: {
+                trigger: spacer,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.5,
+                onUpdate: (self) => {
+                    // Rotate 360 degrees per card section
+                    const rotation = self.progress * 360 * totalCards;
+                    updateCardPositions(rotation);
+                }
+            }
+        });
+
+        // Add parallax effect to card contents while rotating
+        cards.forEach((card, index) => {
+            const content = card.querySelector('.card-content');
+
+            gsap.to(content, {
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100}vh top`,
+                    end: () => `${(index + 1) * 100}vh top`,
+                    scrub: 1,
+                    onUpdate: (self) => {
+                        // Slight rotation and scale pulse when card is at the front
+                        const progress = self.progress;
+                        const pulse = Math.sin(progress * Math.PI);
+                        gsap.set(content, {
+                            rotateZ: pulse * 2,
+                            scale: 1 + (pulse * 0.05)
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
