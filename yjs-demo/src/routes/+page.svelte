@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import * as Y from 'yjs';
-  import { PUBLIC_YJS_ENDPOINT } from '$env/static/public';
+  import { env } from '$env/dynamic/public';
 
   type Visitor = { id: string; label: string; seen: number };
 
@@ -9,7 +9,7 @@
   let status = 'waiting to connect';
 
   const fallbackEndpoint = 'ws://localhost:8788/room/visitors';
-  const endpoint = PUBLIC_YJS_ENDPOINT || fallbackEndpoint;
+  const endpoint = env.PUBLIC_YJS_ENDPOINT || fallbackEndpoint;
 
   const createId = () =>
     crypto.randomUUID ? crypto.randomUUID() : `visitor-${Math.random().toString(16).slice(2)}`;

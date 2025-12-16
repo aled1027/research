@@ -12,6 +12,7 @@ A minimal demo that shows who is visiting a SvelteKit page using Yjs for local-f
    ```bash
    npm install
    ```
+   (This runs `svelte-kit sync` to generate `.svelte-kit/` typings. Re-run `npm run postinstall` if you pull new routes.)
 2. Start the Yjs Durable Object worker (serves WebSockets on port 8788 by default):
    ```bash
    npx wrangler dev --config wrangler.yjs.toml --local --port 8788

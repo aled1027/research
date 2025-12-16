@@ -8,14 +8,15 @@
     "dev:host": "vite dev --host",
     "dev:cf": "wrangler dev --config wrangler.sveltekit.toml",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "svelte-kit sync"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240701",
     "@sveltejs/adapter-cloudflare": "^4.4.1",
     "@sveltejs/kit": "^2.5.9",
-    "@sveltejs/vite-plugin-svelte": "^3.1.1",
-    "svelte": "^4.2.18",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
+    "svelte": "^5.1.9",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5",
     "vite": "^5.3.4",
@@ -23,5 +24,8 @@
   },
   "dependencies": {
     "yjs": "^13.6.19"
+  },
+  "overrides": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6"
   }
 }
