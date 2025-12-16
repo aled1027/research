@@ -11,3 +11,4 @@
 - Switched to importing `vitePreprocess` from `@sveltejs/vite-plugin-svelte` and added a `postinstall` hook to run `svelte-kit sync` so builds work on fresh installs.
 - Upgraded to Svelte 5 and the matching `@sveltejs/vite-plugin-svelte@4` (with an override) to fix missing runtime exports and quiet build warnings; builds now complete successfully.
 - Fixed Durable Objects deployment error: changed migration from `new_classes` to `new_sqlite_classes` in `wrangler.yjs.toml` to support Cloudflare's free plan requirement.
+- Fixed SvelteKit deployment error: updated `wrangler.sveltekit.toml` to point to `.svelte-kit/cloudflare/_worker.js` instead of `build/_worker.js` since `@sveltejs/adapter-cloudflare` outputs the worker file to `.svelte-kit/cloudflare/` directory.

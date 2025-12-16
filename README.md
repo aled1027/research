@@ -235,3 +235,4 @@ The Anki Git Backup project introduces an add-on for [Anki](https://apps.ankiweb
 - High transparency and privacy—data stays local unless explicitly pushed to a remote repository.
 
 <!--[[[end]]]-->
+

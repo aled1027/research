@@ -20,7 +20,7 @@
     "tslib": "^2.6.2",
     "typescript": "^5.4.5",
     "vite": "^5.3.4",
-    "wrangler": "^3.60.2"
+    "wrangler": "^4.55.0"
   },
   "dependencies": {
     "yjs": "^13.6.19"

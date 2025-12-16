@@ -40,3 +40,7 @@ A minimal demo that shows who is visiting a SvelteKit page using Yjs for local-f
 - Each browser tab sets a presence entry in a shared Yjs map with a heartbeat timestamp. Stale entries are cleared automatically.
 - Updates flow over WebSockets to the Yjs Durable Object, which rebroadcasts changes to all peers and stores a snapshot for later visitors.
 - The UI keeps styling minimal—just headings, paragraphs, lists, and a small amount of element-level CSS.
+
+
+## URLS:
+ https://yjs-sveltekit-demo.services-a01.workers.dev
