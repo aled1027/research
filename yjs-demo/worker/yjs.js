@@ -34,6 +34,9 @@ export class YjsRoom {
     await this.ready;
     this.connections.add(webSocket);
 
+    // Cloudflare requires accepting the socket before sending data.
+    webSocket.accept();
+
     const syncUpdate = Y.encodeStateAsUpdate(this.doc);
     webSocket.send(syncUpdate);
 
@@ -50,6 +53,8 @@ export class YjsRoom {
     this.doc.on('update', forwardUpdate);
 
     webSocket.addEventListener('message', async (event) => {
+      if (!(event.data instanceof ArrayBuffer)) return;
+
       const data = new Uint8Array(event.data);
       Y.applyUpdate(this.doc, data, webSocket);
       await this.persist();
@@ -60,8 +65,6 @@ export class YjsRoom {
       this.connections.delete(webSocket);
       this.doc.off('update', forwardUpdate);
     });
-
-    webSocket.accept();
   }
 
   async fetch(request) {
