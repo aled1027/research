@@ -17,6 +17,7 @@
   const readableTime = (timestamp: number) => new Date(timestamp).toLocaleTimeString();
 
   onMount(() => {
+    console.log('[Client] Page visited - initializing Yjs connection');
     const doc = new Y.Doc();
     const presence = doc.getMap<{ label: string; seen: number }>('visitors');
     const id = createId();
@@ -27,13 +28,16 @@
     const refreshList = () => {
       const now = Date.now();
       const fresh: Visitor[] = [];
+      const previousCount = visitors.length;
       presence.forEach((value, key) => {
         if (!value || typeof value.seen !== 'number') {
+          console.log(`[Client] Removing invalid visitor entry: ${key}`);
           presence.delete(key);
           return;
         }
 
         if (now - value.seen > 15000) {
+          console.log(`[Client] Removing stale visitor: ${key} (${value.label}), last seen ${now - value.seen}ms ago`);
           presence.delete(key);
           return;
         }
@@ -41,33 +45,46 @@
         fresh.push({ id: key, label: value.label ?? 'Guest', seen: value.seen });
       });
       visitors = fresh.sort((a, b) => b.seen - a.seen);
+      
+      if (visitors.length !== previousCount) {
+        console.log(`[Client] Visitor list updated: ${previousCount} -> ${visitors.length} visitors`, {
+          visitors: visitors.map(v => ({ id: v.id, label: v.label, seen: readableTime(v.seen) }))
+        });
+      }
     };
 
     const observeUpdates = (update: Uint8Array, origin: unknown) => {
       if (socket && socket.readyState === WebSocket.OPEN && origin !== socket) {
+        console.log('[Client] Sending local update to server', { updateSize: update.length });
         socket.send(update);
       }
     };
 
     const connect = () => {
       if (socket && socket.readyState === WebSocket.OPEN) return;
+      console.log('[Client] Connecting to Yjs room', { endpoint });
       status = 'connecting to room';
 
       const next = new WebSocket(endpoint);
       next.binaryType = 'arraybuffer';
 
       next.addEventListener('open', () => {
+        console.log('[Client] WebSocket connection opened');
         status = 'connected';
-        next.send(Y.encodeStateAsUpdate(doc));
+        const stateUpdate = Y.encodeStateAsUpdate(doc);
+        console.log('[Client] Sending initial state to server', { stateSize: stateUpdate.length });
+        next.send(stateUpdate);
       });
 
       next.addEventListener('message', (event) => {
         const incoming = new Uint8Array(event.data as ArrayBuffer);
+        console.log('[Client] Received update from server', { updateSize: incoming.length });
         Y.applyUpdate(doc, incoming, next);
         refreshList();
       });
 
       next.addEventListener('close', () => {
+        console.log('[Client] WebSocket connection closed - will reconnect');
         status = 'reconnecting soon';
         if (!reconnectTimer) {
           reconnectTimer = setTimeout(() => {
@@ -77,7 +94,8 @@
         }
       });
 
-      next.addEventListener('error', () => {
+      next.addEventListener('error', (error) => {
+        console.error('[Client] WebSocket error', error);
         status = 'connection lost';
         next.close();
       });
@@ -86,25 +104,37 @@
     };
 
     const heartbeat = setInterval(() => {
-      presence.set(id, { label, seen: Date.now() });
+      const now = Date.now();
+      console.log(`[Client] Sending heartbeat for ${label}`, { id, timestamp: now });
+      presence.set(id, { label, seen: now });
       refreshList();
     }, 4000);
 
-    presence.observe(refreshList);
+    presence.observe((event) => {
+      console.log('[Client] Presence map changed', { 
+        keysChanged: Array.from(event.keysChanged),
+        transaction: event.transaction
+      });
+      refreshList();
+    });
     doc.on('update', observeUpdates);
 
+    console.log(`[Client] User joining as ${label}`, { id });
     presence.set(id, { label, seen: Date.now() });
     refreshList();
     connect();
 
     return () => {
+      console.log(`[Client] Page unvisited - cleaning up ${label}`, { id });
       clearInterval(heartbeat);
       if (reconnectTimer) clearTimeout(reconnectTimer);
+      console.log(`[Client] Removing presence entry for ${label}`, { id });
       presence.delete(id);
       refreshList();
       doc.off('update', observeUpdates);
       socket?.close();
       doc.destroy();
+      console.log('[Client] Cleanup complete');
     };
   });
 </script>
