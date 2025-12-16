@@ -10,3 +10,4 @@
 - `npm run build` failed because `vitePreprocess` is no longer exported from `@sveltejs/kit/vite` and because `.svelte-kit/` typings were missing.
 - Switched to importing `vitePreprocess` from `@sveltejs/vite-plugin-svelte` and added a `postinstall` hook to run `svelte-kit sync` so builds work on fresh installs.
 - Upgraded to Svelte 5 and the matching `@sveltejs/vite-plugin-svelte@4` (with an override) to fix missing runtime exports and quiet build warnings; builds now complete successfully.
+- Fixed Durable Objects deployment error: changed migration from `new_classes` to `new_sqlite_classes` in `wrangler.yjs.toml` to support Cloudflare's free plan requirement.
