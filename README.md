@@ -117,7 +117,56 @@ for dirname, commit_date in subdirs_with_dates:
     print()  # Add blank line between entries
 
 ]]]-->
-## 11 research projects
+## 16 research projects
+
+### [rolodex-research](https://github.com/aled1027/research/tree/main/rolodex-research) (2025-12-20)
+
+Exploring how the physical rolodex metaphor can enhance modern web UX, this project presents five interactive scroll components powered by GSAP and ScrollTrigger, each leveraging viewport-spanning cards and 3D CSS transforms. The variations — classic rotating cards, 3D page-flip carousel, stacked depth cards, circular scroll wheel, and split-flap display — demonstrate distinct animation techniques, phased scroll-based transitions, and thoughtful UI indicators. Common design patterns include fixed card positioning, phased ScrollTrigger animation for enter/active/leave states, and performance-oriented use of GPU-accelerated transforms. The project offers practical code and demo files, providing a learn-by-example approach for adaptable implementation in portfolios, galleries, product tours, or presentations. Try the interactive examples and code at [GSAP ScrollTrigger](https://greensock.com/scrolltrigger/) and the [Rolodex Research GitHub page](https://github.com/rolodex-research), if available.
+
+**Key findings:**
+- Phased animation (using 3-4 scroll stages) and perspective settings (1500–2000px) yield convincing 3D effects.
+- Circular layouts require trigonometric positioning for smooth rotation and natural depth.
+- Visual indicators (progress bars, navigation dots) are essential for user orientation.
+- Fixed positioning and hardware-accelerated transforms ensure smooth performance across modern browsers.
+
+### [threejs-toon-material](https://github.com/aled1027/research/tree/main/threejs-toon-material) (2025-12-20)
+
+Three.js Toon Material Explorer is an interactive educational tool that empowers students to experiment with the properties of Three.js's `MeshToonMaterial`, enabling hands-on mastery of cel-shading and cartoon-style rendering. Users can tweak gradient maps, surface qualities, and lighting across nine curated presets, gaining insight into both soft pastel aesthetics and bold, high-contrast toon looks. The demo dynamically generates gradient textures using Three.js's `DataTexture`, illustrating how lighting quantization shapes visual style, while controls for roughness, metalness, and emissive properties highlight the material's versatility. Designed for browser-based use, the project supports direct exploration without a build process, making it ideal for both classroom demos and self-paced learning. Explore the live demo and documentation at [Three.js](https://threejs.org/) or host the project from your own browser.
+
+**Key findings/concepts:**
+- Gradient maps determine the number of shading bands, crucial for the toon effect (from classic 2-step comic style to smooth gradients).
+- Material parameters like roughness, metalness, and emissive color can create a range of surface types, including glossy, metallic, and glowing cartoon objects.
+- Lighting configuration (ambient/directional intensity, color) dramatically affects cel-shaded visuals; pastel tones require softer lighting, bold styles favor higher contrast.
+- Flat shading produces faceted, low-poly looks ideal for stylized visuals and heavily enhances the cartoon feel.
+- The project highlights the distinction between non-photorealistic rendering (NPR) and physically based rendering (PBR) in Three.js.
+
+### [slack-app](https://github.com/aled1027/research/tree/main/slack-app) (2025-12-20)
+
+The Slack Emoji Rewriter App is a Python-based Slack add-on that lets users preview and send emoji-enhanced messages via a slash command workflow, addressing Slack's inability to intercept messages before they're posted. Users can configure channel monitoring, compose messages using `/rewrite`, review both original and modified (with a smiley emoji) versions, and decide which version to post, all within an interactive UI powered by Slack Block Kit. The app operates in Socket Mode for easy deployment and leverages ephemeral messages for private previews, with message attribution as the bot due to API constraints. Key tools and documentation include the [Slack Bolt Framework](https://slack.dev/bolt-python) and the [Slack API docs](https://api.slack.com/docs), and the groundwork is laid for future upgrades like LLM-powered rewriting.
+
+**Key findings/characteristics:**
+- Slash commands offer a practical workaround for message interception limitations.
+- Ephemeral messages provide a clean, user-centric preview experience.
+- All message modifications are sent as the bot, not as the original user, due to Slack restrictions.
+- The app is well-positioned for future enhancements, including AI-powered rewriting and custom emoji logic.
+
+### [yjs-demo](https://github.com/aled1027/research/tree/main/yjs-demo) (2025-12-20)
+
+Demonstrating real-time visitor presence in SvelteKit, this project integrates Yjs for local-first data synchronization and Cloudflare Durable Objects for persistent, distributed storage. Each connected browser tab updates its presence via a Yjs shared map—changes propagate seamlessly across clients using WebSockets, with Cloudflare Durable Objects handling state rebroadcast and persistence. The setup features a minimalist SvelteKit UI and separate worker deployments for Yjs and the app, enabling quick local development and easy deployment to Cloudflare's edge. Full instructions, worker configs, and source code are included for rapid experimentation.
+
+**Key findings/tools:**
+- **Yjs** enables granular presence state sharing with automatic conflict resolution.  
+- **Cloudflare Durable Objects** provide efficient, persistent relaying and storage.  
+- Minimal end-to-end example: [Demo App](https://yjs-sveltekit-demo.services-a01.workers.dev), [Yjs project](https://github.com/yjs/yjs).
+
+### [yjs-demo-fix](https://github.com/aled1027/research/tree/main/yjs-demo-fix) (2025-12-20)
+
+Visitors to a SvelteKit app deployed on Cloudflare Workers encountered 500 errors for all static assets because the worker configuration didn't specify how to serve these files. The root cause was missing `assets` and `nodejs_compat` settings in `wrangler.sveltekit.toml`; these are essential for enabling asset delivery and Node.js module compatibility with SvelteKit’s Cloudflare adapter. The fix involved explicitly defining the assets directory and binding, along with enabling Node.js compatibility—restoring proper loading of static resources. Key details and setup instructions are outlined in Cloudflare’s [SvelteKit deployment guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/sveltekit/) and the [adapter documentation](https://kit.svelte.dev/docs/adapter-cloudflare).
+
+Key changes:
+- Added `assets = { directory = ".svelte-kit/cloudflare", binding = "STATIC_ASSETS" }` to `wrangler.sveltekit.toml`
+- Enabled `compatibility_flags = ["nodejs_compat"]`
+- No more 500 errors; static assets load as expected
 
 ### [mac-state](https://github.com/aled1027/research/tree/main/mac-state) (2025-11-29)
 

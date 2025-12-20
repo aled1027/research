@@ -1,0 +1,7 @@
+Exploring how the physical rolodex metaphor can enhance modern web UX, this project presents five interactive scroll components powered by GSAP and ScrollTrigger, each leveraging viewport-spanning cards and 3D CSS transforms. The variations — classic rotating cards, 3D page-flip carousel, stacked depth cards, circular scroll wheel, and split-flap display — demonstrate distinct animation techniques, phased scroll-based transitions, and thoughtful UI indicators. Common design patterns include fixed card positioning, phased ScrollTrigger animation for enter/active/leave states, and performance-oriented use of GPU-accelerated transforms. The project offers practical code and demo files, providing a learn-by-example approach for adaptable implementation in portfolios, galleries, product tours, or presentations. Try the interactive examples and code at [GSAP ScrollTrigger](https://greensock.com/scrolltrigger/) and the [Rolodex Research GitHub page](https://github.com/rolodex-research), if available.
+
+**Key findings:**
+- Phased animation (using 3-4 scroll stages) and perspective settings (1500–2000px) yield convincing 3D effects.
+- Circular layouts require trigonometric positioning for smooth rotation and natural depth.
+- Visual indicators (progress bars, navigation dots) are essential for user orientation.
+- Fixed positioning and hardware-accelerated transforms ensure smooth performance across modern browsers.

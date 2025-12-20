@@ -1,0 +1,8 @@
+Three.js Toon Material Explorer is an interactive educational tool that empowers students to experiment with the properties of Three.js's `MeshToonMaterial`, enabling hands-on mastery of cel-shading and cartoon-style rendering. Users can tweak gradient maps, surface qualities, and lighting across nine curated presets, gaining insight into both soft pastel aesthetics and bold, high-contrast toon looks. The demo dynamically generates gradient textures using Three.js's `DataTexture`, illustrating how lighting quantization shapes visual style, while controls for roughness, metalness, and emissive properties highlight the material's versatility. Designed for browser-based use, the project supports direct exploration without a build process, making it ideal for both classroom demos and self-paced learning. Explore the live demo and documentation at [Three.js](https://threejs.org/) or host the project from your own browser.
+
+**Key findings/concepts:**
+- Gradient maps determine the number of shading bands, crucial for the toon effect (from classic 2-step comic style to smooth gradients).
+- Material parameters like roughness, metalness, and emissive color can create a range of surface types, including glossy, metallic, and glowing cartoon objects.
+- Lighting configuration (ambient/directional intensity, color) dramatically affects cel-shaded visuals; pastel tones require softer lighting, bold styles favor higher contrast.
+- Flat shading produces faceted, low-poly looks ideal for stylized visuals and heavily enhances the cartoon feel.
+- The project highlights the distinction between non-photorealistic rendering (NPR) and physically based rendering (PBR) in Three.js.
