@@ -1,0 +1,16 @@
+name = "git-lfs-server"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "LFS_BUCKET"
+bucket_name = "lfs"
+
+# Environment variables (set these via wrangler secret)
+# LFS_USERNAME - Basic auth username
+# LFS_PASSWORD - Basic auth password
+
+[vars]
+# Public URL of this worker (update after first deploy)
+# LFS_SERVER_URL = "https://git-lfs-server.your-subdomain.workers.dev"

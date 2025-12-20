@@ -1,0 +1,16 @@
+{
+  "name": "git-lfs-cloudflare-worker",
+  "version": "1.0.0",
+  "description": "Git LFS server implementation using Cloudflare Workers and R2 storage",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "create-bucket": "wrangler r2 bucket create lfs"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "keywords": ["git-lfs", "cloudflare", "workers", "r2"],
+  "license": "MIT"
+}
