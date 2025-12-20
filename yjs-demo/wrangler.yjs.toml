@@ -1,0 +1,13 @@
+name = "yjs-room-server"
+main = "worker/yjs.js"
+compatibility_date = "2024-06-01"
+workers_dev = true
+
+[durable_objects]
+bindings = [
+  { name = "YJS_ROOM", class_name = "YjsRoom" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["YjsRoom"]
