@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rolodex Research - Interactive Variations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .card .tech {
+            color: #764ba2;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rolodex Research</h1>
+        <p class="subtitle">Exploring Interactive Scroll-Based Rolodex Components with GSAP</p>
+
+        <div class="grid">
+            <a href="variation-1-classic.html" class="card">
+                <h2>1. Classic Rotating Cards</h2>
+                <p>Traditional rolodex with cards rotating on a horizontal axis, creating a cylindrical carousel effect.</p>
+                <div class="tech">3D Transforms • ScrollTrigger • Rotation</div>
+            </a>
+
+            <a href="variation-2-flip.html" class="card">
+                <h2>2. 3D Flip Carousel</h2>
+                <p>Cards flip like pages in a book with depth and perspective, creating a dynamic reading experience.</p>
+                <div class="tech">3D Perspective • Flip Animations • Scale</div>
+            </a>
+
+            <a href="variation-3-stacked.html" class="card">
+                <h2>3. Stacked Cards</h2>
+                <p>Cards stack on top of each other with perspective depth, sliding away as you scroll through them.</p>
+                <div class="tech">Z-Index Layers • Scale & Opacity • Depth</div>
+            </a>
+
+            <a href="variation-4-circular.html" class="card">
+                <h2>4. Circular Scroll Wheel</h2>
+                <p>Items arranged in a circle that rotates as you scroll, like a physical rotating file wheel.</p>
+                <div class="tech">Circular Math • Continuous Rotation • Position</div>
+            </a>
+
+            <a href="variation-5-splitflap.html" class="card">
+                <h2>5. Split-Flap Display</h2>
+                <p>Inspired by airport displays, cards flip from top to bottom with a mechanical feel.</p>
+                <div class="tech">Split Animation • Timing Functions • Mechanical</div>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>Each variation demonstrates different GSAP techniques and scroll-based animations</p>
+        </div>
+    </div>
+</body>
+</html>

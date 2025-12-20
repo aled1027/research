@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stacked Cards with Perspective - Rolodex</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .container {
+            height: 100vh;
+            perspective: 1500px;
+            perspective-origin: 50% 50%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90vw;
+            max-width: 1000px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+        }
+
+        .card-content {
+            width: 100%;
+            height: 80vh;
+            padding: 4rem;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+        }
+
+        .card h2 {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card p {
+            font-size: 1.6rem;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.8;
+            max-width: 700px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-number {
+            position: absolute;
+            bottom: 2rem;
+            right: 3rem;
+            font-size: 12rem;
+            font-weight: bold;
+            opacity: 0.15;
+            color: white;
+            line-height: 1;
+        }
+
+        .decoration {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            filter: blur(60px);
+        }
+
+        .decoration:nth-child(1) { top: -50px; left: -50px; }
+        .decoration:nth-child(2) { bottom: -50px; right: -50px; }
+
+        /* Color themes */
+        .card:nth-child(1) .card-content { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card:nth-child(2) .card-content { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .card:nth-child(3) .card-content { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .card:nth-child(4) .card-content { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .card:nth-child(5) .card-content { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .card:nth-child(6) .card-content { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .scroll-progress {
+            position: fixed;
+            top: 50%;
+            right: 3rem;
+            transform: translateY(-50%);
+            height: 300px;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .scroll-progress-fill {
+            width: 100%;
+            height: 0%;
+            background: white;
+            border-radius: 2px;
+            transition: height 0.3s ease;
+        }
+
+        .card-counter {
+            position: fixed;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hint {
+            position: fixed;
+            bottom: 8rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            z-index: 1000;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, -10px); }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+
+    <div class="scroll-progress">
+        <div class="scroll-progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="card-counter" id="counter">1 / 6</div>
+    <div class="hint">Scroll to explore ↓</div>
+
+    <div class="container">
+        <div class="card" data-index="0">
+            <div class="card-content">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <h2>Stacked Cards</h2>
+                <p>Experience cards stacking with depth and perspective. Each card slides away as you scroll, revealing the next layer beneath.</p>
+                <div class="card-number">01</div>
+            </div>
+        </div>
+        <div class="card" data-index="1">
+            <div class="card-content">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <h2>Depth Perception</h2>
+                <p>Cards scale and translate in 3D space, creating realistic depth as they move from background to foreground.</p>
+                <div class="card-number">02</div>
+            </div>
+        </div>
+        <div class="card" data-index="2">
+            <div class="card-content">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <h2>Layer by Layer</h2>
+                <p>Watch as each card emerges from behind, scales up to fill the viewport, then slides away to reveal the next.</p>
+                <div class="card-number">03</div>
+            </div>
+        </div>
+        <div class="card" data-index="3">
+            <div class="card-content">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <h2>Smooth Transitions</h2>
+                <p>GSAP powers buttery-smooth animations with scale, opacity, and z-axis transforms working in harmony.</p>
+                <div class="card-number">04</div>
+            </div>
+        </div>
+        <div class="card" data-index="4">
+            <div class="card-content">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <h2>Active Focus</h2>
+                <p>The active card subtly pulses and rotates, drawing attention while maintaining the stack illusion.</p>
+                <div class="card-number">05</div>
+            </div>
+        </div>
+        <div class="card" data-index="5">
+            <div class="card-content">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <h2>Perfect Stack</h2>
+                <p>A rolodex reimagined with modern web technologies, creating an engaging and memorable user experience.</p>
+                <div class="card-number">06</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        const cards = document.querySelectorAll('.card');
+        const progressFill = document.getElementById('progressFill');
+        const counter = document.getElementById('counter');
+        const totalCards = cards.length;
+
+        // Set up spacer for scrolling
+        const spacer = document.createElement('div');
+        spacer.style.height = `${cards.length * 100}vh`;
+        document.body.appendChild(spacer);
+
+        // Update progress bar and counter
+        ScrollTrigger.create({
+            trigger: spacer,
+            start: 'top top',
+            end: 'bottom bottom',
+            onUpdate: (self) => {
+                const progress = self.progress;
+                progressFill.style.height = `${progress * 100}%`;
+                const currentCard = Math.min(Math.floor(progress * totalCards) + 1, totalCards);
+                counter.textContent = `${currentCard} / ${totalCards}`;
+            }
+        });
+
+        // Animate each card with stacking effect
+        cards.forEach((card, index) => {
+            const content = card.querySelector('.card-content');
+
+            // Initial stacked position - behind and smaller
+            gsap.set(card, {
+                zIndex: cards.length - index
+            });
+
+            gsap.set(content, {
+                scale: 0.7 - (index * 0.05),
+                y: 100 + (index * 30),
+                rotateX: 5,
+                opacity: 0.3
+            });
+
+            // Enter animation - scale up and move to center
+            gsap.to(content, {
+                scale: 1,
+                y: 0,
+                rotateX: 0,
+                opacity: 1,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100}vh top`,
+                    end: () => `${index * 100 + 40}vh top`,
+                    scrub: 1
+                }
+            });
+
+            // Active state - subtle rotation and scale pulse
+            gsap.to(content, {
+                rotateY: 3,
+                rotateZ: -1,
+                scale: 1.02,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 40}vh top`,
+                    end: () => `${index * 100 + 50}vh top`,
+                    scrub: 1
+                }
+            });
+
+            // Return to normal before leaving
+            gsap.to(content, {
+                rotateY: 0,
+                rotateZ: 0,
+                scale: 1,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 50}vh top`,
+                    end: () => `${index * 100 + 60}vh top`,
+                    scrub: 1
+                }
+            });
+
+            // Leave animation - slide up and away
+            gsap.to(content, {
+                y: -window.innerHeight,
+                scale: 1.2,
+                rotateX: -15,
+                opacity: 0,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 60}vh top`,
+                    end: () => `${(index + 1) * 100}vh top`,
+                    scrub: 1
+                }
+            });
+        });
+
+        // Hide hint after first scroll
+        let scrolled = false;
+        window.addEventListener('scroll', () => {
+            if (!scrolled && window.scrollY > 50) {
+                scrolled = true;
+                document.querySelector('.hint').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

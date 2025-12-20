@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split-Flap Display - Rolodex</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+        }
+
+        .container {
+            height: 100vh;
+            perspective: 1500px;
+            perspective-origin: 50% 50%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90vw;
+            max-width: 1000px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flip-container {
+            width: 100%;
+            height: 70vh;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .flip-half {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            left: 0;
+            overflow: hidden;
+            backface-visibility: hidden;
+        }
+
+        .flip-top {
+            top: 0;
+            transform-origin: bottom;
+        }
+
+        .flip-bottom {
+            bottom: 0;
+            transform-origin: top;
+        }
+
+        .flip-content {
+            position: absolute;
+            width: 100%;
+            height: 200%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            border: 3px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .flip-top .flip-content {
+            bottom: 0;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .flip-bottom .flip-content {
+            top: 0;
+            border-top: 2px solid rgba(0, 0, 0, 0.5);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .card h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .card p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            max-width: 700px;
+            font-family: Arial, sans-serif;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            font-size: 6rem;
+            font-weight: bold;
+            opacity: 0.15;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Color themes */
+        .card:nth-child(1) .flip-content { background: linear-gradient(180deg, #667eea 0%, #5a67d8 100%); }
+        .card:nth-child(2) .flip-content { background: linear-gradient(180deg, #f093fb 0%, #d868a0 100%); }
+        .card:nth-child(3) .flip-content { background: linear-gradient(180deg, #4facfe 0%, #3a8cc9 100%); }
+        .card:nth-child(4) .flip-content { background: linear-gradient(180deg, #43e97b 0%, #35b863 100%); }
+        .card:nth-child(5) .flip-content { background: linear-gradient(180deg, #fa709a 0%, #c85a7d 100%); }
+        .card:nth-child(6) .flip-content { background: linear-gradient(180deg, #30cfd0 0%, #26a3a4 100%); }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status-bar {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .indicator-dots {
+            position: fixed;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 1000;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.5);
+            box-shadow: 0 0 10px white;
+        }
+
+        .split-line {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+
+    <div class="status-bar">
+        <div class="status-text" id="statusText">CARD 01</div>
+    </div>
+
+    <div class="split-line"></div>
+
+    <div class="container">
+        <div class="card" data-index="0">
+            <div class="flip-container">
+                <div class="flip-half flip-top">
+                    <div class="flip-content">
+                        <div class="card-number">01</div>
+                        <h2>SPLIT-FLAP</h2>
+                        <p>Inspired by vintage airport displays, cards flip from top to bottom with mechanical precision and satisfying motion.</p>
+                    </div>
+                </div>
+                <div class="flip-half flip-bottom">
+                    <div class="flip-content">
+                        <div class="card-number">01</div>
+                        <h2>SPLIT-FLAP</h2>
+                        <p>Inspired by vintage airport displays, cards flip from top to bottom with mechanical precision and satisfying motion.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-index="1">
+            <div class="flip-container">
+                <div class="flip-half flip-top">
+                    <div class="flip-content">
+                        <div class="card-number">02</div>
+                        <h2>MECHANICAL</h2>
+                        <p>Each card splits at the center, with the top half flipping up and the bottom half staying fixed, creating authentic split-flap motion.</p>
+                    </div>
+                </div>
+                <div class="flip-half flip-bottom">
+                    <div class="flip-content">
+                        <div class="card-number">02</div>
+                        <h2>MECHANICAL</h2>
+                        <p>Each card splits at the center, with the top half flipping up and the bottom half staying fixed, creating authentic split-flap motion.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-index="2">
+            <div class="flip-container">
+                <div class="flip-half flip-top">
+                    <div class="flip-content">
+                        <div class="card-number">03</div>
+                        <h2>NOSTALGIA</h2>
+                        <p>The monospace typography and bold colors evoke the classic aesthetic of train station and airport departure boards.</p>
+                    </div>
+                </div>
+                <div class="flip-half flip-bottom">
+                    <div class="flip-content">
+                        <div class="card-number">03</div>
+                        <h2>NOSTALGIA</h2>
+                        <p>The monospace typography and bold colors evoke the classic aesthetic of train station and airport departure boards.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-index="3">
+            <div class="flip-container">
+                <div class="flip-half flip-top">
+                    <div class="flip-content">
+                        <div class="card-number">04</div>
+                        <h2>TIMING</h2>
+                        <p>Precise timing functions create the characteristic snap and pause of real split-flap displays, adding to the mechanical feel.</p>
+                    </div>
+                </div>
+                <div class="flip-half flip-bottom">
+                    <div class="flip-content">
+                        <div class="card-number">04</div>
+                        <h2>TIMING</h2>
+                        <p>Precise timing functions create the characteristic snap and pause of real split-flap displays, adding to the mechanical feel.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-index="4">
+            <div class="flip-container">
+                <div class="flip-half flip-top">
+                    <div class="flip-content">
+                        <div class="card-number">05</div>
+                        <h2>3D DEPTH</h2>
+                        <p>The top half rotates in 3D space with perspective transforms, creating realistic depth as it flips away from view.</p>
+                    </div>
+                </div>
+                <div class="flip-half flip-bottom">
+                    <div class="flip-content">
+                        <div class="card-number">05</div>
+                        <h2>3D DEPTH</h2>
+                        <p>The top half rotates in 3D space with perspective transforms, creating realistic depth as it flips away from view.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-index="5">
+            <div class="flip-container">
+                <div class="flip-half flip-top">
+                    <div class="flip-content">
+                        <div class="card-number">06</div>
+                        <h2>RETRO-FUTURISM</h2>
+                        <p>Combining vintage mechanical aesthetics with modern web animation creates a unique retro-futuristic experience.</p>
+                    </div>
+                </div>
+                <div class="flip-half flip-bottom">
+                    <div class="flip-content">
+                        <div class="card-number">06</div>
+                        <h2>RETRO-FUTURISM</h2>
+                        <p>Combining vintage mechanical aesthetics with modern web animation creates a unique retro-futuristic experience.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="indicator-dots" id="indicators"></div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        const cards = document.querySelectorAll('.card');
+        const indicators = document.getElementById('indicators');
+        const statusText = document.getElementById('statusText');
+        const totalCards = cards.length;
+
+        // Create indicator dots
+        cards.forEach((card, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.dataset.index = i;
+            if (i === 0) dot.classList.add('active');
+            indicators.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+
+        // Set up spacer for scrolling
+        const spacer = document.createElement('div');
+        spacer.style.height = `${cards.length * 100}vh`;
+        document.body.appendChild(spacer);
+
+        // Animate each card with split-flap effect
+        cards.forEach((card, index) => {
+            const flipTop = card.querySelector('.flip-top');
+            const flipBottom = card.querySelector('.flip-bottom');
+            const container = card.querySelector('.flip-container');
+
+            // Initial state
+            gsap.set(flipTop, { rotateX: 0 });
+            gsap.set(flipBottom, { rotateX: 0 });
+            gsap.set(container, { opacity: 0, scale: 0.8 });
+
+            // Enter - card fades in
+            gsap.to(container, {
+                opacity: 1,
+                scale: 1,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100}vh top`,
+                    end: () => `${index * 100 + 30}vh top`,
+                    scrub: 1,
+                    onEnter: () => {
+                        updateIndicator(index);
+                        statusText.textContent = `CARD ${String(index + 1).padStart(2, '0')}`;
+                    },
+                    onEnterBack: () => {
+                        updateIndicator(index);
+                        statusText.textContent = `CARD ${String(index + 1).padStart(2, '0')}`;
+                    }
+                }
+            });
+
+            // Active state - subtle wobble
+            gsap.to(flipTop, {
+                rotateX: -2,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 40}vh top`,
+                    end: () => `${index * 100 + 50}vh top`,
+                    scrub: 1
+                }
+            });
+
+            gsap.to(flipTop, {
+                rotateX: 0,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 50}vh top`,
+                    end: () => `${index * 100 + 60}vh top`,
+                    scrub: 1
+                }
+            });
+
+            // Leave - top flips up
+            gsap.to(flipTop, {
+                rotateX: -180,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 60}vh top`,
+                    end: () => `${index * 100 + 80}vh top`,
+                    scrub: 1
+                }
+            });
+
+            // Card fades out
+            gsap.to(container, {
+                opacity: 0,
+                scale: 0.9,
+                scrollTrigger: {
+                    trigger: spacer,
+                    start: () => `${index * 100 + 80}vh top`,
+                    end: () => `${(index + 1) * 100}vh top`,
+                    scrub: 1
+                }
+            });
+        });
+
+        function updateIndicator(index) {
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        // Click dots to navigate
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                gsap.to(window, {
+                    duration: 1,
+                    scrollTo: index * window.innerHeight + window.innerHeight / 2,
+                    ease: 'power2.inOut'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
