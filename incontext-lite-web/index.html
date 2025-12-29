@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InContext Lite - Article Simplifier</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        .loading { opacity: 0.6; pointer-events: none; }
+        #output { white-space: pre-wrap; font-family: monospace; }
+        .status { padding: 1rem; border-radius: 0.25rem; margin: 1rem 0; }
+        .status.info { background: var(--pico-secondary-background); }
+        .status.error { background: #ffebee; color: #c62828; }
+        .status.success { background: #e8f5e9; color: #2e7d32; }
+        #preview, #full-output { margin-top: 1rem; }
+        textarea { min-height: 200px; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>InContext Lite</h1>
+        <p>Simplify articles for language learning with AI-generated comprehension questions.</p>
+
+        <form id="simplify-form">
+            <fieldset>
+                <label for="api-key">
+                    OpenRouter API Key
+                    <input type="password" id="api-key" name="api-key" placeholder="sk-or-..." required>
+                </label>
+
+                <label for="model">
+                    Model
+                    <input type="text" id="model" name="model" value="openai/gpt-4o-mini" placeholder="openai/gpt-4o-mini">
+                </label>
+
+                <label for="article-file">
+                    Article File
+                    <input type="file" id="article-file" name="article-file" accept=".txt,.md">
+                </label>
+
+                <label for="article-text">
+                    Or paste article text directly
+                    <textarea id="article-text" name="article-text" placeholder="Paste your article here..."></textarea>
+                </label>
+
+                <div class="grid">
+                    <label for="language">
+                        Target Language
+                        <input type="text" id="language" name="language" placeholder="e.g., Spanish, French" required>
+                    </label>
+
+                    <label for="level">
+                        Target Level
+                        <input type="text" id="level" name="level" placeholder="e.g., A2, Intermediate" required>
+                    </label>
+                </div>
+            </fieldset>
+
+            <button type="submit" id="submit-btn">Simplify Article</button>
+        </form>
+
+        <div id="status" class="status info" style="display: none;"></div>
+
+        <article id="preview" style="display: none;">
+            <header><h3>Preview</h3></header>
+            <div id="preview-content"></div>
+        </article>
+
+        <article id="full-output" style="display: none;">
+            <header>
+                <h3>Full Output</h3>
+                <button id="copy-btn" class="outline">Copy to Clipboard</button>
+                <button id="download-btn" class="outline">Download</button>
+            </header>
+            <div id="output"></div>
+        </article>
+    </main>
+
+    <script>
+        let pyodide = null;
+        let pyodideReady = false;
+
+        // Initialize Pyodide
+        async function initPyodide() {
+            showStatus('Loading Python environment...', 'info');
+            pyodide = await loadPyodide();
+            await pyodide.loadPackage(['micropip']);
+            await pyodide.runPythonAsync(`
+                import micropip
+                await micropip.install('pyyaml')
+            `);
+            pyodideReady = true;
+            showStatus('Ready! Upload an article to get started.', 'success');
+        }
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        // Handle file upload
+        document.getElementById('article-file').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const text = await file.text();
+                document.getElementById('article-text').value = text;
+            }
+        });
+
+        // Form submission
+        document.getElementById('simplify-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!pyodideReady) {
+                showStatus('Python environment still loading, please wait...', 'info');
+                return;
+            }
+
+            const apiKey = document.getElementById('api-key').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const article = document.getElementById('article-text').value.trim();
+            const language = document.getElementById('language').value.trim();
+            const level = document.getElementById('level').value.trim();
+
+            if (!article) {
+                showStatus('Please provide an article text or upload a file.', 'error');
+                return;
+            }
+
+            const form = document.getElementById('simplify-form');
+            form.classList.add('loading');
+            document.getElementById('submit-btn').setAttribute('aria-busy', 'true');
+
+            try {
+                showStatus('Simplifying article...', 'info');
+
+                // Set variables in Python
+                pyodide.globals.set('js_api_key', apiKey);
+                pyodide.globals.set('js_model', model);
+                pyodide.globals.set('js_article', article);
+                pyodide.globals.set('js_language', language);
+                pyodide.globals.set('js_level', level);
+
+                const result = await pyodide.runPythonAsync(pythonCode);
+
+                if (result) {
+                    const output = result.toJs ? result.toJs() : result;
+                    displayResults(output);
+                    showStatus('Done!', 'success');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                form.classList.remove('loading');
+                document.getElementById('submit-btn').removeAttribute('aria-busy');
+            }
+        });
+
+        function displayResults(output) {
+            // Show preview (first 2 paragraphs)
+            const paragraphs = output.simplified.split('\n\n');
+            const preview = paragraphs.slice(0, 2).join('\n\n');
+            document.getElementById('preview-content').textContent = preview + '\n...';
+            document.getElementById('preview').style.display = 'block';
+
+            // Show full output
+            document.getElementById('output').textContent = output.full_content;
+            document.getElementById('full-output').style.display = 'block';
+        }
+
+        // Copy button
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            const output = document.getElementById('output').textContent;
+            navigator.clipboard.writeText(output);
+            showStatus('Copied to clipboard!', 'success');
+        });
+
+        // Download button
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const output = document.getElementById('output').textContent;
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `simplified_${timestamp}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Python code (minimal changes from original)
+        const pythonCode = `
+import json
+from pyodide.http import pyfetch
+
+# Configuration from JavaScript
+API_KEY = js_api_key
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+MODEL = js_model if js_model else "openai/gpt-4o-mini"
+
+# Embedded prompts (originally from prompts.yaml)
+PROMPTS = {
+    "simplify_article": """You are a language learning assistant. Simplify the following article for a {language} learner at the {level} level.
+
+Guidelines:
+- Use vocabulary and grammar appropriate for {level} level
+- Keep the main ideas and important information
+- Use shorter sentences
+- Explain or replace difficult words
+- Maintain the article's structure with clear paragraphs
+
+Article:
+{article}
+
+Simplified version:""",
+
+    "generate_questions": """You are a language learning assistant. Create comprehension questions for the following simplified article, suitable for a {language} learner at the {level} level.
+
+Create 5-7 questions that:
+- Test understanding of main ideas
+- Use vocabulary appropriate for {level} level
+- Include a mix of question types (who, what, where, when, why, how)
+
+After the questions, provide the answers section clearly marked.
+
+Format your response exactly like this:
+### QUESTIONS ###
+1. [Question]
+2. [Question]
+...
+
+### ANSWERS ###
+1. [Answer]
+2. [Answer]
+...
+
+Simplified Article:
+{simplified_article}
+
+Questions and Answers:"""
+}
+
+async def call_llm(prompt: str) -> str:
+    """Sends a prompt to the LLM API and returns the response text."""
+    if not API_KEY:
+        raise ValueError("API Key is required")
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": MODEL,
+        "messages": [{"role": "user", "content": prompt}]
+    }
+
+    response = await pyfetch(
+        API_URL,
+        method="POST",
+        headers=headers,
+        body=json.dumps(payload)
+    )
+
+    data = await response.json()
+
+    if "error" in data:
+        raise ValueError(f"API Error: {data['error']}")
+
+    return data["choices"][0]["message"]["content"]
+
+async def simplify_article(article: str, language: str, level: str) -> str:
+    """Generates a simplified version of the article."""
+    prompt = PROMPTS["simplify_article"].format(language=language, level=level, article=article)
+    return await call_llm(prompt)
+
+async def generate_questions(simplified_article: str, language: str, level: str) -> str:
+    """Generates comprehension questions based on the simplified article."""
+    prompt = PROMPTS["generate_questions"].format(language=language, level=level, simplified_article=simplified_article)
+    return await call_llm(prompt)
+
+async def main():
+    # Get inputs from JavaScript
+    article = js_article
+    language = js_language
+    level = js_level
+
+    if not language or not level:
+        raise ValueError("Language and Level are required")
+
+    # Process article
+    simplified = await simplify_article(article, language, level)
+    qa_content = await generate_questions(simplified, language, level)
+
+    # Format output
+    file_content = simplified + "\\n\\n" + "-" * 40 + "\\n\\n"
+
+    # Attempt to split questions and answers for formatting
+    parts = qa_content.split("### ANSWERS ###")
+    if len(parts) == 2:
+        questions = parts[0].strip()
+        answers = parts[1].strip()
+        file_content += "COMPREHENSION QUESTIONS\\n\\n"
+        file_content += questions
+        file_content += "\\n\\n" + "\\n" * 50 + "\\n\\n"
+        file_content += "ANSWERS\\n\\n"
+        file_content += answers
+    else:
+        file_content += qa_content
+
+    return {"simplified": simplified, "full_content": file_content}
+
+await main()
+`;
+
+        // Start loading Pyodide
+        initPyodide();
+    </script>
+</body>
+</html>
