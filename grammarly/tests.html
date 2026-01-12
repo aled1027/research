@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Grammar Checker - Tests</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        .test-results {
+            font-family: monospace;
+            padding: 1rem;
+            background: var(--pico-card-background-color);
+            border-radius: var(--pico-border-radius);
+            margin-top: 1rem;
+        }
+        .test-pass {
+            color: #2ecc71;
+        }
+        .test-fail {
+            color: #e74c3c;
+        }
+        .test-suite {
+            margin-bottom: 1.5rem;
+        }
+        .test-suite h3 {
+            margin-bottom: 0.5rem;
+        }
+        .test-case {
+            padding: 0.25rem 0;
+            padding-left: 1rem;
+        }
+        .summary {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--pico-muted-border-color);
+            font-weight: bold;
+        }
+        .summary.all-pass {
+            color: #2ecc71;
+        }
+        .summary.has-failures {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>AI Grammar Checker - Test Suite</h1>
+        <p>Running unit tests for the grammar checker application.</p>
+
+        <button id="run-tests" class="primary">Run Tests</button>
+
+        <div id="test-output" class="test-results">
+            <em>Click "Run Tests" to start...</em>
+        </div>
+    </main>
+
+    <!-- Hidden elements for DOM testing -->
+    <div id="test-container" style="display: none;">
+        <input type="text" id="api-key-input">
+        <small id="api-key-status"></small>
+        <button id="save-api-key"></button>
+        <button id="clear-api-key"></button>
+        <details id="api-key-details"></details>
+        <textarea id="text-input"></textarea>
+        <div id="text-output" class="text-output"></div>
+        <button id="check-grammar"></button>
+        <span id="check-text"></span>
+        <span id="check-loading"></span>
+        <button id="clear-text"></button>
+        <section id="results-section"></section>
+        <span id="error-count"></span>
+        <div id="issues-list"></div>
+        <section id="legend-section"></section>
+        <div id="tooltip">
+            <span class="tooltip-type"></span>
+            <div class="tooltip-message"></div>
+            <span class="tooltip-suggestion-text"></span>
+            <button class="tooltip-accept"></button>
+            <button class="tooltip-dismiss"></button>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+    <script src="tests.js"></script>
+</body>
+</html>
