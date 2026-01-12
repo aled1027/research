@@ -191,7 +191,11 @@ const GrammarApp = {
 
         try {
             const result = await GrammarAPI.checkGrammar(text, this.apiKey);
-            this.currentIssues = result.issues.map((issue, index) => ({
+            
+            // Ensure result.issues is an array
+            const issues = Array.isArray(result?.issues) ? result.issues : [];
+            
+            this.currentIssues = issues.map((issue, index) => ({
                 ...issue,
                 id: `issue-${index}`,
                 status: 'active' // active, dismissed, accepted

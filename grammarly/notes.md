@@ -67,3 +67,18 @@ Building a Grammarly-like grammar checker that uses AI via OpenRouter API.
 - Unit tests for individual components and methods
 - Mock localStorage for storage tests
 - No external test framework - simple custom test runner
+
+### Bug Fix - result.issues.map is not a function
+
+**Issue:** Error occurred when checking grammar: "result.issues.map is not a function"
+
+**Root Cause:** The API response might not always return `result.issues` as an array, or the result structure might be unexpected in edge cases.
+
+**Fix:**
+1. Added defensive check in `app.js` to ensure `result.issues` is an array before calling `.map()`
+2. Enhanced `api.js` to always ensure `issues` is an array using `Array.isArray()` check
+3. Added null-safe optional chaining (`result?.issues`) for additional safety
+
+**Changes:**
+- `app.js` line 194: Added `Array.isArray()` check before mapping issues
+- `api.js` line 129: Added `Array.isArray()` check when parsing tool call results

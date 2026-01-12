@@ -125,9 +125,11 @@ IMPORTANT:
             if (toolCall.function?.name === 'report_grammar_issues') {
                 try {
                     const result = JSON.parse(toolCall.function.arguments);
+                    // Ensure issues is always an array
+                    const issues = Array.isArray(result?.issues) ? result.issues : [];
                     return {
-                        issues: result.issues || [],
-                        summary: result.summary || 'Analysis complete'
+                        issues: issues,
+                        summary: result?.summary || 'Analysis complete'
                     };
                 } catch (e) {
                     console.error('Failed to parse tool call arguments:', e);
