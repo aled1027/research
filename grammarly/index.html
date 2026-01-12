@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Grammar Checker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>AI Grammar Checker</h1>
+            <p>Paste your blog post or article below to check for grammar issues.</p>
+        </header>
+
+        <!-- API Key Section -->
+        <section id="api-key-section">
+            <details id="api-key-details">
+                <summary role="button" class="outline">OpenRouter API Key Settings</summary>
+                <div class="api-key-content">
+                    <label for="api-key-input">
+                        OpenRouter API Key
+                        <input type="password" id="api-key-input" placeholder="sk-or-v1-...">
+                    </label>
+                    <div class="api-key-actions">
+                        <button id="save-api-key" class="primary">Save Key</button>
+                        <button id="clear-api-key" class="secondary outline">Clear Key</button>
+                    </div>
+                    <small id="api-key-status"></small>
+                </div>
+            </details>
+        </section>
+
+        <!-- Editor Section -->
+        <section id="editor-section">
+            <div class="editor-container">
+                <div class="editor-header">
+                    <h3>Your Text</h3>
+                    <div class="editor-actions">
+                        <button id="check-grammar" class="primary" disabled>
+                            <span id="check-text">Check Grammar</span>
+                            <span id="check-loading" class="loading-spinner" style="display: none;"></span>
+                        </button>
+                        <button id="clear-text" class="secondary outline">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Input textarea for pasting -->
+                <textarea id="text-input" placeholder="Paste your blog post, article, or any text here..."></textarea>
+
+                <!-- Output area with highlighted errors -->
+                <div id="text-output" class="text-output" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- Results Summary -->
+        <section id="results-section" style="display: none;">
+            <article class="results-card">
+                <header>
+                    <h3>Grammar Check Results</h3>
+                </header>
+                <div id="results-summary">
+                    <div class="stat">
+                        <span class="stat-value" id="error-count">0</span>
+                        <span class="stat-label">Issues Found</span>
+                    </div>
+                </div>
+                <div id="issues-list"></div>
+            </article>
+        </section>
+
+        <!-- Error Categories Legend -->
+        <section id="legend-section" style="display: none;">
+            <article>
+                <h4>Issue Types</h4>
+                <div class="legend">
+                    <span class="legend-item">
+                        <span class="legend-color error-spelling"></span>
+                        Spelling
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-color error-grammar"></span>
+                        Grammar
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-color error-punctuation"></span>
+                        Punctuation
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-color error-style"></span>
+                        Style
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-color error-clarity"></span>
+                        Clarity
+                    </span>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <!-- Tooltip template -->
+    <div id="tooltip" class="tooltip" style="display: none;">
+        <div class="tooltip-header">
+            <span class="tooltip-type"></span>
+        </div>
+        <div class="tooltip-content">
+            <div class="tooltip-message"></div>
+            <div class="tooltip-suggestion">
+                <strong>Suggestion:</strong>
+                <span class="tooltip-suggestion-text"></span>
+            </div>
+        </div>
+        <div class="tooltip-actions">
+            <button class="tooltip-accept">Accept</button>
+            <button class="tooltip-dismiss outline">Dismiss</button>
+        </div>
+    </div>
+
+    <footer class="container">
+        <small>Powered by OpenRouter AI</small>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
