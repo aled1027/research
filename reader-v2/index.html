@@ -73,16 +73,25 @@
       }
 
       .controls {
-        background: linear-gradient(transparent, rgba(26, 26, 26, 0.95));
+        background: linear-gradient(transparent, rgba(26, 26, 26, 0.98));
       }
 
       .nav-btn {
+        background: #2a2a2a;
         border-color: #555;
-        color: #aaa;
+        color: #ccc;
       }
 
-      .nav-btn:hover {
-        background: #333;
+      .nav-btn:hover:not(:disabled) {
+        background: #3a3a3a;
+        border-color: #666;
+        color: #e0e0e0;
+      }
+
+      .nav-btn:disabled {
+        background: #252525;
+        border-color: #444;
+        color: #555;
       }
 
       ::selection {
@@ -404,7 +413,7 @@
 
     @media (prefers-color-scheme: dark) {
       .progress {
-        color: #777;
+        color: #aaa;
       }
     }
 
@@ -524,6 +533,57 @@
     let totalPages = 0;
     let controlsTimeout = null;
     let pages = [];
+
+    // Storage keys
+    const STORAGE_KEYS = {
+      content: 'reader-v2-content',
+      progress: 'reader-v2-progress'
+    };
+
+    // Storage functions
+    function saveContent(content) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.content, content);
+      } catch (e) {
+        console.warn('Failed to save content to localStorage:', e);
+      }
+    }
+
+    function loadContent() {
+      try {
+        return localStorage.getItem(STORAGE_KEYS.content);
+      } catch (e) {
+        console.warn('Failed to load content from localStorage:', e);
+        return null;
+      }
+    }
+
+    function saveProgress(page) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.progress, String(page));
+      } catch (e) {
+        console.warn('Failed to save progress to localStorage:', e);
+      }
+    }
+
+    function loadProgress() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEYS.progress);
+        return saved !== null ? parseInt(saved, 10) : 0;
+      } catch (e) {
+        console.warn('Failed to load progress from localStorage:', e);
+        return 0;
+      }
+    }
+
+    function clearStorage() {
+      try {
+        localStorage.removeItem(STORAGE_KEYS.content);
+        localStorage.removeItem(STORAGE_KEYS.progress);
+      } catch (e) {
+        console.warn('Failed to clear localStorage:', e);
+      }
+    }
 
     // Enable start button when there's content
     pasteArea.addEventListener('input', () => {
@@ -712,16 +772,23 @@
       return page;
     }
 
-    function enterReadingMode(content) {
+    function enterReadingMode(content, savedPage = null) {
       const processedContent = processContent(content);
       createPages(processedContent);
 
       inputView.classList.add('hidden');
       readingView.classList.add('active');
 
-      currentPage = 0;
+      // Save content for future sessions
+      saveContent(content);
+
+      // Restore to saved page or start from beginning
+      const startPage = savedPage !== null ? Math.min(savedPage, totalPages - 1) : 0;
+      currentPage = startPage;
       updateNavigation();
-      scrollToPage(0);
+
+      // Use setTimeout to ensure DOM is ready before scrolling
+      setTimeout(() => scrollToPage(startPage), 50);
 
       // Setup interaction handlers
       setupInteractionHandlers();
@@ -743,6 +810,7 @@
           page.scrollIntoView({ behavior: 'smooth' });
           currentPage = pageIndex;
           updateNavigation();
+          saveProgress(currentPage);
         }
       }
     }
@@ -798,6 +866,7 @@
         if (newPage !== currentPage && newPage >= 0 && newPage < totalPages) {
           currentPage = newPage;
           updateNavigation();
+          saveProgress(currentPage);
         }
 
         // Show controls briefly on scroll
@@ -862,6 +931,50 @@
         }
       }, 250);
     });
+
+    // Initialize: check for saved content
+    function initializeFromStorage() {
+      const savedContent = loadContent();
+      if (savedContent && savedContent.trim()) {
+        // Show saved content in paste area
+        pasteArea.innerHTML = savedContent;
+        startBtn.disabled = false;
+
+        // Ask user if they want to resume
+        const savedPage = loadProgress();
+        if (savedPage > 0) {
+          // Add a resume button
+          const resumeBtn = document.createElement('button');
+          resumeBtn.className = 'start-reading-btn';
+          resumeBtn.textContent = `Resume from page ${savedPage + 1}`;
+          resumeBtn.style.marginLeft = '0.5rem';
+          resumeBtn.style.opacity = '1';
+          startBtn.parentNode.insertBefore(resumeBtn, startBtn.nextSibling);
+
+          resumeBtn.addEventListener('click', () => {
+            enterReadingMode(savedContent, savedPage);
+            resumeBtn.remove();
+          });
+
+          // Update start button to say "Start Over"
+          startBtn.textContent = 'Start Over';
+          startBtn.addEventListener('click', function startOver() {
+            clearStorage();
+            enterReadingMode(pasteArea.innerHTML, 0);
+            resumeBtn.remove();
+            startBtn.textContent = 'Start Reading';
+            startBtn.removeEventListener('click', startOver);
+          }, { once: true });
+        }
+      }
+    }
+
+    // Run initialization when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeFromStorage);
+    } else {
+      initializeFromStorage();
+    }
   </script>
 </body>
 </html>
