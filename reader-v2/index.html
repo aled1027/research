@@ -72,10 +72,6 @@
         background: #ccc;
       }
 
-      .controls {
-        background: linear-gradient(transparent, rgba(26, 26, 26, 0.98));
-      }
-
       .nav-btn {
         background: #2a2a2a;
         border-color: #555;
@@ -376,6 +372,12 @@
       opacity: 0;
       transition: opacity 0.3s;
       pointer-events: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .controls {
+        background: linear-gradient(transparent, rgba(26, 26, 26, 0.98));
+      }
     }
 
     .controls.visible {
