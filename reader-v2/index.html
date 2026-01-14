@@ -10,6 +10,116 @@
        Based on https://clagnut.com/blog/2433
        ========================= */
 
+    /* =========================
+       COLOR TOKENS
+       ========================= */
+    :root {
+      /* Background colors */
+      --color-bg-primary: #fefdfb;
+      --color-bg-secondary: #fff;
+      --color-bg-tertiary: #f0f0f0;
+      
+      /* Text colors */
+      --color-text-primary: #2d2d2d;
+      --color-text-secondary: #555;
+      --color-text-tertiary: #999;
+      --color-text-muted: #777;
+      
+      /* Border colors */
+      --color-border-primary: #ccc;
+      --color-border-secondary: #888;
+      --color-border-tertiary: #ddd;
+      
+      /* Button colors */
+      --color-button-bg: #2d2d2d;
+      --color-button-text: #fefdfb;
+      --color-button-hover-bg: #444;
+      --color-button-disabled-opacity: 0.3;
+      
+      /* Input/Form colors */
+      --color-input-bg: #fff;
+      --color-input-border: #ccc;
+      --color-input-border-focus: #888;
+      --color-input-placeholder: #999;
+      
+      /* Navigation button colors */
+      --color-nav-bg: transparent;
+      --color-nav-bg-hover: #f0f0f0;
+      --color-nav-border: #ccc;
+      --color-nav-text: #555;
+      --color-nav-text-hover: #555;
+      --color-nav-disabled-bg: transparent;
+      --color-nav-disabled-border: #ccc;
+      --color-nav-disabled-text: #555;
+      
+      /* Controls gradient */
+      --color-controls-gradient: rgba(254, 253, 251, 0.95);
+      
+      /* Selection */
+      --color-selection-bg: rgba(100, 100, 100, 0.2);
+      
+      /* Blockquote */
+      --color-blockquote-text: #555;
+      --color-blockquote-border: #ddd;
+      
+      /* Heading colors */
+      --color-heading-secondary: #555;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        /* Background colors */
+        --color-bg-primary: #1a1a1a;
+        --color-bg-secondary: #2a2a2a;
+        --color-bg-tertiary: #3a3a3a;
+        
+        /* Text colors */
+        --color-text-primary: #e0e0e0;
+        --color-text-secondary: #aaa;
+        --color-text-tertiary: #aaa;
+        --color-text-muted: #777;
+        
+        /* Border colors */
+        --color-border-primary: #444;
+        --color-border-secondary: #666;
+        --color-border-tertiary: #444;
+        
+        /* Button colors */
+        --color-button-bg: #e0e0e0;
+        --color-button-text: #1a1a1a;
+        --color-button-hover-bg: #ccc;
+        
+        /* Input/Form colors */
+        --color-input-bg: #2a2a2a;
+        --color-input-border: #444;
+        --color-input-border-focus: #666;
+        --color-input-placeholder: #777;
+        
+        /* Navigation button colors */
+        --color-nav-bg: #2a2a2a;
+        --color-nav-bg-hover: #3a3a3a;
+        --color-nav-border: #555;
+        --color-nav-text: #ccc;
+        --color-nav-text-hover: #e0e0e0;
+        --color-nav-disabled-bg: #252525;
+        --color-nav-disabled-border: #444;
+        --color-nav-disabled-text: #555;
+        
+        /* Controls gradient */
+        --color-controls-gradient: rgba(26, 26, 26, 0.98);
+        
+        /* Selection */
+        --color-selection-bg: rgba(200, 200, 200, 0.3);
+        
+        /* Blockquote */
+        --color-blockquote-text: #aaa;
+        --color-blockquote-border: #444;
+        
+        /* Heading colors */
+        --color-heading-secondary: #aaa;
+      }
+    }
+
     /* Reset and base */
     *, *::before, *::after {
       box-sizing: border-box;
@@ -30,8 +140,8 @@
 
     body {
       font-family: Georgia, 'Times New Roman', serif;
-      background-color: #fefdfb;
-      color: #2d2d2d;
+      background-color: var(--color-bg-primary);
+      color: var(--color-text-primary);
       line-height: 1.5;
       min-height: 100vh;
       /* OpenType features for body text */
@@ -40,64 +150,6 @@
       font-variant-numeric: oldstyle-nums proportional-nums;
       /* Better underline rendering */
       text-decoration-skip-ink: auto;
-    }
-
-    /* Dark mode support */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #1a1a1a;
-        color: #e0e0e0;
-      }
-
-      .paste-area {
-        background: #2a2a2a;
-        border-color: #444;
-        color: #e0e0e0;
-      }
-
-      .paste-area:focus {
-        border-color: #666;
-      }
-
-      .paste-area:empty::before {
-        color: #777;
-      }
-
-      .start-reading-btn {
-        background: #e0e0e0;
-        color: #1a1a1a;
-      }
-
-      .start-reading-btn:not(:disabled):hover {
-        background: #ccc;
-      }
-
-      .nav-btn {
-        background: #2a2a2a;
-        border-color: #555;
-        color: #ccc;
-      }
-
-      .nav-btn:hover:not(:disabled) {
-        background: #3a3a3a;
-        border-color: #666;
-        color: #e0e0e0;
-      }
-
-      .nav-btn:disabled {
-        background: #252525;
-        border-color: #444;
-        color: #555;
-      }
-
-      ::selection {
-        background: rgba(200, 200, 200, 0.3);
-      }
-
-      .reading-content blockquote {
-        border-left-color: #444;
-        color: #aaa;
-      }
     }
 
     /* Headings - tighter line height, lining numerals */
@@ -122,14 +174,8 @@
     .input-view h1 {
       font-size: 1.5rem;
       font-weight: 400;
-      color: #555;
+      color: var(--color-heading-secondary);
       margin-bottom: 1.5rem;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .input-view h1 {
-        color: #aaa;
-      }
     }
 
     .paste-area {
@@ -137,25 +183,25 @@
       max-width: 700px;
       min-height: 300px;
       padding: 1.5rem;
-      border: 2px dashed #ccc;
+      border: 2px dashed var(--color-input-border);
       border-radius: 8px;
       font-family: Georgia, 'Times New Roman', serif;
       font-size: 1rem;
       line-height: 1.5;
-      color: #2d2d2d;
-      background: #fff;
+      color: var(--color-text-primary);
+      background: var(--color-input-bg);
       overflow-y: auto;
       cursor: text;
     }
 
     .paste-area:focus {
       outline: none;
-      border-color: #888;
+      border-color: var(--color-input-border-focus);
     }
 
     .paste-area:empty::before {
       content: "Paste your text here...";
-      color: #999;
+      color: var(--color-input-placeholder);
       pointer-events: none;
     }
 
@@ -164,8 +210,8 @@
       padding: 0.75rem 2rem;
       font-family: Georgia, 'Times New Roman', serif;
       font-size: 1rem;
-      background: #2d2d2d;
-      color: #fefdfb;
+      background: var(--color-button-bg);
+      color: var(--color-button-text);
       border: none;
       border-radius: 4px;
       cursor: pointer;
@@ -178,7 +224,7 @@
     }
 
     .start-reading-btn:not(:disabled):hover {
-      background: #444;
+      background: var(--color-button-hover-bg);
     }
 
     /* =========================
@@ -284,8 +330,8 @@
     .reading-content blockquote {
       margin: 1.5em 0;
       padding-left: 1.5em;
-      border-left: 2px solid #ddd;
-      color: #555;
+      border-left: 2px solid var(--color-blockquote-border);
+      color: var(--color-blockquote-text);
     }
 
     .reading-content ul,
@@ -368,16 +414,10 @@
       justify-content: space-between;
       align-items: center;
       padding: 1rem 2rem;
-      background: linear-gradient(transparent, rgba(254, 253, 251, 0.95));
+      background: linear-gradient(transparent, var(--color-controls-gradient));
       opacity: 0;
       transition: opacity 0.3s;
       pointer-events: none;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .controls {
-        background: linear-gradient(transparent, rgba(26, 26, 26, 0.98));
-      }
     }
 
     .controls.visible {
@@ -389,34 +429,32 @@
       padding: 0.5rem 1rem;
       font-family: Georgia, 'Times New Roman', serif;
       font-size: 0.9rem;
-      background: transparent;
-      border: 1px solid #ccc;
+      background: var(--color-nav-bg);
+      border: 1px solid var(--color-nav-border);
       border-radius: 4px;
-      color: #555;
+      color: var(--color-nav-text);
       cursor: pointer;
       line-height: 1.1;
     }
 
-    .nav-btn:hover {
-      background: #f0f0f0;
+    .nav-btn:hover:not(:disabled) {
+      background: var(--color-nav-bg-hover);
+      color: var(--color-nav-text-hover);
     }
 
     .nav-btn:disabled {
-      opacity: 0.3;
+      background: var(--color-nav-disabled-bg);
+      border-color: var(--color-nav-disabled-border);
+      color: var(--color-nav-disabled-text);
+      opacity: var(--color-button-disabled-opacity);
       cursor: default;
     }
 
     /* Progress indicator - subtle, use lining figures */
     .progress {
       font-size: 0.85rem;
-      color: #999;
+      color: var(--color-text-tertiary);
       font-variant-numeric: tabular-nums lining-nums;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .progress {
-        color: #aaa;
-      }
     }
 
     /* Exit button */
@@ -427,7 +465,7 @@
       padding: 0.5rem;
       background: transparent;
       border: none;
-      color: #999;
+      color: var(--color-text-tertiary);
       cursor: pointer;
       opacity: 0;
       transition: opacity 0.3s;
@@ -440,17 +478,7 @@
     }
 
     .exit-btn:hover {
-      color: #555;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .exit-btn {
-        color: #666;
-      }
-
-      .exit-btn:hover {
-        color: #aaa;
-      }
+      color: var(--color-text-secondary);
     }
 
     /* =========================
@@ -488,7 +516,7 @@
        SELECTION STYLING
        ========================= */
     ::selection {
-      background: rgba(100, 100, 100, 0.2);
+      background: var(--color-selection-bg);
     }
   </style>
 </head>
