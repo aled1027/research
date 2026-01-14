@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reader v2</title>
+  <style>
+    /* =========================
+       TODS-INSPIRED TYPOGRAPHY
+       Based on https://clagnut.com/blog/2433
+       ========================= */
+
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 18px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Prevent text inflation on mobile rotation */
+      -webkit-text-size-adjust: none;
+      text-size-adjust: none;
+      /* Enable optical sizing for variable fonts */
+      font-optical-sizing: auto;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background-color: #fefdfb;
+      color: #2d2d2d;
+      line-height: 1.5;
+      min-height: 100vh;
+      /* OpenType features for body text */
+      font-variant-ligatures: common-ligatures contextual;
+      font-kerning: normal;
+      font-variant-numeric: oldstyle-nums proportional-nums;
+      /* Better underline rendering */
+      text-decoration-skip-ink: auto;
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+      }
+
+      .paste-area {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #e0e0e0;
+      }
+
+      .paste-area:focus {
+        border-color: #666;
+      }
+
+      .paste-area:empty::before {
+        color: #777;
+      }
+
+      .start-reading-btn {
+        background: #e0e0e0;
+        color: #1a1a1a;
+      }
+
+      .start-reading-btn:not(:disabled):hover {
+        background: #ccc;
+      }
+
+      .controls {
+        background: linear-gradient(transparent, rgba(26, 26, 26, 0.95));
+      }
+
+      .nav-btn {
+        border-color: #555;
+        color: #aaa;
+      }
+
+      .nav-btn:hover {
+        background: #333;
+      }
+
+      ::selection {
+        background: rgba(200, 200, 200, 0.3);
+      }
+
+      .reading-content blockquote {
+        border-left-color: #444;
+        color: #aaa;
+      }
+    }
+
+    /* Headings - tighter line height, lining numerals */
+    h1, h2, h3, h4, h5, h6 {
+      line-height: 1.1;
+      font-variant-numeric: lining-nums;
+      text-wrap: balance;
+    }
+
+    /* =========================
+       INPUT VIEW (Paste Area)
+       ========================= */
+    .input-view {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .input-view h1 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .input-view h1 {
+        color: #aaa;
+      }
+    }
+
+    .paste-area {
+      width: 100%;
+      max-width: 700px;
+      min-height: 300px;
+      padding: 1.5rem;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #2d2d2d;
+      background: #fff;
+      overflow-y: auto;
+      cursor: text;
+    }
+
+    .paste-area:focus {
+      outline: none;
+      border-color: #888;
+    }
+
+    .paste-area:empty::before {
+      content: "Paste your text here...";
+      color: #999;
+      pointer-events: none;
+    }
+
+    .start-reading-btn {
+      margin-top: 1.5rem;
+      padding: 0.75rem 2rem;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      background: #2d2d2d;
+      color: #fefdfb;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .start-reading-btn:not(:disabled) {
+      opacity: 1;
+    }
+
+    .start-reading-btn:not(:disabled):hover {
+      background: #444;
+    }
+
+    /* =========================
+       READING VIEW
+       ========================= */
+    .reading-view {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .reading-view.active {
+      display: block;
+    }
+
+    .input-view.hidden {
+      display: none;
+    }
+
+    /* Reading container - generous margins */
+    .reading-container {
+      max-width: 38rem; /* ~55-75 chars at 18px Georgia */
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    @media (min-width: 768px) {
+      .reading-container {
+        padding: 4rem 2rem;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .reading-container {
+        padding: 5rem 2rem;
+      }
+    }
+
+    /* =========================
+       PROSE TYPOGRAPHY (TODS)
+       ========================= */
+    .reading-content {
+      text-align: left;
+      /* Enable hyphenation for better text flow */
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      /* Hyphenation limits */
+      hyphenate-limit-chars: 7 4 3;
+      hyphenate-limit-lines: 2;
+      /* Reduce widows/orphans */
+      text-wrap: pretty;
+      word-wrap: break-word;
+    }
+
+    .reading-content p {
+      margin-bottom: 1.2em;
+      text-indent: 0;
+    }
+
+    .reading-content p + p {
+      text-indent: 1.5em;
+    }
+
+    .reading-content strong,
+    .reading-content b {
+      font-weight: 700;
+    }
+
+    .reading-content em,
+    .reading-content i {
+      font-style: italic;
+    }
+
+    .reading-content h1,
+    .reading-content h2,
+    .reading-content h3 {
+      font-weight: 400;
+      margin-top: 2em;
+      margin-bottom: 1em;
+      /* Disable hyphenation in headings */
+      hyphens: manual;
+      -webkit-hyphens: manual;
+      /* Use lining figures in headings */
+      font-variant-numeric: lining-nums;
+      /* Balance heading text */
+      text-wrap: balance;
+    }
+
+    .reading-content h1 {
+      font-size: 1.5rem;
+      /* Enable discretionary ligatures for large headings */
+      font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
+    }
+
+    .reading-content h2 {
+      font-size: 1.3rem;
+    }
+
+    .reading-content h3 {
+      font-size: 1.1rem;
+    }
+
+    .reading-content blockquote {
+      margin: 1.5em 0;
+      padding-left: 1.5em;
+      border-left: 2px solid #ddd;
+      color: #555;
+    }
+
+    .reading-content ul,
+    .reading-content ol {
+      margin: 1em 0;
+      padding-left: 1.5em;
+    }
+
+    .reading-content li {
+      margin-bottom: 0.5em;
+    }
+
+    /* Code blocks - disable hyphenation and ligatures */
+    .reading-content code,
+    .reading-content pre {
+      hyphens: manual;
+      -webkit-hyphens: manual;
+      font-variant-ligatures: none;
+      font-variant-numeric: tabular-nums lining-nums slashed-zero;
+    }
+
+    /* Superscripts and subscripts using OpenType */
+    @supports (font-variant-position: super) {
+      .reading-content sup {
+        font-variant-position: super;
+        font-size: inherit;
+        vertical-align: baseline;
+      }
+    }
+
+    @supports (font-variant-position: sub) {
+      .reading-content sub {
+        font-variant-position: sub;
+        font-size: inherit;
+        vertical-align: baseline;
+      }
+    }
+
+    /* Language-specific quotation marks */
+    :lang(en) q {
+      quotes: '"' '"' ''' ''';
+    }
+
+    :lang(en-GB) q {
+      quotes: ''' ''' '"' '"';
+    }
+
+    :lang(fr) q {
+      quotes: '<<' '>>' '"' '"';
+    }
+
+    :lang(de) q {
+      quotes: '<<' '>>' "'" "'";
+    }
+
+    /* Small caps utility */
+    .smcp {
+      font-variant-caps: small-caps;
+      /* Adjust letter-spacing slightly for small caps */
+      letter-spacing: 0.02em;
+    }
+
+    /* =========================
+       PAGINATION
+       ========================= */
+    .page-container {
+      position: relative;
+      min-height: calc(100vh - 8rem);
+    }
+
+    /* =========================
+       UI CONTROLS (Hidden by default)
+       ========================= */
+    .controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: linear-gradient(transparent, rgba(254, 253, 251, 0.95));
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .controls.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .nav-btn {
+      padding: 0.5rem 1rem;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 0.9rem;
+      background: transparent;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      color: #555;
+      cursor: pointer;
+      line-height: 1.1;
+    }
+
+    .nav-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    /* Progress indicator - subtle, use lining figures */
+    .progress {
+      font-size: 0.85rem;
+      color: #999;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .progress {
+        color: #777;
+      }
+    }
+
+    /* Exit button */
+    .exit-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem;
+      background: transparent;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 1.2rem;
+      line-height: 1.1;
+    }
+
+    .exit-btn.visible {
+      opacity: 1;
+    }
+
+    .exit-btn:hover {
+      color: #555;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .exit-btn {
+        color: #666;
+      }
+
+      .exit-btn:hover {
+        color: #aaa;
+      }
+    }
+
+    /* =========================
+       SCROLL SNAP PAGINATION
+       ========================= */
+    .reading-view.paginated {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+
+    .page {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      padding: 4rem 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .page-content {
+      max-width: 38rem;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .page-content {
+        padding: 0 2rem;
+      }
+    }
+
+    /* =========================
+       SELECTION STYLING
+       ========================= */
+    ::selection {
+      background: rgba(100, 100, 100, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <!-- INPUT VIEW -->
+  <div class="input-view" id="inputView">
+    <h1>Paste your text to begin reading</h1>
+    <div
+      class="paste-area"
+      id="pasteArea"
+      contenteditable="true"
+      role="textbox"
+      aria-label="Paste your text here"
+    ></div>
+    <button class="start-reading-btn" id="startBtn" disabled>Start Reading</button>
+  </div>
+
+  <!-- READING VIEW -->
+  <div class="reading-view paginated" id="readingView">
+    <button class="exit-btn" id="exitBtn" title="Exit reading">&#x2715;</button>
+    <div id="pagesContainer"></div>
+    <div class="controls" id="controls">
+      <button class="nav-btn" id="prevBtn">&#x2190; Previous</button>
+      <span class="progress" id="progress"></span>
+      <button class="nav-btn" id="nextBtn">Next &#x2192;</button>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const inputView = document.getElementById('inputView');
+    const pasteArea = document.getElementById('pasteArea');
+    const startBtn = document.getElementById('startBtn');
+    const readingView = document.getElementById('readingView');
+    const pagesContainer = document.getElementById('pagesContainer');
+    const controls = document.getElementById('controls');
+    const exitBtn = document.getElementById('exitBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progress = document.getElementById('progress');
+
+    // State
+    let currentPage = 0;
+    let totalPages = 0;
+    let controlsTimeout = null;
+    let pages = [];
+
+    // Enable start button when there's content
+    pasteArea.addEventListener('input', () => {
+      const hasContent = pasteArea.innerHTML.trim() !== '' &&
+                         pasteArea.textContent.trim() !== '';
+      startBtn.disabled = !hasContent;
+    });
+
+    // Handle paste - preserve rich text
+    pasteArea.addEventListener('paste', (e) => {
+      // Allow default paste behavior for rich text
+      setTimeout(() => {
+        startBtn.disabled = pasteArea.textContent.trim() === '';
+      }, 0);
+    });
+
+    // Start reading
+    startBtn.addEventListener('click', () => {
+      const content = pasteArea.innerHTML;
+      if (content.trim()) {
+        enterReadingMode(content);
+      }
+    });
+
+    // Exit reading
+    exitBtn.addEventListener('click', exitReadingMode);
+
+    // Process content into pages
+    function processContent(html) {
+      // Create a temporary container to process HTML
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+
+      // Clean up Google Docs artifacts while preserving formatting
+      const cleaned = cleanGoogleDocsContent(temp);
+
+      return cleaned.innerHTML;
+    }
+
+    function cleanGoogleDocsContent(container) {
+      // Remove Google Docs specific styles but keep semantic tags
+      const elements = container.querySelectorAll('*');
+      elements.forEach(el => {
+        // Keep only essential formatting
+        const tag = el.tagName.toLowerCase();
+
+        // Remove inline styles except font-weight and font-style
+        if (el.style) {
+          const fontWeight = el.style.fontWeight;
+          const fontStyle = el.style.fontStyle;
+          el.removeAttribute('style');
+
+          // Reapply essential styles
+          if (fontWeight === 'bold' || fontWeight === '700') {
+            el.style.fontWeight = 'bold';
+          }
+          if (fontStyle === 'italic') {
+            el.style.fontStyle = 'italic';
+          }
+        }
+
+        // Remove class and id attributes
+        el.removeAttribute('class');
+        el.removeAttribute('id');
+      });
+
+      // Convert spans with bold/italic to semantic tags
+      const spans = container.querySelectorAll('span');
+      spans.forEach(span => {
+        if (span.style.fontWeight === 'bold') {
+          const strong = document.createElement('strong');
+          strong.innerHTML = span.innerHTML;
+          span.parentNode.replaceChild(strong, span);
+        } else if (span.style.fontStyle === 'italic') {
+          const em = document.createElement('em');
+          em.innerHTML = span.innerHTML;
+          span.parentNode.replaceChild(em, span);
+        } else if (!span.innerHTML.trim()) {
+          span.remove();
+        }
+      });
+
+      return container;
+    }
+
+    function createPages(content) {
+      // Clear previous pages
+      pagesContainer.innerHTML = '';
+      pages = [];
+
+      // Create content container for measurement
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'reading-content';
+      contentDiv.innerHTML = content;
+
+      // Get all block-level elements (paragraphs, headings, etc.)
+      const blocks = [];
+      const walk = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (node.textContent.trim()) {
+            const p = document.createElement('p');
+            p.textContent = node.textContent;
+            blocks.push(p);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const tag = node.tagName.toLowerCase();
+          if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'ul', 'ol', 'div'].includes(tag)) {
+            if (node.textContent.trim()) {
+              blocks.push(node.cloneNode(true));
+            }
+          } else if (['br'].includes(tag)) {
+            // Skip line breaks as block elements
+          } else {
+            // Recurse for other containers
+            node.childNodes.forEach(walk);
+          }
+        }
+      };
+
+      contentDiv.childNodes.forEach(walk);
+
+      // If no blocks found, wrap everything in paragraphs
+      if (blocks.length === 0) {
+        const text = contentDiv.textContent;
+        const paragraphs = text.split(/\n\n+/);
+        paragraphs.forEach(para => {
+          if (para.trim()) {
+            const p = document.createElement('p');
+            p.textContent = para.trim();
+            blocks.push(p);
+          }
+        });
+      }
+
+      // Calculate available height per page
+      const viewportHeight = window.innerHeight;
+      const pageHeight = viewportHeight - 160; // Account for padding
+
+      // Create pages by measuring content
+      let currentPageDiv = createPageElement();
+      let currentContent = currentPageDiv.querySelector('.page-content');
+      let currentReadingContent = document.createElement('div');
+      currentReadingContent.className = 'reading-content';
+      currentContent.appendChild(currentReadingContent);
+
+      // Temporarily add to DOM for measurement
+      pagesContainer.appendChild(currentPageDiv);
+
+      blocks.forEach((block, index) => {
+        currentReadingContent.appendChild(block);
+
+        // Check if content exceeds page height
+        if (currentReadingContent.offsetHeight > pageHeight && currentReadingContent.children.length > 1) {
+          // Remove the block that caused overflow
+          currentReadingContent.removeChild(block);
+
+          // Start a new page
+          pages.push(currentPageDiv);
+          currentPageDiv = createPageElement();
+          currentContent = currentPageDiv.querySelector('.page-content');
+          currentReadingContent = document.createElement('div');
+          currentReadingContent.className = 'reading-content';
+          currentContent.appendChild(currentReadingContent);
+          pagesContainer.appendChild(currentPageDiv);
+
+          // Add the block to the new page
+          currentReadingContent.appendChild(block);
+        }
+      });
+
+      // Don't forget the last page
+      if (currentReadingContent.children.length > 0) {
+        pages.push(currentPageDiv);
+      }
+
+      totalPages = pages.length;
+      return pages;
+    }
+
+    function createPageElement() {
+      const page = document.createElement('div');
+      page.className = 'page';
+      const content = document.createElement('div');
+      content.className = 'page-content';
+      page.appendChild(content);
+      return page;
+    }
+
+    function enterReadingMode(content) {
+      const processedContent = processContent(content);
+      createPages(processedContent);
+
+      inputView.classList.add('hidden');
+      readingView.classList.add('active');
+
+      currentPage = 0;
+      updateNavigation();
+      scrollToPage(0);
+
+      // Setup interaction handlers
+      setupInteractionHandlers();
+    }
+
+    function exitReadingMode() {
+      readingView.classList.remove('active');
+      inputView.classList.remove('hidden');
+      pagesContainer.innerHTML = '';
+      pages = [];
+      currentPage = 0;
+      totalPages = 0;
+    }
+
+    function scrollToPage(pageIndex) {
+      if (pageIndex >= 0 && pageIndex < totalPages) {
+        const page = pages[pageIndex];
+        if (page) {
+          page.scrollIntoView({ behavior: 'smooth' });
+          currentPage = pageIndex;
+          updateNavigation();
+        }
+      }
+    }
+
+    function updateNavigation() {
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage >= totalPages - 1;
+      progress.textContent = `${currentPage + 1} of ${totalPages}`;
+    }
+
+    // Navigation
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 0) {
+        scrollToPage(currentPage - 1);
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages - 1) {
+        scrollToPage(currentPage + 1);
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!readingView.classList.contains('active')) return;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault();
+        if (currentPage < totalPages - 1) {
+          scrollToPage(currentPage + 1);
+        }
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentPage > 0) {
+          scrollToPage(currentPage - 1);
+        }
+      } else if (e.key === 'Escape') {
+        exitReadingMode();
+      }
+    });
+
+    // Show/hide controls on interaction
+    function setupInteractionHandlers() {
+      let lastScrollTop = 0;
+
+      // Track scroll to update current page
+      readingView.addEventListener('scroll', () => {
+        const scrollTop = readingView.scrollTop;
+        const pageHeight = window.innerHeight;
+        const newPage = Math.round(scrollTop / pageHeight);
+
+        if (newPage !== currentPage && newPage >= 0 && newPage < totalPages) {
+          currentPage = newPage;
+          updateNavigation();
+        }
+
+        // Show controls briefly on scroll
+        showControls();
+        lastScrollTop = scrollTop;
+      });
+
+      // Show controls on mouse move
+      readingView.addEventListener('mousemove', showControls);
+
+      // Show controls on touch
+      readingView.addEventListener('touchstart', showControls);
+
+      // Click/tap to navigate
+      readingView.addEventListener('click', (e) => {
+        // Don't navigate if clicking on a control
+        if (e.target.closest('.controls') || e.target.closest('.exit-btn')) return;
+
+        const x = e.clientX;
+        const width = window.innerWidth;
+
+        if (x < width * 0.3) {
+          // Left third - previous
+          if (currentPage > 0) {
+            scrollToPage(currentPage - 1);
+          }
+        } else if (x > width * 0.7) {
+          // Right third - next
+          if (currentPage < totalPages - 1) {
+            scrollToPage(currentPage + 1);
+          }
+        }
+
+        showControls();
+      });
+    }
+
+    function showControls() {
+      controls.classList.add('visible');
+      exitBtn.classList.add('visible');
+
+      clearTimeout(controlsTimeout);
+      controlsTimeout = setTimeout(() => {
+        controls.classList.remove('visible');
+        exitBtn.classList.remove('visible');
+      }, 2000);
+    }
+
+    // Handle window resize - repaginate
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      if (!readingView.classList.contains('active')) return;
+
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const content = pasteArea.innerHTML;
+        if (content) {
+          const savedPage = currentPage;
+          const processedContent = processContent(content);
+          createPages(processedContent);
+          scrollToPage(Math.min(savedPage, totalPages - 1));
+        }
+      }, 250);
+    });
+  </script>
+</body>
+</html>
