@@ -117,7 +117,16 @@ for dirname, commit_date in subdirs_with_dates:
     print()  # Add blank line between entries
 
 ]]]-->
-## 20 research projects
+## 21 research projects
+
+### [reader-v2-dark-mode-storage](https://github.com/aled1027/research/tree/main/reader-v2-dark-mode-storage) (2026-01-13)
+
+Reader v2 has been upgraded to better support dark mode and enhance user reading experience by persisting text content and progress using localStorage. The bottom navigation controls now offer higher contrast, clearer button states, and improved separation in dark mode for greater readability. Users’ pasted text and reading positions are automatically saved to localStorage, allowing seamless session recovery: upon returning, users can resume where they left off or start fresh. These updates are implemented entirely within the `reader-v2/index.html` file, employing simple, robust storage operations. Explore the [Reader v2 app](#) or review [localStorage documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) for technical details.
+
+Key improvements:
+- Enhanced navigation control visibility and readability in dark mode
+- Automatic session persistence (text and progress) via localStorage
+- "Resume" feature for seamless reading continuity
 
 ### [reader-v2](https://github.com/aled1027/research/tree/main/reader-v2) (2026-01-13)
 
