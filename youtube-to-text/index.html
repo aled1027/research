@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube to Text</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        :root {
+            --primary: #ff0000;
+            --primary-hover: #cc0000;
+        }
+
+        .container {
+            max-width: 900px;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            color: var(--primary);
+        }
+
+        .input-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .url-input-group input {
+            flex: 1;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--pico-muted-border-color);
+            border-radius: 0.25rem;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: var(--pico-primary-background);
+            color: var(--pico-primary-inverse);
+            border-color: var(--pico-primary-background);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #transcript-input {
+            min-height: 200px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .processing-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .option-card {
+            padding: 1rem;
+            border: 1px solid var(--pico-muted-border-color);
+            border-radius: 0.5rem;
+        }
+
+        .option-card label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .output-section {
+            margin-top: 2rem;
+        }
+
+        #output-content {
+            background: var(--pico-card-background-color);
+            border: 1px solid var(--pico-muted-border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            min-height: 300px;
+            white-space: pre-wrap;
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+        }
+
+        .output-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .status-message {
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin: 1rem 0;
+        }
+
+        .status-message.info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status-message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        [data-theme="dark"] .status-message.info {
+            background: #1a237e;
+            color: #90caf9;
+        }
+
+        [data-theme="dark"] .status-message.error {
+            background: #4a1c1c;
+            color: #ef9a9a;
+        }
+
+        [data-theme="dark"] .status-message.success {
+            background: #1b3d1b;
+            color: #a5d6a7;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .video-preview {
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .video-preview img {
+            max-width: 320px;
+            border-radius: 0.5rem;
+        }
+
+        .video-preview h4 {
+            margin: 0.5rem 0;
+        }
+
+        .api-key-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .api-key-content {
+            padding: 1rem;
+        }
+
+        .api-key-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .model-select {
+            margin-top: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: var(--pico-muted-color);
+        }
+
+        /* Markdown output styling */
+        #output-content h1 { font-size: 1.5rem; margin-top: 1.5rem; }
+        #output-content h2 { font-size: 1.3rem; margin-top: 1.25rem; color: var(--primary); }
+        #output-content h3 { font-size: 1.1rem; margin-top: 1rem; }
+        #output-content ul { margin-left: 1.5rem; }
+        #output-content blockquote {
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>YouTube to Text</h1>
+            <p>Convert YouTube video transcripts into clean, readable text with AI-powered enhancement</p>
+        </header>
+
+        <!-- API Key Section -->
+        <section class="api-key-section">
+            <details id="api-key-details">
+                <summary role="button" class="outline">OpenRouter API Key Settings</summary>
+                <div class="api-key-content">
+                    <label for="api-key-input">
+                        OpenRouter API Key
+                        <input type="password" id="api-key-input" placeholder="sk-or-v1-...">
+                    </label>
+                    <div class="model-select">
+                        <label for="model-select">
+                            AI Model
+                            <select id="model-select">
+                                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Recommended)</option>
+                                <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Faster)</option>
+                                <option value="openai/gpt-4o">GPT-4o</option>
+                                <option value="openai/gpt-4o-mini">GPT-4o Mini (Budget)</option>
+                                <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="api-key-actions">
+                        <button id="save-api-key" class="primary">Save Key</button>
+                        <button id="clear-api-key" class="secondary outline">Clear Key</button>
+                    </div>
+                    <small id="api-key-status"></small>
+                </div>
+            </details>
+        </section>
+
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="tabs">
+                <button class="tab active" data-tab="url">YouTube URL</button>
+                <button class="tab" data-tab="transcript">Paste Transcript</button>
+            </div>
+
+            <div id="url-tab" class="tab-content active">
+                <div class="url-input-group">
+                    <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                    <button id="fetch-transcript" class="primary">
+                        <span id="fetch-text">Fetch</span>
+                        <span id="fetch-loading" class="loading-spinner" style="display: none;"></span>
+                    </button>
+                </div>
+                <small>Paste a YouTube URL to automatically fetch its transcript</small>
+                <div id="video-preview" class="video-preview" style="display: none;"></div>
+            </div>
+
+            <div id="transcript-tab" class="tab-content">
+                <textarea id="transcript-input" placeholder="Paste the raw transcript here...
+
+You can copy transcripts from YouTube by:
+1. Open the video on YouTube
+2. Click '...' below the video
+3. Click 'Show transcript'
+4. Select all and copy the text"></textarea>
+                <small>Paste a raw transcript directly if auto-fetch doesn't work</small>
+            </div>
+        </section>
+
+        <!-- Processing Options -->
+        <section>
+            <h3>Processing Options</h3>
+            <div class="processing-options">
+                <div class="option-card">
+                    <label>
+                        <input type="checkbox" id="opt-cleanup" checked>
+                        Clean up grammar & punctuation
+                    </label>
+                </div>
+                <div class="option-card">
+                    <label>
+                        <input type="checkbox" id="opt-chapters" checked>
+                        Generate chapter summaries
+                    </label>
+                </div>
+                <div class="option-card">
+                    <label>
+                        <input type="checkbox" id="opt-takeaways" checked>
+                        Extract key takeaways
+                    </label>
+                </div>
+                <div class="option-card">
+                    <label>
+                        <input type="checkbox" id="opt-timestamps">
+                        Preserve timestamps
+                    </label>
+                </div>
+            </div>
+
+            <button id="process-btn" class="primary" style="width: 100%;">
+                <span id="process-text">Process Transcript</span>
+                <span id="process-loading" class="loading-spinner" style="display: none;"></span>
+            </button>
+        </section>
+
+        <!-- Status Messages -->
+        <div id="status-container"></div>
+
+        <!-- Output Section -->
+        <section id="output-section" class="output-section" style="display: none;">
+            <h3>Processed Transcript</h3>
+            <div id="output-content"></div>
+            <div class="output-actions">
+                <button id="copy-btn" class="primary">Copy to Clipboard</button>
+                <button id="download-md" class="secondary">Download Markdown</button>
+                <button id="clear-output" class="secondary outline">Clear</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <small>Powered by OpenRouter AI | Based on <a href="https://github.com/jaswsunny/youtube-to-text" target="_blank">youtube-to-text</a></small>
+    </footer>
+
+    <script>
+        // ============================================
+        // YouTube to Text - Main Application
+        // ============================================
+
+        const App = {
+            // State
+            apiKey: null,
+            currentTranscript: '',
+            processedOutput: '',
+            videoInfo: null,
+
+            // API Configuration
+            OPENROUTER_URL: 'https://openrouter.ai/api/v1/chat/completions',
+
+            // CORS proxy for YouTube transcript fetching
+            CORS_PROXIES: [
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?'
+            ],
+
+            // DOM Elements
+            elements: {},
+
+            // Initialize the app
+            init() {
+                this.cacheElements();
+                this.bindEvents();
+                this.loadSettings();
+            },
+
+            cacheElements() {
+                this.elements = {
+                    apiKeyInput: document.getElementById('api-key-input'),
+                    apiKeyStatus: document.getElementById('api-key-status'),
+                    apiKeyDetails: document.getElementById('api-key-details'),
+                    saveApiKey: document.getElementById('save-api-key'),
+                    clearApiKey: document.getElementById('clear-api-key'),
+                    modelSelect: document.getElementById('model-select'),
+
+                    youtubeUrl: document.getElementById('youtube-url'),
+                    fetchTranscript: document.getElementById('fetch-transcript'),
+                    fetchText: document.getElementById('fetch-text'),
+                    fetchLoading: document.getElementById('fetch-loading'),
+                    videoPreview: document.getElementById('video-preview'),
+
+                    transcriptInput: document.getElementById('transcript-input'),
+
+                    tabs: document.querySelectorAll('.tab'),
+                    urlTab: document.getElementById('url-tab'),
+                    transcriptTab: document.getElementById('transcript-tab'),
+
+                    optCleanup: document.getElementById('opt-cleanup'),
+                    optChapters: document.getElementById('opt-chapters'),
+                    optTakeaways: document.getElementById('opt-takeaways'),
+                    optTimestamps: document.getElementById('opt-timestamps'),
+
+                    processBtn: document.getElementById('process-btn'),
+                    processText: document.getElementById('process-text'),
+                    processLoading: document.getElementById('process-loading'),
+
+                    statusContainer: document.getElementById('status-container'),
+
+                    outputSection: document.getElementById('output-section'),
+                    outputContent: document.getElementById('output-content'),
+                    copyBtn: document.getElementById('copy-btn'),
+                    downloadMd: document.getElementById('download-md'),
+                    clearOutput: document.getElementById('clear-output')
+                };
+            },
+
+            bindEvents() {
+                // API Key events
+                this.elements.saveApiKey.addEventListener('click', () => this.saveApiKey());
+                this.elements.clearApiKey.addEventListener('click', () => this.clearApiKey());
+
+                // Tab switching
+                this.elements.tabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+
+                // Fetch transcript
+                this.elements.fetchTranscript.addEventListener('click', () => this.fetchTranscript());
+                this.elements.youtubeUrl.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.fetchTranscript();
+                });
+
+                // Process transcript
+                this.elements.processBtn.addEventListener('click', () => this.processTranscript());
+
+                // Output actions
+                this.elements.copyBtn.addEventListener('click', () => this.copyToClipboard());
+                this.elements.downloadMd.addEventListener('click', () => this.downloadMarkdown());
+                this.elements.clearOutput.addEventListener('click', () => this.clearOutput());
+            },
+
+            loadSettings() {
+                // Load API key
+                const storedKey = localStorage.getItem('openrouter_api_key');
+                if (storedKey) {
+                    this.apiKey = storedKey;
+                    this.elements.apiKeyInput.value = storedKey;
+                    this.showApiKeyStatus('API key loaded', 'success');
+                }
+
+                // Load model preference
+                const storedModel = localStorage.getItem('youtube_to_text_model');
+                if (storedModel) {
+                    this.elements.modelSelect.value = storedModel;
+                }
+            },
+
+            // API Key Management
+            saveApiKey() {
+                const key = this.elements.apiKeyInput.value.trim();
+                if (!key) {
+                    this.showApiKeyStatus('Please enter an API key', 'error');
+                    return;
+                }
+
+                localStorage.setItem('openrouter_api_key', key);
+                this.apiKey = key;
+                this.showApiKeyStatus('API key saved', 'success');
+            },
+
+            clearApiKey() {
+                localStorage.removeItem('openrouter_api_key');
+                this.apiKey = null;
+                this.elements.apiKeyInput.value = '';
+                this.showApiKeyStatus('API key cleared', 'info');
+            },
+
+            showApiKeyStatus(message, type) {
+                this.elements.apiKeyStatus.textContent = message;
+                this.elements.apiKeyStatus.className = type;
+            },
+
+            // Tab Management
+            switchTab(tabName) {
+                this.elements.tabs.forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
+                this.elements.urlTab.classList.toggle('active', tabName === 'url');
+                this.elements.transcriptTab.classList.toggle('active', tabName === 'transcript');
+            },
+
+            // YouTube URL Parsing
+            extractVideoId(url) {
+                const patterns = [
+                    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+                    /youtube\.com\/shorts\/([^&\n?#]+)/
+                ];
+
+                for (const pattern of patterns) {
+                    const match = url.match(pattern);
+                    if (match) return match[1];
+                }
+                return null;
+            },
+
+            // Fetch Transcript
+            async fetchTranscript() {
+                const url = this.elements.youtubeUrl.value.trim();
+                if (!url) {
+                    this.showStatus('Please enter a YouTube URL', 'error');
+                    return;
+                }
+
+                const videoId = this.extractVideoId(url);
+                if (!videoId) {
+                    this.showStatus('Invalid YouTube URL', 'error');
+                    return;
+                }
+
+                this.setFetchLoading(true);
+                this.showStatus('Fetching transcript...', 'info');
+
+                try {
+                    // Show video preview
+                    this.showVideoPreview(videoId);
+
+                    // Try to fetch transcript
+                    const transcript = await this.fetchYouTubeTranscript(videoId);
+
+                    if (transcript) {
+                        this.currentTranscript = transcript;
+                        this.elements.transcriptInput.value = transcript;
+                        this.showStatus('Transcript fetched successfully! You can now process it.', 'success');
+                    } else {
+                        this.showStatus('Could not auto-fetch transcript. Please copy it manually from YouTube and paste in the "Paste Transcript" tab.', 'error');
+                        this.switchTab('transcript');
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    this.showStatus(`Error: ${error.message}. Please paste the transcript manually.`, 'error');
+                    this.switchTab('transcript');
+                } finally {
+                    this.setFetchLoading(false);
+                }
+            },
+
+            showVideoPreview(videoId) {
+                this.videoInfo = { id: videoId };
+                this.elements.videoPreview.innerHTML = `
+                    <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="Video thumbnail">
+                `;
+                this.elements.videoPreview.style.display = 'block';
+            },
+
+            async fetchYouTubeTranscript(videoId) {
+                // Try multiple approaches to fetch transcript
+
+                // Approach 1: Try using a transcript API service via CORS proxy
+                for (const proxy of this.CORS_PROXIES) {
+                    try {
+                        const transcript = await this.fetchViaProxy(videoId, proxy);
+                        if (transcript) return transcript;
+                    } catch (e) {
+                        console.log(`Proxy ${proxy} failed:`, e.message);
+                    }
+                }
+
+                // If all methods fail, return null
+                return null;
+            },
+
+            async fetchViaProxy(videoId, proxy) {
+                // Try to fetch the YouTube page and extract transcript data
+                const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                const response = await fetch(proxy + encodeURIComponent(youtubeUrl));
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch page');
+                }
+
+                const html = await response.text();
+
+                // Try to extract captions URL from the page
+                const captionsMatch = html.match(/"captions":\s*(\{[^}]+\})/);
+                if (!captionsMatch) {
+                    // Try alternative: Look for timedtext URL
+                    const timedtextMatch = html.match(/timedtext[^"]*videoId[^"]*"/);
+                    if (!timedtextMatch) {
+                        throw new Error('No captions found');
+                    }
+                }
+
+                // Extract caption tracks from playerCaptionsTracklistRenderer
+                const captionUrlMatch = html.match(/"captionTracks":\s*\[([^\]]+)\]/);
+                if (captionUrlMatch) {
+                    try {
+                        const tracksJson = '[' + captionUrlMatch[1] + ']';
+                        const tracks = JSON.parse(tracksJson);
+
+                        if (tracks.length > 0) {
+                            // Prefer English, or take the first available
+                            const englishTrack = tracks.find(t =>
+                                t.languageCode === 'en' ||
+                                t.languageCode?.startsWith('en')
+                            ) || tracks[0];
+
+                            if (englishTrack?.baseUrl) {
+                                // Fetch the actual transcript
+                                const transcriptResponse = await fetch(proxy + encodeURIComponent(englishTrack.baseUrl));
+                                const transcriptXml = await transcriptResponse.text();
+
+                                // Parse XML transcript
+                                return this.parseTranscriptXml(transcriptXml);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Failed to parse caption tracks:', e);
+                    }
+                }
+
+                throw new Error('Could not extract transcript');
+            },
+
+            parseTranscriptXml(xml) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xml, 'text/xml');
+                const texts = doc.querySelectorAll('text');
+
+                if (texts.length === 0) {
+                    throw new Error('No transcript content found');
+                }
+
+                const lines = [];
+                texts.forEach(text => {
+                    const start = parseFloat(text.getAttribute('start') || 0);
+                    const content = text.textContent
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&#39;/g, "'")
+                        .replace(/&quot;/g, '"')
+                        .replace(/\n/g, ' ')
+                        .trim();
+
+                    if (content) {
+                        const timestamp = this.formatTimestamp(start);
+                        lines.push(`[${timestamp}] ${content}`);
+                    }
+                });
+
+                return lines.join('\n');
+            },
+
+            formatTimestamp(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            },
+
+            // Process Transcript
+            async processTranscript() {
+                // Get transcript from either tab
+                const transcript = this.elements.transcriptInput.value.trim() || this.currentTranscript;
+
+                if (!transcript) {
+                    this.showStatus('Please fetch or paste a transcript first', 'error');
+                    return;
+                }
+
+                if (!this.apiKey) {
+                    this.showStatus('Please set your OpenRouter API key first', 'error');
+                    this.elements.apiKeyDetails.open = true;
+                    return;
+                }
+
+                // Save model preference
+                const model = this.elements.modelSelect.value;
+                localStorage.setItem('youtube_to_text_model', model);
+
+                this.setProcessLoading(true);
+                this.showStatus('Processing transcript with AI...', 'info');
+
+                try {
+                    const options = {
+                        cleanup: this.elements.optCleanup.checked,
+                        chapters: this.elements.optChapters.checked,
+                        takeaways: this.elements.optTakeaways.checked,
+                        timestamps: this.elements.optTimestamps.checked
+                    };
+
+                    const result = await this.callOpenRouter(transcript, options, model);
+                    this.processedOutput = result;
+                    this.displayOutput(result);
+                    this.showStatus('Transcript processed successfully!', 'success');
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    this.showStatus(`Error: ${error.message}`, 'error');
+                } finally {
+                    this.setProcessLoading(false);
+                }
+            },
+
+            async callOpenRouter(transcript, options, model) {
+                const systemPrompt = this.buildSystemPrompt(options);
+
+                const response = await fetch(this.OPENROUTER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.apiKey}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'YouTube to Text'
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: `Please process the following YouTube transcript:\n\n${transcript}` }
+                        ],
+                        max_tokens: 4096
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.choices?.[0]?.message?.content || 'No content returned';
+            },
+
+            buildSystemPrompt(options) {
+                let prompt = `You are an expert at processing YouTube video transcripts. Your task is to transform raw, auto-generated captions into clean, readable text.\n\n`;
+
+                prompt += `Instructions:\n`;
+
+                if (options.cleanup) {
+                    prompt += `- Fix all grammar, punctuation, and spelling errors from auto-generated captions
+- Remove filler words (um, uh, like, you know) unless they add meaning
+- Properly capitalize names, places, and technical terms
+- Add proper paragraph breaks for readability
+`;
+                }
+
+                if (options.chapters) {
+                    prompt += `- Divide the content into logical chapters/sections with descriptive headers (use ## for headers)
+- Each chapter should cover a distinct topic or theme from the video
+`;
+                }
+
+                if (options.takeaways) {
+                    prompt += `- At the end, include a "## Key Takeaways" section with 5-7 main points
+- Include relevant direct quotes where impactful (use > for blockquotes)
+`;
+                }
+
+                if (options.timestamps) {
+                    prompt += `- Preserve timestamps at the start of each major section or chapter
+`;
+                } else {
+                    prompt += `- Remove all timestamps from the output
+`;
+                }
+
+                prompt += `
+Output format:
+- Use Markdown formatting
+- Start with a brief summary paragraph
+- Use headers (##) for chapters
+- Use bullet points for lists
+- Use blockquotes (>) for important quotes
+- End with key takeaways if requested
+
+Be thorough but concise. Focus on making the content easy to read and understand.`;
+
+                return prompt;
+            },
+
+            displayOutput(content) {
+                // Convert markdown to basic HTML for display
+                const html = this.markdownToHtml(content);
+                this.elements.outputContent.innerHTML = html;
+                this.elements.outputSection.style.display = 'block';
+                this.elements.outputSection.scrollIntoView({ behavior: 'smooth' });
+            },
+
+            markdownToHtml(markdown) {
+                return markdown
+                    // Headers
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                    // Bold and italic
+                    .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    // Blockquotes
+                    .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+                    // Bullet points
+                    .replace(/^- (.*$)/gm, '<li>$1</li>')
+                    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                    // Line breaks
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>')
+                    // Wrap in paragraph
+                    .replace(/^(.*)$/, '<p>$1</p>')
+                    // Clean up empty paragraphs
+                    .replace(/<p><\/p>/g, '')
+                    .replace(/<p>(<h[1-3]>)/g, '$1')
+                    .replace(/(<\/h[1-3]>)<\/p>/g, '$1');
+            },
+
+            // Output Actions
+            async copyToClipboard() {
+                try {
+                    await navigator.clipboard.writeText(this.processedOutput);
+                    this.showStatus('Copied to clipboard!', 'success');
+                } catch (error) {
+                    this.showStatus('Failed to copy to clipboard', 'error');
+                }
+            },
+
+            downloadMarkdown() {
+                const blob = new Blob([this.processedOutput], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `transcript-${Date.now()}.md`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                this.showStatus('Downloaded as Markdown', 'success');
+            },
+
+            clearOutput() {
+                this.processedOutput = '';
+                this.elements.outputContent.innerHTML = '';
+                this.elements.outputSection.style.display = 'none';
+                this.showStatus('Output cleared', 'info');
+            },
+
+            // UI Helpers
+            setFetchLoading(loading) {
+                this.elements.fetchTranscript.disabled = loading;
+                this.elements.fetchText.style.display = loading ? 'none' : 'inline';
+                this.elements.fetchLoading.style.display = loading ? 'inline-block' : 'none';
+            },
+
+            setProcessLoading(loading) {
+                this.elements.processBtn.disabled = loading;
+                this.elements.processText.style.display = loading ? 'none' : 'inline';
+                this.elements.processLoading.style.display = loading ? 'inline-block' : 'none';
+            },
+
+            showStatus(message, type) {
+                this.elements.statusContainer.innerHTML = `
+                    <div class="status-message ${type}">${message}</div>
+                `;
+            }
+        };
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>
