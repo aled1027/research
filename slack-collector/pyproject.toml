@@ -1,0 +1,17 @@
+[project]
+name = "slack-collector"
+version = "0.1.0"
+description = "Collect Slack messages and store them in SQLite"
+requires-python = ">=3.10"
+dependencies = [
+    "slack-sdk>=3.21.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+slack-collect = "collector:main"
+slack-dm = "send_dm:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

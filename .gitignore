@@ -13,3 +13,6 @@
 
 # Build artifacts
 *.dSYM
+
+node_modules
+__pycache__
