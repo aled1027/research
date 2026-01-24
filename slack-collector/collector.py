@@ -37,7 +37,7 @@ class SlackCollector:
     def __init__(self, config: Config, db: SlackDatabase):
         self.config = config
         self.db = db
-        self.client = WebClient(token=config.bot_token)
+        self.client = WebClient(token=config.user_token)
         self._rate_limit_delay = 1.0  # seconds between API calls
 
     def _handle_rate_limit(self, retry_after: int = 1):
@@ -168,9 +168,8 @@ class SlackCollector:
                     print(f"Error fetching IMs: {e}")
                     break
 
-        # Also collect self-DM (messages to yourself)
-        count += self._collect_self_dm()
-
+        if count > 0:
+            print(f"  Found {count} DM channels")
         return count
 
     def _collect_self_dm(self) -> int:
@@ -234,6 +233,8 @@ class SlackCollector:
                     print(f"Error fetching MPIMs: {e}")
                     break
 
+        if count > 0:
+            print(f"  Found {count} group DM channels")
         return count
 
     def collect_messages(self, channel_id: Optional[str] = None, full_history: bool = False) -> int:
@@ -250,6 +251,7 @@ class SlackCollector:
         for channel in channels:
             cid = channel["id"]
             channel_name = channel.get("name", cid)
+            channel_type = channel.get("type", "unknown")
 
             # Get oldest timestamp if we're doing incremental update
             oldest = None
@@ -258,7 +260,7 @@ class SlackCollector:
 
             count = self._collect_channel_messages(cid, oldest=oldest)
             if count > 0:
-                print(f"  {channel_name}: {count} messages")
+                print(f"  {channel_name} ({channel_type}): {count} messages")
             total_count += count
 
         print(f"  Collected {total_count} messages total")
@@ -310,9 +312,10 @@ class SlackCollector:
                 if e.response.get("error") == "ratelimited":
                     self._handle_rate_limit(int(e.response.headers.get("Retry-After", 1)))
                 elif e.response.get("error") in ("channel_not_found", "not_in_channel"):
+                    print(f"  Skipping {channel_id}: {e.response.get('error')}")
                     break
                 else:
-                    print(f"Error fetching messages from {channel_id}: {e}")
+                    print(f"Error fetching messages from {channel_id}: {e.response.get('error')}")
                     break
 
         return count

@@ -64,6 +64,28 @@ The collector uses a 1-second delay between requests and handles `ratelimited` r
 - `pyproject.toml` - Package configuration for uv/pip install
 - `README.md` - Documentation
 
+## DM Collection Fix (2026-01-24)
+
+The collector was finding DM channels but collecting 0 messages. Root cause:
+- **Bot tokens** can only read DMs where the bot is a participant
+- **User tokens** can read all the user's personal DMs
+
+Fixed by:
+1. Adding `user_client` using `SLACK_USER_TOKEN` when available
+2. Using user client for listing IMs and MPIMs (`conversations.list types=im,mpim`)
+3. Using user client for fetching DM message history (`conversations.history`)
+
+**Required User Token Scopes for DM collection:**
+- `im:read` - List DM channels
+- `im:history` - Read DM messages
+- `mpim:read` - List group DM channels
+- `mpim:history` - Read group DM messages
+
+To add these scopes in Slack App settings:
+1. Go to https://api.slack.com/apps -> Your App -> OAuth & Permissions
+2. Under "User Token Scopes", add: `im:read`, `im:history`, `mpim:read`, `mpim:history`
+3. Reinstall the app to get a new user token with the additional scopes
+
 ## uvx Support (2026-01-24)
 
 Added support for running scripts directly with `uvx` using PEP 723 inline script metadata:

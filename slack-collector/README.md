@@ -76,14 +76,12 @@ Navigate to **OAuth & Permissions** and add these scopes:
 ### 5. Set Environment Variables
 
 ```bash
-export SLACK_BOT_TOKEN="xoxb-your-bot-token"
 export SLACK_USER_TOKEN="xoxp-your-user-token"
 ```
 
 Or create a `.env` file:
 
 ```bash
-SLACK_BOT_TOKEN=xoxb-your-bot-token
 SLACK_USER_TOKEN=xoxp-your-user-token
 SLACK_DB_PATH=slack_messages.db
 ```
