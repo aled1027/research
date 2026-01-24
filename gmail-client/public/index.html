@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gmail Client</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    :root {
+      --email-list-height: calc(100vh - 300px);
+    }
+
+    .container {
+      max-width: 1200px;
+      padding: 1rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .email-list {
+      max-height: var(--email-list-height);
+      overflow-y: auto;
+      border: 1px solid var(--pico-muted-border-color);
+      border-radius: var(--pico-border-radius);
+    }
+
+    .email-item {
+      padding: 1rem;
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .email-item:hover {
+      background-color: var(--pico-secondary-background);
+    }
+
+    .email-item:last-child {
+      border-bottom: none;
+    }
+
+    .email-item.unread {
+      font-weight: bold;
+      background-color: var(--pico-primary-background);
+    }
+
+    .email-item .subject {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .email-item .meta {
+      font-size: 0.85rem;
+      color: var(--pico-muted-color);
+      margin-top: 0.25rem;
+    }
+
+    .email-item .snippet {
+      font-size: 0.85rem;
+      color: var(--pico-muted-color);
+      margin-top: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-view {
+      display: none;
+      padding: 1rem;
+      border: 1px solid var(--pico-muted-border-color);
+      border-radius: var(--pico-border-radius);
+      margin-top: 1rem;
+    }
+
+    .email-view.active {
+      display: block;
+    }
+
+    .email-view-header {
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .email-view-body {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .email-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .compose-form {
+      display: none;
+    }
+
+    .compose-form.active {
+      display: block;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .login-container {
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    .search-bar {
+      margin-bottom: 1rem;
+    }
+
+    .search-bar form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .search-bar input {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .search-bar button {
+      margin-bottom: 0;
+      width: auto;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .load-more {
+      text-align: center;
+      padding: 1rem;
+    }
+
+    #status {
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border-radius: var(--pico-border-radius);
+      display: none;
+    }
+
+    #status.success {
+      display: block;
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    #status.error {
+      display: block;
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <!-- Login View -->
+    <div id="login-view" class="login-container">
+      <h1>Gmail Client</h1>
+      <p>A simple Gmail client using the Gmail API</p>
+      <a href="/auth/login" role="button">Sign in with Google</a>
+    </div>
+
+    <!-- App View -->
+    <div id="app-view" class="hidden">
+      <header>
+        <h1>Gmail Client</h1>
+        <div class="btn-group">
+          <span id="user-email"></span>
+          <button id="compose-btn" class="secondary">Compose</button>
+          <a href="/auth/logout" role="button" class="outline">Logout</a>
+        </div>
+      </header>
+
+      <div id="status"></div>
+
+      <!-- Compose Form -->
+      <article id="compose-form" class="compose-form">
+        <header>
+          <h3>Compose Email</h3>
+        </header>
+        <form id="send-form">
+          <label>
+            To:
+            <input type="email" name="to" required placeholder="recipient@example.com">
+          </label>
+          <label>
+            Subject:
+            <input type="text" name="subject" required placeholder="Subject">
+          </label>
+          <label>
+            Message:
+            <textarea name="body" rows="6" required placeholder="Write your message..."></textarea>
+          </label>
+          <div class="btn-group">
+            <button type="submit">Send</button>
+            <button type="button" id="cancel-compose" class="secondary">Cancel</button>
+          </div>
+        </form>
+      </article>
+
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <form id="search-form">
+          <input type="text" id="search-input" placeholder="Search emails (e.g., from:someone@example.com)">
+          <button type="submit" class="secondary">Search</button>
+          <button type="button" id="clear-search" class="outline">Clear</button>
+        </form>
+      </div>
+
+      <!-- Email List -->
+      <div id="email-list" class="email-list">
+        <p style="padding: 1rem; text-align: center;">Loading emails...</p>
+      </div>
+
+      <div class="load-more">
+        <button id="load-more-btn" class="secondary outline hidden">Load More</button>
+      </div>
+
+      <!-- Email View -->
+      <article id="email-view" class="email-view">
+        <header class="email-view-header">
+          <h3 id="view-subject"></h3>
+          <p><strong>From:</strong> <span id="view-from"></span></p>
+          <p><strong>To:</strong> <span id="view-to"></span></p>
+          <p><strong>Date:</strong> <span id="view-date"></span></p>
+        </header>
+        <div id="view-body" class="email-view-body"></div>
+        <div class="email-actions">
+          <button id="close-email" class="secondary">Close</button>
+          <button id="delete-email" class="outline contrast">Delete</button>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // State
+    let nextPageToken = null;
+    let currentEmailId = null;
+    let currentQuery = '';
+
+    // DOM elements
+    const loginView = document.getElementById('login-view');
+    const appView = document.getElementById('app-view');
+    const emailList = document.getElementById('email-list');
+    const emailView = document.getElementById('email-view');
+    const composeForm = document.getElementById('compose-form');
+    const sendForm = document.getElementById('send-form');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const statusDiv = document.getElementById('status');
+    const userEmail = document.getElementById('user-email');
+
+    // Check authentication status
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+
+        if (data.authenticated) {
+          loginView.classList.add('hidden');
+          appView.classList.remove('hidden');
+          loadProfile();
+          loadEmails();
+        } else {
+          loginView.classList.remove('hidden');
+          appView.classList.add('hidden');
+        }
+      } catch (error) {
+        showStatus('Failed to check authentication', 'error');
+      }
+    }
+
+    // Load user profile
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/profile');
+        const data = await res.json();
+        userEmail.textContent = data.emailAddress;
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+      }
+    }
+
+    // Show status message
+    function showStatus(message, type = 'success') {
+      statusDiv.textContent = message;
+      statusDiv.className = type;
+      setTimeout(() => {
+        statusDiv.className = '';
+      }, 3000);
+    }
+
+    // Load emails
+    async function loadEmails(append = false) {
+      try {
+        const params = new URLSearchParams({
+          maxResults: 20
+        });
+
+        if (nextPageToken && append) {
+          params.set('pageToken', nextPageToken);
+        }
+
+        if (currentQuery) {
+          params.set('q', currentQuery);
+        }
+
+        const res = await fetch(`/api/emails?${params}`);
+        const data = await res.json();
+
+        if (!append) {
+          emailList.innerHTML = '';
+        }
+
+        if (data.emails.length === 0 && !append) {
+          emailList.innerHTML = '<p style="padding: 1rem; text-align: center;">No emails found</p>';
+          loadMoreBtn.classList.add('hidden');
+          return;
+        }
+
+        data.emails.forEach(email => {
+          const div = document.createElement('div');
+          div.className = `email-item ${email.isUnread ? 'unread' : ''}`;
+          div.dataset.id = email.id;
+          div.innerHTML = `
+            <p class="subject">${escapeHtml(email.subject || '(No Subject)')}</p>
+            <p class="meta">${escapeHtml(email.from)} - ${formatDate(email.date)}</p>
+            <p class="snippet">${escapeHtml(email.snippet)}</p>
+          `;
+          div.addEventListener('click', () => viewEmail(email.id));
+          emailList.appendChild(div);
+        });
+
+        nextPageToken = data.nextPageToken;
+        loadMoreBtn.classList.toggle('hidden', !nextPageToken);
+      } catch (error) {
+        showStatus('Failed to load emails', 'error');
+        console.error(error);
+      }
+    }
+
+    // View email
+    async function viewEmail(id) {
+      try {
+        const res = await fetch(`/api/emails/${id}`);
+        const email = await res.json();
+
+        currentEmailId = id;
+
+        document.getElementById('view-subject').textContent = email.subject || '(No Subject)';
+        document.getElementById('view-from').textContent = email.from;
+        document.getElementById('view-to').textContent = email.to;
+        document.getElementById('view-date').textContent = formatDate(email.date);
+
+        // Check if body is HTML
+        const viewBody = document.getElementById('view-body');
+        if (email.body.includes('<html') || email.body.includes('<div') || email.body.includes('<p>')) {
+          viewBody.innerHTML = email.body;
+        } else {
+          viewBody.textContent = email.body;
+        }
+
+        emailView.classList.add('active');
+        composeForm.classList.remove('active');
+
+        // Mark as read
+        if (email.labelIds?.includes('UNREAD')) {
+          await fetch(`/api/emails/${id}/read`, { method: 'POST' });
+          const emailItem = emailList.querySelector(`[data-id="${id}"]`);
+          if (emailItem) {
+            emailItem.classList.remove('unread');
+          }
+        }
+      } catch (error) {
+        showStatus('Failed to load email', 'error');
+        console.error(error);
+      }
+    }
+
+    // Delete email
+    async function deleteEmail() {
+      if (!currentEmailId) return;
+
+      if (!confirm('Move this email to trash?')) return;
+
+      try {
+        await fetch(`/api/emails/${currentEmailId}`, { method: 'DELETE' });
+        showStatus('Email moved to trash');
+
+        // Remove from list
+        const emailItem = emailList.querySelector(`[data-id="${currentEmailId}"]`);
+        if (emailItem) {
+          emailItem.remove();
+        }
+
+        emailView.classList.remove('active');
+        currentEmailId = null;
+      } catch (error) {
+        showStatus('Failed to delete email', 'error');
+        console.error(error);
+      }
+    }
+
+    // Send email
+    async function sendEmail(e) {
+      e.preventDefault();
+
+      const formData = new FormData(sendForm);
+      const data = {
+        to: formData.get('to'),
+        subject: formData.get('subject'),
+        body: formData.get('body')
+      };
+
+      try {
+        const res = await fetch('/api/emails/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          showStatus('Email sent successfully!');
+          sendForm.reset();
+          composeForm.classList.remove('active');
+          loadEmails(); // Refresh to show sent email
+        } else {
+          const error = await res.json();
+          showStatus(error.error || 'Failed to send email', 'error');
+        }
+      } catch (error) {
+        showStatus('Failed to send email', 'error');
+        console.error(error);
+      }
+    }
+
+    // Helper functions
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = now - date;
+
+        if (diff < 24 * 60 * 60 * 1000) {
+          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        return date.toLocaleDateString();
+      } catch {
+        return dateStr;
+      }
+    }
+
+    // Event listeners
+    document.getElementById('compose-btn').addEventListener('click', () => {
+      composeForm.classList.add('active');
+      emailView.classList.remove('active');
+    });
+
+    document.getElementById('cancel-compose').addEventListener('click', () => {
+      composeForm.classList.remove('active');
+      sendForm.reset();
+    });
+
+    document.getElementById('close-email').addEventListener('click', () => {
+      emailView.classList.remove('active');
+      currentEmailId = null;
+    });
+
+    document.getElementById('delete-email').addEventListener('click', deleteEmail);
+
+    sendForm.addEventListener('submit', sendEmail);
+
+    loadMoreBtn.addEventListener('click', () => loadEmails(true));
+
+    document.getElementById('search-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      currentQuery = document.getElementById('search-input').value;
+      nextPageToken = null;
+      loadEmails();
+    });
+
+    document.getElementById('clear-search').addEventListener('click', () => {
+      document.getElementById('search-input').value = '';
+      currentQuery = '';
+      nextPageToken = null;
+      loadEmails();
+    });
+
+    // Initialize
+    checkAuth();
+  </script>
+</body>
+</html>
