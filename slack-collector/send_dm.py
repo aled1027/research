@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "slack-sdk>=3.21.0",
+#     "python-dotenv>=1.0.0",
+# ]
+# ///
 """
 Slack DM Sender CLI
 
@@ -7,6 +14,9 @@ Send direct messages from one user to another using user token impersonation.
 Note: This requires a user OAuth token (xoxp-*) with chat:write scope.
 The message will appear as if sent by the user who authorized the token.
 """
+
+from dotenv import load_dotenv
+load_dotenv()
 
 import argparse
 import sys

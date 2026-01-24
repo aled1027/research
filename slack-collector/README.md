@@ -14,8 +14,30 @@ A Python tool for collecting Slack messages and storing them in a local SQLite d
 
 ### 1. Install Dependencies
 
+The scripts use [PEP 723 inline script metadata](https://peps.python.org/pep-0723/), so you can run them directly with `uvx` (no installation required):
+
+```bash
+# Run with uvx (recommended - auto-installs dependencies)
+uvx collector.py
+uvx send_dm.py --help
+```
+
+Or install as a package:
+
+```bash
+# Install with uv
+uv pip install .
+
+# Then run
+slack-collect
+slack-dm --help
+```
+
+Or traditional pip:
+
 ```bash
 pip install -r requirements.txt
+python collector.py
 ```
 
 ### 2. Create a Slack App
@@ -72,38 +94,38 @@ SLACK_DB_PATH=slack_messages.db
 
 ```bash
 # Run full collection (users, channels, messages)
-python collector.py
+uvx collector.py
 
 # Collect full history (not just incremental)
-python collector.py --full
+uvx collector.py --full
 
 # Collect from specific channel only
-python collector.py --channel C1234567890
+uvx collector.py --channel C1234567890
 
 # Use custom database file
-python collector.py --db my_slack.db
+uvx collector.py --db my_slack.db
 
 # Show database statistics
-python collector.py --stats
+uvx collector.py --stats
 ```
 
 ### Sending DMs
 
 ```bash
 # Send a DM to a user by name
-python send_dm.py --to john.doe --message "Hello!"
+uvx send_dm.py --to john.doe --message "Hello!"
 
 # Send to user by email
-python send_dm.py --to john@company.com --message "Hello!"
+uvx send_dm.py --to john@company.com --message "Hello!"
 
 # Send to user by Slack ID
-python send_dm.py --to U1234567890 --message "Hello!"
+uvx send_dm.py --to U1234567890 --message "Hello!"
 
 # Reply in a thread
-python send_dm.py --to john.doe --message "Reply" --thread 1234567890.123456
+uvx send_dm.py --to john.doe --message "Reply" --thread 1234567890.123456
 
 # List available users
-python send_dm.py --list-users
+uvx send_dm.py --list-users
 ```
 
 ## Database Schema

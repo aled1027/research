@@ -61,4 +61,20 @@ The collector uses a 1-second delay between requests and handles `ratelimited` r
 - `collector.py` - Message collection script
 - `send_dm.py` - DM sending CLI
 - `requirements.txt` - Dependencies
+- `pyproject.toml` - Package configuration for uv/pip install
 - `README.md` - Documentation
+
+## uvx Support (2026-01-24)
+
+Added support for running scripts directly with `uvx` using PEP 723 inline script metadata:
+
+- Added inline `# /// script` metadata to `collector.py` and `send_dm.py`
+- Added `pyproject.toml` for package installation with `uv pip install .`
+- Added `python-dotenv` load calls to scripts so `.env` files work with uvx
+- Updated README with uvx usage examples
+
+Scripts can now be run without prior installation:
+```bash
+uvx collector.py --stats
+uvx send_dm.py --list-users
+```

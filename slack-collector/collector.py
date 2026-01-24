@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "slack-sdk>=3.21.0",
+#     "python-dotenv>=1.0.0",
+# ]
+# ///
 """
 Slack Message Collector
 
 Collects messages from Slack and stores them in a local SQLite database.
 """
+
+from dotenv import load_dotenv
+load_dotenv()
 
 import argparse
 import sys
@@ -158,7 +168,37 @@ class SlackCollector:
                     print(f"Error fetching IMs: {e}")
                     break
 
+        # Also collect self-DM (messages to yourself)
+        count += self._collect_self_dm()
+
         return count
+
+    def _collect_self_dm(self) -> int:
+        """Collect the DM channel with yourself (notes to self)."""
+        try:
+            # Get the bot's own user ID
+            auth_response = self.client.auth_test()
+            own_user_id = auth_response.get("user_id")
+            
+            if not own_user_id:
+                return 0
+
+            # Open/get the DM channel with yourself
+            response = self.client.conversations_open(users=[own_user_id])
+            channel = response.get("channel", {})
+            
+            if channel:
+                self.db.upsert_channel(channel)
+                print(f"  Found self-DM channel: {channel.get('id')}")
+                return 1
+
+        except SlackApiError as e:
+            if e.response.get("error") == "cannot_dm_bot":
+                print("  Skipping self-DM (bot cannot DM itself)")
+            elif e.response.get("error") != "missing_scope":
+                print(f"  Could not get self-DM: {e.response.get('error')}")
+        
+        return 0
 
     def _collect_mpims(self) -> int:
         """Collect group direct message channels."""
