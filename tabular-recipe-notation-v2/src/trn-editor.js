@@ -6,84 +6,168 @@
 // Import jsonToHtml for browser use (will be in global scope via script tag)
 // For module usage, this would be: import { jsonToHtml } from './trn.js';
 
-const defaultRecipe = {
-  "table": {
-    "rows": [
-      {
-        "cells": [
-          { "content": "Butter and flour a loaf pan", "colspan": 7, "align": "center" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "Preheat oven to 350°F (170°C)", "colspan": 7, "align": "center" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "2 large (250 g) ripe bananas" },
-          { "content": "mash" },
-          { "content": "mash until smooth", "rowspan": 4, "class": "vertical" },
-          { "content": "fold", "rowspan": 10, "class": "vertical" },
-          { "content": "bake 350°F (170°C) 55 min.", "rowspan": 10, "class": "vertical" },
-          { "content": "cool 10 min. in pan", "rowspan": 10, "class": "vertical" },
-          { "content": "cool on wire rack", "rowspan": 10, "class": "vertical" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "6 Tbs. (90 mL) butter" },
-          { "content": "melt" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "1 tsp. (5 mL) vanilla extract" },
-          { "content": "", "class": "righthide" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "2 large eggs" },
-          { "content": "lightly beat" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "1-1/3 cups (167 g) all-purpose flour" },
-          { "content": "whisk", "rowspan": 5, "class": "vertical" },
-          { "content": "", "rowspan": 6, "class": "righthide" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "2/3 cup (130 g) sugar" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "1/2 tsp. (2.3 g) baking soda" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "1/4 tsp. (1.2 g) baking powder" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "1/2 tsp. (3 g) salt" }
-        ]
-      },
-      {
-        "cells": [
-          { "content": "1/2 cup (70 g) chopped walnuts" },
-          { "content": "", "class": "righthide" }
-        ]
-      }
-    ]
+const recipes = {
+  "banana-bread": {
+    "name": "Banana Bread",
+    "table": {
+      "rows": [
+        {
+          "cells": [
+            { "content": "Butter and flour a loaf pan", "colspan": 7, "align": "center" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "Preheat oven to 350°F (170°C)", "colspan": 7, "align": "center" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "2 large (250 g) ripe bananas" },
+            { "content": "mash" },
+            { "content": "mash until smooth", "rowspan": 4, "class": "vertical" },
+            { "content": "fold", "rowspan": 10, "class": "vertical" },
+            { "content": "bake 350°F (170°C) 55 min.", "rowspan": 10, "class": "vertical" },
+            { "content": "cool 10 min. in pan", "rowspan": 10, "class": "vertical" },
+            { "content": "cool on wire rack", "rowspan": 10, "class": "vertical" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "6 Tbs. (90 mL) butter" },
+            { "content": "melt" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1 tsp. (5 mL) vanilla extract" },
+            { "content": "", "class": "righthide" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "2 large eggs" },
+            { "content": "lightly beat" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1-1/3 cups (167 g) all-purpose flour" },
+            { "content": "whisk", "rowspan": 5, "class": "vertical" },
+            { "content": "", "rowspan": 6, "class": "righthide" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "2/3 cup (130 g) sugar" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1/2 tsp. (2.3 g) baking soda" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1/4 tsp. (1.2 g) baking powder" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1/2 tsp. (3 g) salt" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1/2 cup (70 g) chopped walnuts" },
+            { "content": "", "class": "righthide" }
+          ]
+        }
+      ]
+    }
+  },
+  "lemon-bars": {
+    "name": "Lemon Bars",
+    "table": {
+      "rows": [
+        {
+          "cells": [
+            { "content": "1-3/4 cup (245 g) all purpose flour" },
+            { "content": "mix", "rowspan": 4, "class": "vertical" },
+            { "content": "process", "rowspan": 5, "class": "vertical" },
+            { "content": "line 9x13\" pan", "rowspan": 5, "class": "vertical" },
+            { "content": "refrigerate for 30 min.", "rowspan": 5, "class": "vertical" },
+            { "content": "350°F for 20 min.", "rowspan": 5, "class": "vertical" },
+            { "content": "350°F for 20 min.", "rowspan": 12, "class": "vertical" },
+            { "content": "cool and cut", "rowspan": 12, "class": "vertical" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "2/3 cup (80 g) confectioner's sugar" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1/4 cup (30 g) cornstarch" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "3/4 tsp. (4.5 g) salt" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "3/4 cup (170 g) butter" },
+            { "content": "", "class": "righthide" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "4 large (200 g) eggs" },
+            { "content": "whisk", "rowspan": 4, "class": "vertical" },
+            { "content": "mix", "rowspan": 7, "class": "vertical" },
+            { "content": "", "rowspan": 7, "colspan": 3, "class": "righthide" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1-1/3 cup (270 g) granulated sugar" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "3 Tbs. (24 g) all purpose flour" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1/8 tsp. (0.8 g) salt" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "2 tsp. (4 g) lemon zest" },
+            { "content": "", "rowspan": 3, "class": "righthide" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "2/3 cup (160 mL) lemon juice" }
+          ]
+        },
+        {
+          "cells": [
+            { "content": "1/3 cup (80 mL) whole milk" }
+          ]
+        }
+      ]
+    }
   }
 };
+
+const defaultRecipe = recipes["banana-bread"];
 
 class TrnEditor extends HTMLElement {
   constructor() {
@@ -136,6 +220,22 @@ class TrnEditor extends HTMLElement {
         }
 
         textarea:focus {
+          outline: none;
+          border-color: #0066cc;
+          box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+        }
+
+        select {
+          padding: 8px 12px;
+          font-size: 14px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          background: white;
+          margin-bottom: 12px;
+          cursor: pointer;
+        }
+
+        select:focus {
           outline: none;
           border-color: #0066cc;
           box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
@@ -194,6 +294,12 @@ class TrnEditor extends HTMLElement {
 
       <div class="container">
         <div class="panel input-panel">
+          <label for="recipe-select">Select Recipe</label>
+          <select id="recipe-select">
+            ${Object.entries(recipes).map(([key, recipe]) =>
+              `<option value="${key}">${recipe.name}</option>`
+            ).join('')}
+          </select>
           <label for="json-input">Recipe JSON</label>
           <textarea id="json-input">${JSON.stringify(defaultRecipe, null, 2)}</textarea>
         </div>
@@ -207,10 +313,20 @@ class TrnEditor extends HTMLElement {
 
   setupEventListeners() {
     const textarea = this.shadowRoot.getElementById('json-input');
+    const select = this.shadowRoot.getElementById('recipe-select');
+
     textarea.addEventListener('input', () => {
       // Debounce updates for performance
       clearTimeout(this._debounceTimer);
       this._debounceTimer = setTimeout(() => this.updatePreview(), 150);
+    });
+
+    select.addEventListener('change', (e) => {
+      const recipe = recipes[e.target.value];
+      if (recipe) {
+        textarea.value = JSON.stringify(recipe, null, 2);
+        this.updatePreview();
+      }
     });
   }
 

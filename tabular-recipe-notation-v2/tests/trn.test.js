@@ -162,3 +162,90 @@ test('jsonToHtml converts banana bread recipe exactly', () => {
   const result = jsonToHtml(bananaBreadRecipe);
   assert.strictEqual(result, expectedBananaBreadHtml);
 });
+
+// Lemon bars recipe test case
+const lemonBarsRecipe = {
+  "table": {
+    "rows": [
+      {
+        "cells": [
+          { "content": "1-3/4 cup (245 g) all purpose flour" },
+          { "content": "mix", "rowspan": 4, "class": "vertical" },
+          { "content": "process", "rowspan": 5, "class": "vertical" },
+          { "content": "line 9x13\" pan", "rowspan": 5, "class": "vertical" },
+          { "content": "refrigerate for 30 min.", "rowspan": 5, "class": "vertical" },
+          { "content": "350°F for 20 min.", "rowspan": 5, "class": "vertical" },
+          { "content": "350°F for 20 min.", "rowspan": 12, "class": "vertical" },
+          { "content": "cool and cut", "rowspan": 12, "class": "vertical" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "2/3 cup (80 g) confectioner's sugar" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "1/4 cup (30 g) cornstarch" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "3/4 tsp. (4.5 g) salt" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "3/4 cup (170 g) butter" },
+          { "content": "", "class": "righthide" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "4 large (200 g) eggs" },
+          { "content": "whisk", "rowspan": 4, "class": "vertical" },
+          { "content": "mix", "rowspan": 7, "class": "vertical" },
+          { "content": "", "rowspan": 7, "colspan": 3, "class": "righthide" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "1-1/3 cup (270 g) granulated sugar" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "3 Tbs. (24 g) all purpose flour" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "1/8 tsp. (0.8 g) salt" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "2 tsp. (4 g) lemon zest" },
+          { "content": "", "rowspan": 3, "class": "righthide" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "2/3 cup (160 mL) lemon juice" }
+        ]
+      },
+      {
+        "cells": [
+          { "content": "1/3 cup (80 mL) whole milk" }
+        ]
+      }
+    ]
+  }
+};
+
+const expectedLemonBarsHtml = '<table><tr><td>1-3/4 cup (245 g) all purpose flour</td><td rowspan=4 class="vertical">mix</td><td rowspan=5 class="vertical">process</td><td rowspan=5 class="vertical">line 9x13" pan</td><td rowspan=5 class="vertical">refrigerate for 30 min.</td><td rowspan=5 class="vertical">350&#176;F for 20 min.</td><td rowspan=12 class="vertical">350&#176;F for 20 min.</td><td rowspan=12 class="vertical">cool and cut</td></tr><tr><td>2/3 cup (80 g) confectioner\'s sugar</td></tr><tr><td>1/4 cup (30 g) cornstarch</td></tr><tr><td>3/4 tsp. (4.5 g) salt</td></tr><tr><td>3/4 cup (170 g) butter</td><td class="righthide"></td></tr><tr><td>4 large (200 g) eggs</td><td rowspan=4 class="vertical">whisk</td><td rowspan=7 class="vertical">mix</td><td colspan=3 rowspan=7 class="righthide"></td></tr><tr><td>1-1/3 cup (270 g) granulated sugar</td></tr><tr><td>3 Tbs. (24 g) all purpose flour</td></tr><tr><td>1/8 tsp. (0.8 g) salt</td></tr><tr><td>2 tsp. (4 g) lemon zest</td><td rowspan=3 class="righthide"></td></tr><tr><td>2/3 cup (160 mL) lemon juice</td></tr><tr><td>1/3 cup (80 mL) whole milk</td></tr></table>';
+
+test('jsonToHtml converts lemon bars recipe exactly', () => {
+  const result = jsonToHtml(lemonBarsRecipe);
+  assert.strictEqual(result, expectedLemonBarsHtml);
+});
