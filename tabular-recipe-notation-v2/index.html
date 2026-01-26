@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabular Recipe Notation</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .instructions {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .instructions h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .instructions ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    .instructions code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    trn-editor {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Tabular Recipe Notation</h1>
+  <p class="subtitle">A visual format for recipes: steps flow left-to-right, ingredients flow top-to-bottom</p>
+
+  <div class="instructions">
+    <h2>How to Use</h2>
+    <ul>
+      <li>Edit the JSON in the left panel to see the table update in real-time</li>
+      <li>Use <code>colspan</code> to span multiple columns (for preparation steps)</li>
+      <li>Use <code>rowspan</code> to span multiple rows (for actions that apply to multiple ingredients)</li>
+      <li>Use <code>class: "vertical"</code> to rotate text 90 degrees</li>
+      <li>Use <code>class: "righthide"</code> to hide the right border for visual continuity</li>
+      <li>Use <code>align: "center"</code> to center text in a cell</li>
+    </ul>
+  </div>
+
+  <trn-editor></trn-editor>
+
+  <script src="src/trn.js"></script>
+  <script src="src/trn-editor.js"></script>
+</body>
+</html>
