@@ -82,6 +82,22 @@ The `rowspan` value must match exactly how many ingredient rows that step encomp
 ### 6. Final Steps Span All Ingredient Rows
 Steps like "bake", "cool" typically span all the ingredient rows (excluding prep rows at top).
 
+### 7. Visual Continuity for Late-Joining Ingredients
+When an ingredient joins the process at a later step (skipping earlier columns), the `righthide` cells must create an unbroken visual path from the ingredient to its joining step:
+
+1. The joining step's cell must have a `rowspan` that covers this ingredient's row
+2. Fill ALL skipped columns with a single `righthide` cell using appropriate `colspan`
+3. **Critical**: Verify the righthide cell's right edge directly abuts the joining step's column
+
+```json
+// Ingredient joins at "stir" (column 4), skipping "dissolve" (col 2) and "cool" (col 3)
+{ "content": "ingredient added at stir step" },
+{ "content": "", "colspan": 2, "class": "righthide" }
+// Column 4 (stir) is covered by rowspan from earlier row - no gap should appear
+```
+
+**Verification**: For each ingredient row, count: `1 (ingredient) + colspan of righthide cells + columns covered by rowspans from above = total table width`. If this doesn't balance, there will be visual gaps.
+
 ## Conversion Process
 
 1. **Identify prep steps**: Preheat oven, prepare pans, etc. These go first with full colspan.
@@ -336,3 +352,4 @@ For recipes like lemon bars where crust bakes before filling is added:
 5. Always use `class: "vertical"` for process steps that span multiple rows
 6. Always use `class: "righthide"` for empty spacer cells
 7. Omit `colspan`, `rowspan`, `align`, and `class` when they would be 1 or default values
+8. **Verify cell counts for each row**: For every ingredient row, sum the explicit cells (with their colspans) plus cells covered by rowspans from above. This must equal the total table width. Gaps occur when this sum is wrong.
