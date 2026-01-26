@@ -4,3 +4,7 @@
 - Captured screenshot of the demo page for reference.
 - Updated TRN table styling to keep action text horizontal and added sample selector with multiple recipes.
 - Captured updated screenshot with horizontal action text and sample selector.
+- Extracted recipe samples into samples.js and added a validation test script for table coverage.
+- Adjusted lemon bars and tomato pasta samples to fill every row/column.
+- Ran npm test to validate sample tables.
+- Attempted multi-screenshot capture; first Playwright run timed out, captured a fallback screenshot for the demo.

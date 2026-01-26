@@ -19,7 +19,11 @@ This keeps the structure close to HTML table semantics while allowing the TRN de
 ## Implementation Notes
 - `trn-table.js` defines a `<trn-table>` custom element that renders the table in its shadow DOM.
 - `index.html` includes a sample selector plus a textarea that edits the JSON and updates the component live.
+- `samples.js` holds the demo recipes so they can be reused by the page and the tests.
 - Styling keeps action columns horizontal for readability and uses `.righthide` to soften right borders where appropriate.
 
 ## How To Run
 Open `index.html` in a browser, edit the JSON, and see the TRN table update.
+
+## Tests
+Run `npm test` to validate that each sample recipe fills every table cell.
