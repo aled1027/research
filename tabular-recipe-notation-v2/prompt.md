@@ -96,6 +96,32 @@ When an ingredient joins the process at a later step (skipping earlier columns),
 // Column 4 (stir) is covered by rowspan from earlier row - no gap should appear
 ```
 
+When multiple ingredients join at the same step, place them consecutively and use a single righthide cell with:
+
+rowspan = number of ingredients joining together
+colspan = number of columns being skipped
+This ensures consistent border rendering across all rows in the group.
+
+### 8. Border Rendering with Rowspans
+
+**Known issue**: When a `righthide` cell is horizontally adjacent to a cell covered by a `rowspan` from above, visual gaps can occur because the rowspanned cell's left border only renders in its starting row.
+
+**Solution**: For ingredients that skip multiple columns to join a rowspanned step, group them together and use a **single righthide cell with both `rowspan` and `colspan`** rather than individual righthide cells per row:
+
+```json
+// PREFERRED: Group late-joining ingredients with shared righthide
+// First late-joining ingredient row:
+{ "content": "ingredient A that joins at step X" },
+{ "content": "", "rowspan": 3, "colspan": 4, "class": "righthide" }
+// Subsequent rows only need the ingredient cell - righthide spans down
+
+// AVOID: Individual righthide cells per row (can cause gaps)
+{ "content": "ingredient A" },
+{ "content": "", "colspan": 4, "class": "righthide" }
+// Next row:
+{ "content": "ingredient B" },
+{ "content": "", "colspan": 4, "class": "righthide" }  // May show gap
+
 **Verification**: For each ingredient row, count: `1 (ingredient) + colspan of righthide cells + columns covered by rowspans from above = total table width`. If this doesn't balance, there will be visual gaps.
 
 ## Conversion Process
