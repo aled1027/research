@@ -3,6 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/validate-trn.js"
+    "test": "node tests/validate-trn.js && node tests/render-trn.test.js",
+    "test:validate": "node tests/validate-trn.js",
+    "test:render": "node tests/render-trn.test.js"
+  },
+  "devDependencies": {
+    "linkedom": "^0.18.9"
   }
 }
