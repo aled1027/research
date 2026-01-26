@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tabular Recipe Notation Demo</title>
+    <style>
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        margin: 24px;
+        background: #f6f7fb;
+        color: #1d1d1f;
+      }
+
+      h1 {
+        margin-bottom: 6px;
+      }
+
+      p {
+        margin-top: 0;
+        max-width: 900px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        align-items: start;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 420px;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #cfd3dd;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 0.9rem;
+        background: #fff;
+      }
+
+      .panel {
+        background: #ffffff;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+      }
+
+      .status {
+        margin-top: 12px;
+        color: #b42318;
+        font-weight: 600;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      select {
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #cfd3dd;
+        font-size: 0.9rem;
+        background: #fff;
+      }
+
+      .hint {
+        font-size: 0.85rem;
+        color: #667085;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tabular Recipe Notation (TRN)</h1>
+    <p>
+      Paste recipe JSON on the left to render a TRN table. Each row lists a step or ingredient
+      with dependencies represented by vertical, row-spanning action cells.
+    </p>
+
+    <div class="layout">
+      <div class="panel">
+        <div class="controls">
+          <label for="sample-select"><strong>Sample Recipe</strong></label>
+          <select id="sample-select"></select>
+        </div>
+        <label for="trn-input"><strong>TRN JSON Input</strong></label>
+        <textarea id="trn-input" spellcheck="false"></textarea>
+        <div class="hint">Update the JSON to experiment with different recipe flows.</div>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+      <div class="panel">
+        <trn-table id="trn-table"></trn-table>
+      </div>
+    </div>
+
+    <script type="module" src="./trn-table.js"></script>
+    <script type="module">
+      import { samples } from "./samples.js";
+
+      const input = document.getElementById("trn-input");
+      const status = document.getElementById("status");
+      const table = document.getElementById("trn-table");
+      const sampleSelect = document.getElementById("sample-select");
+
+      const updateTable = () => {
+        status.textContent = "";
+        try {
+          const data = JSON.parse(input.value);
+          table.data = data;
+        } catch (error) {
+          status.textContent = `Invalid JSON: ${error.message}`;
+        }
+      };
+
+      Object.keys(samples).forEach((label) => {
+        const option = document.createElement("option");
+        option.value = label;
+        option.textContent = label;
+        sampleSelect.appendChild(option);
+      });
+
+      const loadSample = (label) => {
+        const sample = samples[label];
+        input.value = JSON.stringify(sample, null, 2);
+        updateTable();
+      };
+
+      sampleSelect.addEventListener("change", (event) => {
+        loadSample(event.target.value);
+      });
+
+      loadSample("Banana Nut Bread");
+      updateTable();
+
+      input.addEventListener("input", updateTable);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "tabular-recipe-notation",
+  "version": "1.0.0",
+  "description": "Web component that converts JSON recipe data into HTML tables using tabular recipe notation",
+  "main": "src/trn.js",
+  "scripts": {
+    "test": "node --test 'tests/**/*.test.js'"
+  },
+  "keywords": [
+    "recipe",
+    "cooking",
+    "web-component",
+    "table"
+  ],
+  "license": "MIT"
+}
