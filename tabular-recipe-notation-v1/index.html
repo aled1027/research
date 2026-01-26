@@ -52,6 +52,21 @@
         font-weight: 600;
       }
 
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      select {
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #cfd3dd;
+        font-size: 0.9rem;
+        background: #fff;
+      }
+
       .hint {
         font-size: 0.85rem;
         color: #667085;
@@ -68,6 +83,10 @@
 
     <div class="layout">
       <div class="panel">
+        <div class="controls">
+          <label for="sample-select"><strong>Sample Recipe</strong></label>
+          <select id="sample-select"></select>
+        </div>
         <label for="trn-input"><strong>TRN JSON Input</strong></label>
         <textarea id="trn-input" spellcheck="false"></textarea>
         <div class="hint">Update the JSON to experiment with different recipe flows.</div>
@@ -83,8 +102,9 @@
       const input = document.getElementById("trn-input");
       const status = document.getElementById("status");
       const table = document.getElementById("trn-table");
+      const sampleSelect = document.getElementById("sample-select");
 
-      const defaultRecipe = {
+      const bananaNutBread = {
         title: "Banana Nut Bread",
         rows: [
           {
@@ -164,6 +184,123 @@
         ],
       };
 
+      const lemonBars = {
+        title: "Lemon Bars",
+        rows: [
+          {
+            cells: [
+              { text: "Preheat oven to 350°F (175°C)", colspan: 6, align: "center", className: "instruction" },
+            ],
+          },
+          {
+            cells: [
+              { text: "8 Tbsp (113 g) butter" },
+              { text: "soften" },
+              { text: "cream", rowspan: 3, className: "vertical" },
+              { text: "press into pan", rowspan: 4, className: "vertical" },
+              { text: "bake crust 20 min.", rowspan: 4, className: "vertical" },
+              { text: "cool", rowspan: 6, className: "vertical" },
+            ],
+          },
+          {
+            cells: [
+              { text: "1/4 cup (50 g) sugar" },
+              { text: "" },
+            ],
+          },
+          {
+            cells: [
+              { text: "1 1/4 cups (160 g) flour" },
+              { text: "mix in" },
+            ],
+          },
+          {
+            cells: [
+              { text: "Pinch salt" },
+              { text: "" },
+            ],
+          },
+          {
+            cells: [
+              { text: "4 large eggs" },
+              { text: "whisk", rowspan: 4, className: "vertical" },
+              { text: "pour over crust", rowspan: 4, className: "vertical" },
+              { text: "bake 20 min.", rowspan: 4, className: "vertical" },
+              { text: "chill", rowspan: 4, className: "vertical" },
+              { text: "slice", rowspan: 4, className: "vertical" },
+            ],
+          },
+          {
+            cells: [
+              { text: "1 1/2 cups (300 g) sugar" },
+              { text: "" },
+            ],
+          },
+          {
+            cells: [
+              { text: "1/4 cup (32 g) flour" },
+              { text: "" },
+            ],
+          },
+          {
+            cells: [
+              { text: "1/2 cup (120 mL) lemon juice" },
+              { text: "" },
+            ],
+          },
+        ],
+      };
+
+      const tomatoPasta = {
+        title: "Weeknight Tomato Pasta",
+        rows: [
+          {
+            cells: [
+              { text: "Bring salted water to a boil", colspan: 5, align: "center", className: "instruction" },
+            ],
+          },
+          {
+            cells: [
+              { text: "8 oz (225 g) pasta" },
+              { text: "boil", rowspan: 3, className: "vertical" },
+              { text: "drain", rowspan: 3, className: "vertical" },
+              { text: "toss with sauce", rowspan: 5, className: "vertical" },
+              { text: "serve", rowspan: 5, className: "vertical" },
+            ],
+          },
+          {
+            cells: [
+              { text: "1 Tbsp olive oil" },
+              { text: "warm", rowspan: 4, className: "vertical" },
+            ],
+          },
+          {
+            cells: [
+              { text: "2 cloves garlic" },
+              { text: "sauté" },
+            ],
+          },
+          {
+            cells: [
+              { text: "1 can (14 oz) crushed tomatoes" },
+              { text: "simmer", rowspan: 2, className: "vertical" },
+            ],
+          },
+          {
+            cells: [
+              { text: "Salt, pepper, basil" },
+              { text: "" },
+            ],
+          },
+        ],
+      };
+
+      const samples = {
+        "Banana Nut Bread": bananaNutBread,
+        "Lemon Bars": lemonBars,
+        "Weeknight Tomato Pasta": tomatoPasta,
+      };
+
       const updateTable = () => {
         status.textContent = "";
         try {
@@ -174,7 +311,24 @@
         }
       };
 
-      input.value = JSON.stringify(defaultRecipe, null, 2);
+      Object.keys(samples).forEach((label) => {
+        const option = document.createElement("option");
+        option.value = label;
+        option.textContent = label;
+        sampleSelect.appendChild(option);
+      });
+
+      const loadSample = (label) => {
+        const sample = samples[label];
+        input.value = JSON.stringify(sample, null, 2);
+        updateTable();
+      };
+
+      sampleSelect.addEventListener("change", (event) => {
+        loadSample(event.target.value);
+      });
+
+      loadSample("Banana Nut Bread");
       updateTable();
 
       input.addEventListener("input", updateTable);

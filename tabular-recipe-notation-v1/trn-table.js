@@ -97,12 +97,12 @@ class TrnTable extends HTMLElement {
       }
 
       td.vertical {
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
-        white-space: nowrap;
+        white-space: normal;
         font-weight: 600;
-        letter-spacing: 0.4px;
+        letter-spacing: 0.2px;
         background: #f5f5f5;
+        min-width: 120px;
+        text-align: center;
       }
 
       td.righthide {

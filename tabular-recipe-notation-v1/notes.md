@@ -2,3 +2,5 @@
 - Built TRN web component that renders recipe JSON into a table with vertical dependency cells.
 - Added demo index.html with textarea input, default banana nut bread data, and live rendering.
 - Captured screenshot of the demo page for reference.
+- Updated TRN table styling to keep action text horizontal and added sample selector with multiple recipes.
+- Captured updated screenshot with horizontal action text and sample selector.
