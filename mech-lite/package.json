@@ -1,0 +1,21 @@
+{
+  "name": "mech-lite",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mechabellum Lite - A cooperative auto-battler for the browser",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "dev:server": "cd server && npm run dev",
+    "test": "npx vitest run",
+    "test:watch": "npx vitest"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
+}
