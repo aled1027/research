@@ -117,7 +117,16 @@ for dirname, commit_date in subdirs_with_dates:
     print()  # Add blank line between entries
 
 ]]]-->
-## 27 research projects
+## 28 research projects
+
+### [automerge](https://github.com/aled1027/research/tree/main/automerge) (2026-03-28)
+
+Demonstrating Automerge’s capabilities, this project presents a minimal static web demo for collaborative text editing, focusing on local edit persistence and change history reconstruction. Using Automerge’s CRDT (Conflict-free Replicated Data Type), every input is recorded as a change, stored in localStorage, and displayed via rebuilt history, even in a single-user context. The implementation uses simple HTML, JavaScript, and Automerge loaded from a CDN, highlighting how Automerge's document and patch management works in practice. The demo can be extended to support multiple peers, further illustrating Automerge's main use-case in real-time collaborative applications. More information about Automerge’s CRDT technology can be found at [Automerge GitHub](https://github.com/automerge/automerge).
+
+Key findings:
+- Automerge efficiently tracks and reconstructs individual edits from patch data, even offline.
+- The demo confirms Automerge’s robust change tracking works for both solo and multi-peer editing scenarios.
+- Minimal setup is needed: Automerge handles document updates, history, and state persistence with concise code.
 
 ### [mechabellum-lite](https://github.com/aled1027/research/tree/main/mechabellum-lite) (2026-02-19)
 
@@ -129,6 +138,10 @@ Mechabellum Lite is a browser-based adaptation of the strategic mech auto-battle
 - Reinforcement cards and tech upgrades enhance strategic depth.
 - Procedurally generated graphics ensure zero asset dependencies.
 - Supports varied unit types, deployment mechanics, and strategic counterplay.
+
+### [tabular-recipe-notation-v2](https://github.com/aled1027/research/tree/main/tabular-recipe-notation-v2) (2026-01-26)
+
+*No description available.*
 
 ### [tabular-recipe-notation-v1](https://github.com/aled1027/research/tree/main/tabular-recipe-notation-v1) (2026-01-26)
 
@@ -143,10 +156,6 @@ Key links:
 - Supports row/column spans for dependency visualizations
 - Editable demo with live table preview
 - Test suite ensures correct cell population per recipe sample
-
-### [tabular-recipe-notation-v2](https://github.com/aled1027/research/tree/main/tabular-recipe-notation-v2) (2026-01-26)
-
-*No description available.*
 
 ### [slack-collector](https://github.com/aled1027/research/tree/main/slack-collector) (2026-01-24)
 
@@ -267,15 +276,6 @@ The Slack Emoji Rewriter App is a Python-based Slack add-on that lets users prev
 - All message modifications are sent as the bot, not as the original user, due to Slack restrictions.
 - The app is well-positioned for future enhancements, including AI-powered rewriting and custom emoji logic.
 
-### [yjs-demo](https://github.com/aled1027/research/tree/main/yjs-demo) (2025-12-20)
-
-Demonstrating real-time visitor presence in SvelteKit, this project integrates Yjs for local-first data synchronization and Cloudflare Durable Objects for persistent, distributed storage. Each connected browser tab updates its presence via a Yjs shared map—changes propagate seamlessly across clients using WebSockets, with Cloudflare Durable Objects handling state rebroadcast and persistence. The setup features a minimalist SvelteKit UI and separate worker deployments for Yjs and the app, enabling quick local development and easy deployment to Cloudflare's edge. Full instructions, worker configs, and source code are included for rapid experimentation.
-
-**Key findings/tools:**
-- **Yjs** enables granular presence state sharing with automatic conflict resolution.  
-- **Cloudflare Durable Objects** provide efficient, persistent relaying and storage.  
-- Minimal end-to-end example: [Demo App](https://yjs-sveltekit-demo.services-a01.workers.dev), [Yjs project](https://github.com/yjs/yjs).
-
 ### [yjs-demo-fix](https://github.com/aled1027/research/tree/main/yjs-demo-fix) (2025-12-20)
 
 Visitors to a SvelteKit app deployed on Cloudflare Workers encountered 500 errors for all static assets because the worker configuration didn't specify how to serve these files. The root cause was missing `assets` and `nodejs_compat` settings in `wrangler.sveltekit.toml`; these are essential for enabling asset delivery and Node.js module compatibility with SvelteKit’s Cloudflare adapter. The fix involved explicitly defining the assets directory and binding, along with enabling Node.js compatibility—restoring proper loading of static resources. Key details and setup instructions are outlined in Cloudflare’s [SvelteKit deployment guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/sveltekit/) and the [adapter documentation](https://kit.svelte.dev/docs/adapter-cloudflare).
@@ -284,6 +284,15 @@ Key changes:
 - Added `assets = { directory = ".svelte-kit/cloudflare", binding = "STATIC_ASSETS" }` to `wrangler.sveltekit.toml`
 - Enabled `compatibility_flags = ["nodejs_compat"]`
 - No more 500 errors; static assets load as expected
+
+### [yjs-demo](https://github.com/aled1027/research/tree/main/yjs-demo) (2025-12-20)
+
+Demonstrating real-time visitor presence in SvelteKit, this project integrates Yjs for local-first data synchronization and Cloudflare Durable Objects for persistent, distributed storage. Each connected browser tab updates its presence via a Yjs shared map—changes propagate seamlessly across clients using WebSockets, with Cloudflare Durable Objects handling state rebroadcast and persistence. The setup features a minimalist SvelteKit UI and separate worker deployments for Yjs and the app, enabling quick local development and easy deployment to Cloudflare's edge. Full instructions, worker configs, and source code are included for rapid experimentation.
+
+**Key findings/tools:**
+- **Yjs** enables granular presence state sharing with automatic conflict resolution.  
+- **Cloudflare Durable Objects** provide efficient, persistent relaying and storage.  
+- Minimal end-to-end example: [Demo App](https://yjs-sveltekit-demo.services-a01.workers.dev), [Yjs project](https://github.com/yjs/yjs).
 
 ### [mac-state](https://github.com/aled1027/research/tree/main/mac-state) (2025-11-29)
 
