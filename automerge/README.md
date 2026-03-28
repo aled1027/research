@@ -1,45 +1,62 @@
-# Automerge text demo
+# Automerge + ProseMirror text demo
 
-This folder contains a small static demo showing that this task **does** make sense with Automerge.
+This folder contains a small static demo showing that this task **does** make sense with Automerge, including styled rich text.
 
-Even though Automerge is most valuable for collaborative/offline-first editing across multiple peers, it also works well for a single-page demo where you:
+The page now uses:
 
-- edit text locally
-- store each edit as an Automerge change
-- reconstruct and display the edit history from Automerge itself
+- **ProseMirror** for editing and styling text
+- **Automerge** for storing the document and tracking changes
+- a local in-memory **DocHandle-like wrapper** so `@automerge/prosemirror` can work in a plain static demo without needing `automerge-repo`
+
+## What the demo supports
+
+- typing and editing text
+- styling text with:
+  - bold
+  - italic
+  - code
+  - heading 1
+  - heading 2
+- undo / redo
+- local persistence with `localStorage`
+- a visible “Changes according to Automerge” panel built from Automerge history and patch data
 
 ## Files
 
-- `index.html` — simple page structure and minimal CSS
-- `app.js` — textarea handling, Automerge document updates, history rendering, and localStorage persistence
+- `index.html` — page structure and minimal CSS
+- `app.js` — ProseMirror setup, Automerge integration, toolbar behavior, persistence, and history rendering
 - `notes.md` — implementation notes from the investigation
 
 ## How it works
 
-The demo keeps a single Automerge document with this shape:
+The Automerge document is still very small:
 
 ```js
 { text: "" }
 ```
 
-On every `input` event:
+But instead of a plain `<textarea>`, the demo initializes a ProseMirror editor through `@automerge/prosemirror`.
 
-1. the textarea value is read
-2. `Automerge.change()` creates a new change
-3. `Automerge.updateText(doc, ["text"], nextValue)` updates the collaborative string
-4. the document is saved to `localStorage`
-5. the UI rebuilds the change history from:
+### Main flow
+
+1. the page loads an Automerge document from `localStorage` or creates a new one
+2. a small local handle implements the minimal API expected by `@automerge/prosemirror`:
+   - `doc()`
+   - `change(fn)`
+   - `on("change", callback)`
+   - `off("change", callback)`
+3. ProseMirror transactions are converted into Automerge rich-text changes
+4. Automerge patch callbacks are used to notify the editor and UI
+5. the history panel is rebuilt from:
    - `Automerge.getHistory()`
    - `Automerge.getHeads()`
    - `Automerge.diff()`
 
-The “Changes according to Automerge” section is derived from Automerge patch data, not a separate handwritten log.
+The page therefore shows formatting changes like bold/unbold as Automerge operations, not as a separate handwritten log.
 
 ## Run it
 
-Because the page loads Automerge from a CDN script, serve the folder over HTTP.
-
-From the repository root:
+Serve the repository over HTTP:
 
 ```bash
 python3 -m http.server 8000
@@ -53,22 +70,25 @@ http://localhost:8000/automerge/
 
 ## Verified
 
-I verified the demo in headless Chrome by:
+I verified the updated demo in headless Chrome by:
 
 - loading the page over a local HTTP server
-- typing into the textarea programmatically
+- confirming the editor initializes correctly
+- programmatically inserting text into the ProseMirror editor
+- applying bold formatting
+- converting the block to a heading
 - confirming that the page updated:
-  - character count
+  - rendered styled HTML in the editor
   - Automerge change count
-  - rendered Automerge patch history
+  - Automerge patch history including formatting changes
 
 ## Notes
 
-This is intentionally a minimal demo:
+This is intentionally still a minimal demo:
 
 - simple HTML
 - minimal CSS
 - no framework
 - no build step
 
-If you wanted to extend it further, the next natural step would be adding a second peer or tab and merging concurrent edits to better show Automerge’s main strength.
+The next natural extension would be adding a second peer/tab so concurrent rich-text edits can be merged live, which would better show Automerge’s core multiplayer value.
