@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Automerge Text Demo</title>
+    <style>
+      :root {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #111827;
+        background: #f8fafc;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+      }
+
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      .panel {
+        background: #ffffff;
+        border: 1px solid #dbe2ea;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 200px;
+        box-sizing: border-box;
+        font: inherit;
+        line-height: 1.5;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        resize: vertical;
+      }
+
+      button {
+        font: inherit;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #eef2f7;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+      }
+
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .stat {
+        font-size: 0.92rem;
+        color: #334155;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+
+      ol {
+        padding-left: 20px;
+        margin: 0;
+      }
+
+      li + li {
+        margin-top: 14px;
+      }
+
+      .change {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        background: #fcfdff;
+      }
+
+      .change-meta {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 8px;
+      }
+
+      .patch-list {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .patch-list li {
+        margin-top: 4px;
+      }
+
+      details {
+        margin-top: 8px;
+      }
+
+      pre {
+        overflow-x: auto;
+        font-size: 0.85rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .empty {
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1>Automerge text demo</h1>
+        <p>
+          Type in the box below. Each input updates an Automerge document with
+          <code>updateText()</code>. The history underneath is rebuilt from
+          Automerge itself using <code>getHistory()</code> and
+          <code>diff()</code>.
+        </p>
+        <textarea id="editor" placeholder="Start typing..."></textarea>
+        <div class="row">
+          <div class="stats" id="stats"></div>
+          <button id="reset" type="button">Reset document</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Changes according to Automerge</h2>
+        <div id="history"></div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@automerge/automerge@3.2.5/dist/iife/iife.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
